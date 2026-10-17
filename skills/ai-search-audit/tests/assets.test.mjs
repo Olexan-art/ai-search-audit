@@ -16,3 +16,11 @@ test("every crawler vendor has a favicon, and each is small", () => {
   for (const bot of AI_BOTS) assert.ok(FAVICONS[bot.vendor], bot.vendor);
   for (const [vendor, uri] of Object.entries(FAVICONS)) assert.ok(uri.length < 2000, `${vendor}: ${uri.length}`);
 });
+
+test("scripts/lib/brandmark.mjs is the generated module, and the mark is small", async () => {
+  const { brandmarkModule } = await import("../tools/brandmark.mjs");
+  const { GLL_MARK } = await import("../scripts/lib/brandmark.mjs");
+  const committed = readFileSync(new URL("../scripts/lib/brandmark.mjs", import.meta.url), "utf8").replace(/\r\n/g, "\n");
+  assert.equal(committed, brandmarkModule());
+  assert.ok(GLL_MARK.startsWith("data:image/webp;base64,") && GLL_MARK.length < 12000, String(GLL_MARK.length));
+});

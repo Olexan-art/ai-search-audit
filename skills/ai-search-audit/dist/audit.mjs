@@ -11,7 +11,7 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __name = (target2, value) => __defProp(target2, "name", { value, configurable: true });
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var __commonJS = (cb, mod) => function __require() {
   try {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
@@ -19,9 +19,9 @@ var __commonJS = (cb, mod) => function __require() {
     throw mod = 0, e;
   }
 };
-var __export = (target2, all) => {
+var __export = (target, all) => {
   for (var name in all)
-    __defProp(target2, name, { get: all[name], enumerable: true });
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -31,12 +31,12 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target2, "default", { value: mod, enumerable: true }) : target2,
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
 
@@ -7301,14 +7301,14 @@ function uniqueSplice(array, spliceIdx, spliceCount, newElems, parent2) {
   return array.splice(...spliceArgs);
 }
 __name(uniqueSplice, "uniqueSplice");
-function appendTo(target2) {
-  const appendTarget = isCheerio(target2) ? target2 : this._make(target2);
+function appendTo(target) {
+  const appendTarget = isCheerio(target) ? target : this._make(target);
   appendTarget.append(this);
   return this;
 }
 __name(appendTo, "appendTo");
-function prependTo(target2) {
-  const prependTarget = isCheerio(target2) ? target2 : this._make(target2);
+function prependTo(target) {
+  const prependTarget = isCheerio(target) ? target : this._make(target);
   prependTarget.prepend(this);
   return this;
 }
@@ -7410,13 +7410,13 @@ function after(...elems) {
   });
 }
 __name(after, "after");
-function insertAfter(target2) {
-  if (typeof target2 === "string") {
-    target2 = this._make(target2);
+function insertAfter(target) {
+  if (typeof target === "string") {
+    target = this._make(target);
   }
   this.remove();
   const clones = [];
-  for (const el of this._makeDomArray(target2)) {
+  for (const el of this._makeDomArray(target)) {
     const clonedSelf = this.clone().toArray();
     const { parent: parent2 } = el;
     if (!parent2) {
@@ -7448,8 +7448,8 @@ function before(...elems) {
   });
 }
 __name(before, "before");
-function insertBefore(target2) {
-  const targetArr = this._make(target2);
+function insertBefore(target) {
+  const targetArr = this._make(target);
   this.remove();
   const clones = [];
   domEach(targetArr, (el) => {
@@ -13940,8 +13940,8 @@ __name(appendCommentToDocument, "appendCommentToDocument");
 function stopParsing(p2, token) {
   p2.stopped = true;
   if (token.location) {
-    const target2 = p2.fragmentContext ? 0 : 2;
-    for (let i = p2.openElements.stackTop; i >= target2; i--) {
+    const target = p2.fragmentContext ? 0 : 2;
+    for (let i = p2.openElements.stackTop; i >= target; i--) {
       p2._setEndLocation(p2.openElements.items[i], token);
     }
     if (!p2.fragmentContext && p2.openElements.stackTop >= 0) {
@@ -19217,6 +19217,129 @@ function dateOf(iso) {
   return [`${d.getDate()} ${MONTHS_EN[d.getMonth()]} ${d.getFullYear()}`, `${d.getDate()} ${MONTHS_UK[d.getMonth()]} ${d.getFullYear()}`];
 }
 __name(dateOf, "dateOf");
+var MONTHS_EN_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function dateLong(iso) {
+  const d = new Date(iso);
+  return [`${d.getDate()} ${MONTHS_EN_LONG[d.getMonth()]} ${d.getFullYear()}`, `${d.getDate()} ${MONTHS_UK[d.getMonth()]} ${d.getFullYear()}`];
+}
+__name(dateLong, "dateLong");
+var joinEn = /* @__PURE__ */ __name((xs) => xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`, "joinEn");
+var joinUk = /* @__PURE__ */ __name((xs) => xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} та ${xs[xs.length - 1]}`, "joinUk");
+var notesEn = /* @__PURE__ */ __name((n) => n ? en2(n, "note", "notes") : "no notes", "notesEn");
+var notesUk = /* @__PURE__ */ __name((n) => n ? uk2(n, "зауваження", "зауваження", "зауважень") : "зауважень немає", "notesUk");
+var BLOCKS = { index: ["noindex"], robots: ["search_engine_blocked", "robots_unreachable"], ai: ["ai_search_blocked"] };
+function headline(findings) {
+  const has3 = /* @__PURE__ */ __name((codes) => findings.some((f) => codes.includes(f.code)), "has");
+  const n = findings.length;
+  const tail = n ? [`${notesEn(n)}.`, `Є ${notesUk(n)}.`] : ["No notes.", "Зауважень немає."];
+  let lead = null;
+  if (has3(BLOCKS.index) && has3(BLOCKS.robots)) lead = ["robots.txt and noindex block the page.", "robots.txt і noindex блокують сторінку."];
+  else if (has3(BLOCKS.index)) lead = ["The page asks search not to index it.", "Сторінка просить пошук не індексувати її."];
+  else if (has3(BLOCKS.robots)) lead = ["robots.txt blocks search robots.", "robots.txt блокує пошукових роботів."];
+  else if (has3(BLOCKS.ai)) lead = ["robots.txt blocks AI search robots.", "robots.txt блокує роботів ШІ-пошуку."];
+  else if (findings.some((f) => f.severity === "blocking")) lead = ["Something blocks the page.", "Щось блокує сторінку."];
+  const blocked = Boolean(lead);
+  lead ||= ["The page is reachable.", "Сторінка доступна."];
+  return { blocked, t: [`${lead[0]} ${tail[0]}`, `${lead[1]} ${tail[1]}`] };
+}
+__name(headline, "headline");
+var AREA_TOPIC = {
+  classic: ["the Google and Bing basics", "базові перевірки Google і Bing"],
+  find: ["robot access", "доступ роботів"],
+  read: ["how the text is read", "читання тексту"],
+  quote: ["quoting and answers to questions", "цитування й відповіді на запитання"],
+  brand: ["the brand description", "опис бренду"],
+  lang: ["the language versions", "мовні версії"]
+};
+function subtitle(findings, blocked) {
+  const first2 = blocked ? ["Start with the block: until it is lifted, the other notes matter less.", "Почніть із блокування: доки його не знято, решта зауважень важить менше."] : ["The check found nothing that blocks robots.", "Перевірка не знайшла блокування для роботів."];
+  const areas = AREAS.map((a) => a.id).filter((id) => findings.some((f) => f.area === id && f.severity !== "low" && f.severity !== "blocking"));
+  let second = null;
+  if (areas.length) second = [`Worth reviewing: ${joinEn(areas.map((a) => AREA_TOPIC[a][0]))}.`, `Варто переглянути ${joinUk(areas.map((a) => AREA_TOPIC[a][1]))}.`];
+  else if (findings.some((f) => f.severity === "low")) second = ["The other notes are minor.", "Решта зауважень дрібні."];
+  return second ? [`${first2[0]} ${second[0]}`, `${first2[1]} ${second[1]}`] : first2;
+}
+__name(subtitle, "subtitle");
+var SEV_COUNT = {
+  blocking: [(n) => `${fmtEn(n)} blocking`, (n) => uk2(n, "блокувальна", "блокувальні", "блокувальних")],
+  high: [(n) => `${fmtEn(n)} high`, (n) => uk2(n, "висока", "високі", "високих")],
+  medium: [(n) => `${fmtEn(n)} medium`, (n) => uk2(n, "середня", "середні", "середніх")],
+  low: [(n) => `${fmtEn(n)} low`, (n) => uk2(n, "низька", "низькі", "низьких")]
+};
+var CARD_COPY = {
+  find: {
+    title: { ok: ["Robots can find it", "Роботи можуть знайти"], block: ["Robots are blocked", "Роботам закрито доступ"] },
+    status: {
+      none: ["No blocks found", "Блокування не знайдено"],
+      notes: [(n) => `No blocks found · ${notesEn(n)} on search`, (n) => `Блокування не знайдено · ${notesUk(n)} щодо пошуку`],
+      block: [(l) => `Blocked: ${l}`, (l) => `Заблоковано: ${l}`]
+    }
+  },
+  text: {
+    title: { ok: ["The text reads in full", "Текст читається повністю"], notes: ["Part of the text to check", "Частину тексту слід перевірити"], hides: ["Part of the text is hidden from AI", "Частину тексту ШІ не бачить"] },
+    status: { none: ["Nothing found", "Нічого не знайдено"], notes: [(n) => `${notesEn(n)} on reading`, (n) => `${notesUk(n)} до читання`] }
+  },
+  brand: {
+    title: {
+      na: ["Brand and questions", "Бренд і запитання"],
+      ok: ["Brand and questions: no notes", "Бренд і запитання: без зауважень"],
+      brand: ["Brand description needs attention", "Опис бренду потребує уваги"],
+      questions: ["Answers to questions need attention", "Відповіді на запитання потребують уваги"]
+    },
+    status: {
+      na: ["Not checked: no brand, reviews or questions file", "Не перевірено: немає файлів бренду, відгуків чи запитань"],
+      ok: ["The model's answers match the page", "Відповіді моделі збігаються зі сторінкою"],
+      unknown: ["The model did not recognise the brand", "Модель не впізнала бренд"],
+      notes: [(n) => `${notesEn(n)} from one model`, (n) => `${notesUk(n)} від однієї моделі`]
+    }
+  }
+};
+var LITE = {
+  checked: [(d) => `Checked ${d}`, (d) => `Перевірено ${d}`],
+  about: ["About this check", "Про цю перевірку"],
+  seeFindings: ["See the main findings", "Переглянути головні знахідки"],
+  means: ["What it means for you", "Що це означає для вас"],
+  cardsAria: ["Summary in three cards", "Підсумок у трьох картках"],
+  cardsNote: [
+    [(m) => `The first two cards come from the page data. The third is one model's estimate (${m}).`, (m) => `Перші дві картки — за даними сторінки. Третя — оцінка однієї моделі (${m}).`],
+    ["The first two cards come from the page data. The third needs the agent's brand, reviews or questions file.", "Перші дві картки — за даними сторінки. Для третьої потрібен файл агента з оцінкою бренду, відгуків чи запитань."]
+  ],
+  first: ["Review these first", "Спочатку перегляньте ці знахідки"],
+  showPlace: ["Show place", "Показати місце"],
+  showInList: ["Show in the list", "Показати у списку"],
+  examples: ["Examples of questions", "Приклади запитань"],
+  aboutEstimate: ["About this estimate", "Про цю оцінку"],
+  modelLine: [(m) => `Model: ${m}`, (m) => `Модель: ${m}`],
+  notThree: ["the agent's estimate, not a check of three assistants", "оцінка агента, не перевірка трьох асистентів"],
+  notInText: ["Not found in the text", "Не знайдено у тексті"],
+  wholePage: ["The whole page", "Уся сторінка"],
+  where: ["Where on the page", "Де на сторінці це знайдено"],
+  schemaNote: ["A schema of the document, not a screenshot of the page.", "Схема документа, а не скріншот сторінки."],
+  placesAria: ["Places in the document, top to bottom", "Місця в документі згори донизу"],
+  selected: ["Selected place", "Обране місце"],
+  found: ["Found", "Знайдено"],
+  nothingHere: ["Nothing found here", "Тут нічого не знайдено"],
+  exact: ["Show exact place", "Показати точне місце"],
+  path: ["Path in the document", "Шлях у документі"],
+  copy: ["Copy", "Копіювати"],
+  copied: ["Copied", "Скопійовано"],
+  rows: [(n) => en2(n, "row", "rows"), (n) => uk2(n, "рядок", "рядки", "рядків")],
+  notRead: ["Not read by the reader", "Не прочитано читачем"],
+  partRead: [(p2) => `${p2}% not read by the reader`, (p2) => `${p2}% не прочитано читачем`],
+  all: ["All checks and technical details", "Усі перевірки та технічні подробиці"],
+  allSub: ["Robot access · Google and Bing · Languages · Reading the text", "Доступ роботів · Google і Bing · Мови · Читання тексту"],
+  areas: ["Status by area", "Стан за напрямами"],
+  allFindings: ["All findings", "Усі знахідки"],
+  strips: ["<head> and robots.txt", "<head> і robots.txt"],
+  info: ["This is a check of one page, not a guarantee of how it shows in search. The brand and questions estimate reflects one model's view.", "Це перевірка однієї сторінки, а не гарантія показу в пошуку. Оцінка бренду й запитань відображає погляд однієї моделі."],
+  measured: ["Measured", "Виміряно"],
+  measuredSub: ["from the page data", "за даними сторінки"],
+  estimate: ["Model's estimate", "Оцінка моделі"],
+  estimateSub: ["one model's answers", "відповіді однієї моделі"],
+  full: ["Full report with explanations", "Повний звіт із поясненнями"],
+  tagline: ["AI search that understands your business", "AI пошук, який розуміє ваш бізнес"],
+  product: "AI Search Audit · Lite"
+};
 
 // scripts/vendor/vectorscope/robots.mjs
 var MAX_ROBOTS_BYTES = 500 * 1024;
@@ -20139,7 +20262,8 @@ td.sample{color:var(--muted);font-size:14px;min-width:180px}
 
 // scripts/lib/css.mjs
 var CSS = `
-/* 2.102: light is the default whatever the system prefers; dark comes only from the toggle or
+/* 2.103: the summary-first layout; light is still the default
+   2.102: light is the default whatever the system prefers; dark comes only from the toggle or
    #theme=dark. Every text and UI pair passes WCAG AA in both themes (tools/contrast.mjs). */
 :root{
   --bg:#f3f6fa;--bg-2:#eaf0f6;--panel:#ffffff;--panel-2:#f6f9fc;--line:#d6dfea;--line-2:#c3d0df;--control:#6b7c91;
@@ -20152,6 +20276,7 @@ var CSS = `
   --deco:.2;--deco-filter:none;--deco-mark:.5;
   --red-ink:#ffffff;--amber-ink:#ffffff;--pin-low:#0369a1;--hatch:rgba(75,92,114,.38);
   --pop:0 10px 30px rgba(11,22,38,.14);
+  --est:#6d28d9;--est-soft:rgba(109,40,217,.08);--sel-soft:rgba(11,106,133,.07);
   color-scheme:light;
 }
 :root[data-theme="dark"]{
@@ -20165,6 +20290,7 @@ var CSS = `
   --deco:.15;--deco-filter:brightness(2.6) saturate(.55);--deco-mark:.42;
   --red-ink:#1a0606;--amber-ink:#1a1200;--pin-low:#7dd3fc;--hatch:rgba(143,161,184,.42);
   --pop:0 10px 30px rgba(0,0,0,.35);
+  --est:#b69cfb;--est-soft:rgba(182,156,251,.13);--sel-soft:rgba(34,211,238,.08);
   color-scheme:dark;
 }
 .l-uk{display:none}
@@ -20308,16 +20434,9 @@ input[type="checkbox"]:focus-visible,a:focus-visible{outline:2px solid var(--acc
 /* lite */
 .lite-verdict h1{font-size:clamp(26px,4vw,40px);line-height:1.12;letter-spacing:-.02em;margin:2px 0 6px;font-weight:800}
 .lite-meta{margin:0;font-size:15px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 8px}
-.tiles-lite .tile{gap:8px}
-.tiles-lite .tile h2{font-size:16.5px}
-.bchips{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.bchip{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-top:4px solid var(--sev);border-radius:12px;padding:10px 12px;background:var(--panel-2);min-width:0;scroll-margin-top:12px}
-.bchip.blocking{--sev:var(--red)}.bchip.high,.bchip.medium{--sev:var(--amber)}.bchip.low{--sev:var(--pin-low)}
 .sevw{font-size:13px;letter-spacing:.02em;font-weight:800;color:var(--sc)}
 .sevw.blocking{--sc:var(--red)}.sevw.high,.sevw.medium{--sc:var(--amber)}.sevw.low{--sc:var(--pin-low)}
 .fav{vertical-align:-3px;border-radius:3px;flex:none}
-.bchip .bc-t{display:flex;gap:9px;align-items:center;font-weight:800;font-size:16px;line-height:1.25}
-.bchip .bc-m{display:flex;gap:8px;align-items:center;justify-content:space-between}
 .lcharts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
 .lcharts .panel{margin-top:16px}
 .lcharts .wide{grid-column:1/-1}
@@ -20365,7 +20484,6 @@ input[type="checkbox"]:focus-visible,a:focus-visible{outline:2px solid var(--acc
 .fulllink a{text-decoration:none;border-bottom:2px solid var(--accent)}
 @media (max-width:860px){.pmap{grid-template-columns:1fr}.pm-side{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
 @media (max-width:720px){.lcharts{grid-template-columns:1fr}.sbars li{grid-template-columns:104px minmax(0,1fr) 34px}}
-@media (max-width:640px){.tiles-lite .tile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}.tiles-lite .tile .tc{grid-column:1/-1}.bchips{grid-template-columns:1fr}}
 `;
 var CSS_EXTRA = `
 .pm-svg .zn{fill:var(--text);font:700 12px ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -20379,7 +20497,6 @@ var CSS_EXTRA = `
 .caps{margin:10px 0 0;padding:0 0 0 16px;font-size:14px;color:var(--muted);display:grid;gap:2px}
 .none-found{margin:0;font-size:14.5px;color:var(--muted)}
 .lgrid .self{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:500;font-size:12.5px;color:var(--muted);margin-left:4px}
-.bchip .bc-t>span:last-child{overflow-wrap:break-word;min-width:0}
 .refusal{margin-top:18px;border:1.5px solid var(--red);border-left-width:4px;background:var(--panel);border-radius:14px;padding:18px 20px;box-shadow:var(--glow)}
 .refusal-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .refusal-head svg{width:30px;height:30px;color:var(--red);flex:none}
@@ -20403,10 +20520,188 @@ var CSS_EXTRA = `
 .lyr::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
 .lyr.judgement{--c:var(--lj);--cs:var(--lj-soft)}
 .pm-key li.jd{flex-wrap:wrap}
-.pm-key li.jd .lyr,.bchip .lyr{text-transform:none;letter-spacing:.01em;font-size:12px;white-space:normal;overflow:visible;line-height:1.35;padding:1px 8px}
+.pm-key li.jd .lyr{text-transform:none;letter-spacing:.01em;font-size:12px;white-space:normal;overflow:visible;line-height:1.35;padding:1px 8px}
 .pm-key li.jd .lyr{flex-basis:100%;margin:0 0 2px;width:fit-content;max-width:100%}
-.bchip .lyr{align-self:flex-start}
 .honest{margin:0 0 12px;font-size:14.5px;color:var(--text);border:1px solid var(--line-2);border-left:3px solid var(--lj);border-radius:10px;padding:8px 12px;background:var(--lj-soft)}
+/* 2.103 layout: header, headline, cards, the first three, the places, all checks, notes, footer */
+.wrap{max-width:1160px}
+.top{display:flex;align-items:center;gap:12px 18px;flex-wrap:nowrap;margin:2px 0 22px}
+.top-l{flex:none;gap:10px 14px}
+.brand{display:inline-flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.01em;color:var(--text)}
+.gll-mark{width:56px;height:27px;flex:none}
+.brand--top .gll-word{font-size:18px}
+.divider{width:1px;height:22px;background:var(--line-2);flex:none}
+.product{font-size:16px;font-weight:700;color:var(--accent)}
+.deco--top{flex:1;min-width:40px;height:22px;margin:0;background-size:auto 22px}
+.toggles{flex:none}
+.pageid{display:block;margin:0 0 2px;font-size:15px}
+.url{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:15px;font-weight:600;text-decoration:none;word-break:break-all}
+.url:hover{text-decoration:underline}
+.url .ext{width:15px;height:15px;flex:none}
+.lite-meta{font-size:15px;margin:0 0 12px;gap:2px 8px}
+.lite-meta .pt{max-width:60ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lite-verdict h1{font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.025em;margin:0 0 10px;max-width:1000px}
+.lede{margin:0 0 14px;font-size:clamp(16px,1.9vw,19px);line-height:1.5;color:var(--muted);max-width:820px}
+.sevrow{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:6px 26px;font-size:16px;color:var(--text)}
+.sevrow li{display:inline-flex;align-items:center;gap:8px}
+.cta-row{margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;font-size:16px;line-height:1.2;text-decoration:none;border-radius:10px;padding:11px 22px;min-height:44px;cursor:pointer;border:1.5px solid var(--accent);white-space:nowrap}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-out{background:var(--panel);color:var(--accent)}
+.btn-out:hover{background:var(--accent-soft)}
+.btn-sm{font-size:14px;padding:7px 14px;min-height:36px;border-radius:9px}
+.btn .chev{width:16px;height:16px;flex:none;transition:transform .15s}
+.sum{margin-top:34px}
+.sum>h2,.sum-head h2{font-size:clamp(22px,2.6vw,28px);letter-spacing:-.015em;margin:0 0 14px}
+.sum-head{display:flex;align-items:baseline;justify-content:space-between;gap:4px 16px;flex-wrap:wrap}
+.sum-head .sub{font-size:14px;color:var(--muted)}
+/* the three cards */
+.cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.card{display:flex;align-items:center;gap:16px;padding:6px 22px;min-width:0;--st:var(--green)}
+.card+.card{border-left:1px solid var(--line-2)}
+.card:first-child{padding-left:0}
+.card.prob{--st:var(--amber)}.card.block{--st:var(--red)}.card.na{--st:var(--muted)}
+.card-i{flex:none;width:52px;height:52px;border-radius:50%;border:2px solid var(--st);color:var(--st);display:grid;place-items:center}
+.card.na .card-i{border-style:dashed}
+.card-i svg{width:26px;height:26px}
+.card-t{display:flex;flex-direction:column;gap:3px;min-width:0}
+.card h3{font-size:16.5px;line-height:1.3}
+.card-s{font-size:14.5px;color:var(--st);font-weight:600;line-height:1.35}
+.cards-note{margin:12px 0 0;font-size:13.5px;color:var(--muted)}
+/* the first three */
+.trows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.tr{border-bottom:1px solid var(--line);scroll-margin-top:24px}
+.tr-m{display:grid;grid-template-columns:40px minmax(0,1fr) auto minmax(0,190px) auto;align-items:center;gap:8px 16px;padding:10px 0}
+summary.tr-m{cursor:pointer;list-style:none}
+summary.tr-m::-webkit-details-marker{display:none}
+.tn{width:36px;height:36px;border-radius:50%;border:2px solid var(--sc,var(--amber));display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--text)}
+.tn.blocking{--sc:var(--red)}.tn.high,.tn.medium{--sc:var(--amber)}.tn.low{--sc:var(--pin-low)}
+.tl{font-weight:700;font-size:16.5px;line-height:1.3;min-width:0}
+.tp{display:flex;gap:8px;flex-wrap:wrap}
+.tloc{font-size:14.5px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.tr-b{justify-self:end}
+.tr-d[open] .tr-b .chev{transform:rotate(180deg)}
+.tr-x{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px 24px;margin:0 0 12px;padding:14px 18px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel-2)}
+.qx{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px}
+.qx li::marker{color:var(--pin-low)}
+.tr-model{margin:0;font-size:14.5px;display:flex;flex-direction:column;gap:2px;border-left:1px solid var(--line-2);padding-left:20px}
+.tr-model>span{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;line-height:1.2;border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;background:var(--panel);color:var(--text);white-space:nowrap}
+.pill .pi{width:12px;height:12px}
+.lp::before{content:"";width:8px;height:8px;flex:none}
+.lp.ms::before{border-radius:50%;background:var(--lm)}
+.lp.est{border-color:var(--est);color:var(--est);background:var(--est-soft)}
+.lp.est::before{border:2px solid var(--est);transform:rotate(45deg);width:6px;height:6px}
+/* where on the page */
+.pmap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+.places{list-style:none;margin:0;padding:0 0 0 24px;position:relative;display:grid;gap:8px}
+.places::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;width:2px;background:var(--line-2)}
+.pl{position:relative;scroll-margin-top:24px}
+.pl::before{content:"";position:absolute;left:-21px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--control);border:2px solid var(--bg)}
+.pl.sel::before{background:var(--accent)}
+.pr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) minmax(40px,30%) auto;align-items:center;gap:6px 12px;width:100%;min-height:44px;padding:7px 12px 7px 16px;border:1px solid var(--control);border-radius:10px;background:var(--panel);cursor:pointer;font-size:15px;color:var(--text)}
+.pr:hover{border-color:var(--accent)}
+.pr:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.pl.sel .pr{border:2px solid var(--accent);background:var(--sel-soft);padding:6px 11px 6px 15px;font-weight:700}
+.pl.file .pr-l{font-family:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;font-size:14px}
+.pl.js .pr{border-style:dashed}
+.pr-l{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-bar{display:block;height:8px;border-radius:4px;background:var(--line);justify-self:start}
+.pr-n{font-size:13px;color:var(--muted);font-weight:500}
+.pl.hid .pr{background:repeating-linear-gradient(45deg,var(--hatch) 0 2px,var(--bg-2) 2px 7px);border-style:dashed;border-color:var(--muted)}
+.pr-hid{justify-self:end;font-size:13px;font-weight:600;color:var(--text);background:var(--panel);border:1px solid var(--line-2);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.pr-pins{display:inline-flex;gap:4px;align-items:center;justify-self:end;min-height:24px}
+.pr-more{font-size:13px;font-weight:700;color:var(--text)}
+.pm-side{display:block;justify-items:stretch;position:sticky;top:12px}
+.pd{border:1px solid var(--line-2);border-radius:14px;background:var(--panel);padding:18px 20px;box-shadow:var(--glow)}
+.pd h3{font-size:18px;line-height:1.3;margin:0 0 12px}
+.pd-f{margin:0 0 6px;font-weight:700;font-size:15px}
+.pd-f.none{font-weight:500;color:var(--muted)}
+.pd-list{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}
+.pd-list li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:4px 10px;align-items:center}
+.pd-l{font-size:15.5px;font-weight:600;min-width:0}
+.pd-p{grid-column:2;display:flex;gap:8px;flex-wrap:wrap}
+.pd-rows{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.pd-rows li{display:grid;grid-template-columns:minmax(80px,auto) minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);font-size:13.5px}
+.pd-rows li:last-child{border-bottom:0}
+.pd-rows .rk{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:700}
+.pd-rows .rv{color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.pd-rows .rs{display:inline-flex;gap:3px}
+.pd-rows .mk{padding:0}
+.pd-rows .mk i{width:18px;height:18px;font-size:11px}
+.exact>summary{list-style:none;width:fit-content}
+.exact>summary::-webkit-details-marker{display:none}
+.exact[open]>summary .chev{transform:rotate(180deg)}
+.ex-box{margin-top:12px;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;background:var(--panel-2);display:grid;gap:8px}
+.ex-l{margin:0;font-size:14px;color:var(--muted)}
+.ex-row{display:flex;gap:8px;align-items:center}
+.ex-c{flex:1;min-width:0;font-family:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;overflow-wrap:anywhere;color:var(--text)}
+.copy{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:8px;border:1px solid var(--control);background:var(--panel);color:var(--text);cursor:pointer}
+.copy svg{width:17px;height:17px}
+.copy.done{border-color:var(--green);color:var(--green)}
+.copy.sel-text{border-color:var(--accent);color:var(--accent)}
+.pm-legend{margin-top:14px}
+/* all checks */
+.allc{margin-top:30px;border:1px solid var(--line-2);border-radius:14px;background:var(--panel);box-shadow:var(--glow)}
+.allc-s{display:flex;align-items:center;gap:16px;padding:16px 22px;cursor:pointer;list-style:none;border-radius:14px}
+.allc-s::-webkit-details-marker{display:none}
+.allc-i{flex:none;width:40px;height:40px;display:grid;place-items:center;color:var(--accent)}
+.allc-i svg{width:30px;height:30px}
+.allc-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.allc-t h2{font-size:19px}
+.allc-t .sub{font-size:14.5px;color:var(--muted)}
+.allc-s>.chev{width:22px;height:22px;flex:none;color:var(--accent);transition:transform .15s}
+.allc[open]>.allc-s>.chev{transform:rotate(180deg)}
+.allc[open]>.allc-s{border-bottom:1px solid var(--line);border-radius:14px 14px 0 0}
+.allc-b{padding:4px 20px 22px}
+.allc-b .panel{box-shadow:none}
+.areas{grid-template-columns:repeat(3,minmax(0,1fr))}
+.areas .tile h3{font-size:15.5px;line-height:1.3}
+.strips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.strip h3{font-size:15px;margin:0 0 8px}
+.strip .pd-rows{margin:0}
+.strip .rs a{display:inline-flex}
+.pk-l{display:flex;flex-direction:column}
+.pk-w{font-size:13px;font-weight:500;color:var(--muted);overflow-wrap:anywhere}
+/* notes, the full version, the footer */
+.info{margin-top:26px;display:grid;grid-template-columns:minmax(0,1.4fr) auto auto;align-items:center;gap:14px 26px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.info-n{margin:0;display:flex;gap:12px;align-items:center;font-size:13.5px;color:var(--muted);line-height:1.45}
+.info-n svg{width:26px;height:26px;flex:none;color:var(--muted)}
+.info-l{list-style:none;margin:0;padding:0;display:flex;gap:10px 22px;flex-wrap:wrap;font-size:13.5px}
+.info-l li{display:flex;gap:8px;align-items:baseline}
+.info-l li>span:last-child{display:flex;flex-direction:column;color:var(--muted)}
+.info-l b{color:var(--text);font-weight:600}
+.lyr-k{width:10px;height:10px;flex:none;position:relative;top:1px}
+.lyr-k.ms{border-radius:50%;background:var(--lm)}
+.lyr-k.est{border:2px solid var(--est);transform:rotate(45deg);width:8px;height:8px}
+.fulllink{margin:0;font-size:16px}
+.fulllink a{text-decoration:none;border-bottom-width:1.5px}
+.foot{margin-top:20px;border-top:0;padding:8px 0 4px;align-items:center}
+.foot-brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand--foot .gll-word{font-size:16px;font-weight:700}
+.tagline{font-size:15px;color:var(--muted)}
+.foot-made{flex-basis:100%;max-width:none;font-size:13px}
+.foot-made p{max-width:760px}
+.links a{font-size:13.5px;padding:5px 12px 5px 9px}
+.corner--br{width:110px;height:112px}
+@media (max-width:900px){
+  .top{flex-wrap:wrap}.deco--top{display:none}
+  .cards{grid-template-columns:1fr;gap:12px}
+  .card,.card:first-child{padding:0}.card+.card{border-left:0}
+  .tr-m{grid-template-columns:40px minmax(0,1fr) auto;gap:6px 12px}
+  .tr-m .tp{grid-column:2/-1}.tr-m .tloc{grid-column:2}.tr-m .tr-b{grid-column:3;grid-row:1}
+  .tr-x{grid-template-columns:1fr}.tr-model{border-left:0;padding-left:0;border-top:1px solid var(--line-2);padding-top:8px}
+  .pmap{grid-template-columns:1fr}.pm-side{position:static}
+  .areas,.strips{grid-template-columns:1fr}
+  .info{grid-template-columns:1fr}}
+@media (max-width:560px){
+  .top-l .divider,.top-l .product{display:none}
+  .tr-m{grid-template-columns:36px minmax(0,1fr)}
+  .tr-m .tr-b{grid-column:2;grid-row:auto;justify-self:start}
+  .pr{grid-template-columns:minmax(0,1fr) auto}.pr-bar{display:none}.pr-hid{grid-column:1/-1;justify-self:start;white-space:normal}
+  .allc-s{padding:14px}.allc-b{padding:4px 10px 16px}
+  .btn{white-space:normal}}
 `;
 
 // scripts/lib/favicons.mjs
@@ -20418,6 +20713,9 @@ var FAVICONS = {
   "Microsoft": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB60lEQVRYhe2WO5LTQBCGv57lAHZGoMABRYozaU0iRyRU7d6APYIpRUSWD2AvnAB8A8jI1kRGmW+AEuVLRqJpAsv27GK9KG058Z9oHj3Tn7rnJW8mbzmlzEm9nwHOAMCzpoYJUYjNr8FcAYOieYPoBjEzn3n6PwBStw0Toh7KFNVJ9Uz6sQC5bwNQmYKEqIe1q1rnACoTrN4lRL3OAFCmIK+c+gojY4z0fbMQjIyBpTNiiNppG4DSFCREA6z+cmhmvrmNj9ra9zHIwbGRsc981QSgPAI2PzgT+VLmHMA3tzHKwaHV6ybOqwEwh9DLgzAf14XMnNpVBwAMd4WG4dw45UEXAHs1Wdltt18TgNQpD8uMdkqIQqe6KbNrA/BtX8q1fmvZ/GZfFukAwMjXw4SEiY1KIbZ95p1jPyuzfayLF8HLox0e6zTTyz4QFE1hRjDI5PVvj3WaEPUyRkGWX35GuNkPVFa+WXxqClB5F2yPYr2jwRp4NG3sm3mjKFTuAp/5fXHc1v+RexChcVXKXJWmYCeP9R9P1t8zGS1R+kXz8+KbAkuMfPDNYpZpICBh0RdmOsKT9Y+q+Wuv47b6516oSUdtBNrKk5+rNpF4kifZ9uJS5681LrN9sjfhQwgtTUHna6CtTv4qPgOcAf4CS1CiUTfGv6sAAAAASUVORK5CYII=",
   "Common Crawl": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAEAAQAMBIgACEQEDEQH/xAAZAAEBAQADAAAAAAAAAAAAAAACBgUBAwf/xAAoEAABAwMDAwQDAQAAAAAAAAABAAIDBAUREiExBhMiFEFCUWFxsRX/xAAXAQEBAQEAAAAAAAAAAAAAAAACAQME/8QAGBEBAQEBAQAAAAAAAAAAAAAAAAEREgL/2gAMAwEAAhEDEQA/APMEgikF3uSmEgiEgqFNvKQRbykExphIIhIKhWckEVZwWOw2Xp+iunUU89VVXGIS0lDTAtDWZGXOdkb4P2OffkY7joxIhIKsvHTVmiNqutsushsNxqxA90zNMtLv5ZyMEAZ3P0OeVzFZ6F08gktbGVDWx6aD/aiILCX6pNftpAZtnfVq4GFeoNiVbykFZzdO9OsPdgujZYRRz6WdwapJg2R0T/w1zWHbbyaB8l2TdOdPQz1nbr2zt9UfSwipaw6A2TEbnHYF0rNGr2ADvkr3E5qLCQVrB0/0/IYGzzilqZJm9ynNUHtj8CXxax743B+/E7qJYSWgnnCXn1rP1MZ6tPX2LqPp+3UFyqprXcrXAIYJnAPhnZkZzwQ7AzyP2eBFpBZ5rdYX682P0FrsFnbUz22hqu9LV1GzpyT5YaACBgn6P9OTTTUcbQKo0s0he3eGmDW6QHbHLBgZxktbqwffGBkBIKyYNrYhfa2RNB0ukgZtrg2meMO53yCQ9uSBs9u3jsa70EkEYonRs7bnk5a4OeHBrgOPiS5vPx/KzG8pBPApNA+kwiEgkFZyQRSCydFMJBEJBUKbeUgi3lIJjTCQRCQVCv/Z"
 };
+
+// scripts/lib/brandmark.mjs
+var GLL_MARK = "data:image/webp;base64,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";
 
 // scripts/lib/report.mjs
 var TOOL_NAME = "AI Search Audit";
@@ -20474,12 +20772,6 @@ function pinShape(sev) {
 }
 __name(pinShape, "pinShape");
 var pinIcon = /* @__PURE__ */ __name((sev, n, size = 28) => `<svg class="pi pin ${sev}" viewBox="-19 -19 38 38" width="${size}" height="${size}" aria-hidden="true">${pinShape(sev)}${n != null ? `<text dy=".36em">${n}</text>` : ""}</svg>`, "pinIcon");
-var target = /* @__PURE__ */ __name((f) => f.big ? `big-${f.id}` : `pin-${f.id}`, "target");
-function pinLink(f, x, y) {
-  const lab = /* @__PURE__ */ __name((i) => `${f.pin} · ${SEV[f.severity][i]} · ${f.label[i]}`, "lab");
-  return `<a class="pm-a" href="#${target(f)}" ${attrPair("aria-label", lab(0), lab(1))}><g class="pin ${f.severity}" transform="translate(${x} ${y})"><circle class="ring" r="19"/>${pinShape(f.severity)}<text dy=".36em">${f.pin}</text></g></a>`;
-}
-__name(pinLink, "pinLink");
 var judgeBadge = /* @__PURE__ */ __name((f) => {
   if (f.layer !== "judgement") return "";
   const m = f.judgement?.model;
@@ -20488,141 +20780,247 @@ var judgeBadge = /* @__PURE__ */ __name((f) => {
 }, "judgeBadge");
 var ownerMark = /* @__PURE__ */ __name((o) => `<span class="own" ${attrPair("title", OWNERS[o][0], OWNERS[o][1])}>${OWNER_ICON[o]}<span class="vh">${P(OWNERS[o])}</span></span>`, "ownerMark");
 var stx = /* @__PURE__ */ __name((x, y, t, cls, extra2 = "") => t[0] === t[1] ? `<text class="${cls}" x="${x}" y="${y}"${extra2}>${esc(t[0])}</text>` : `<text class="${cls} l-en" x="${x}" y="${y}"${extra2}>${esc(t[0])}</text><text class="${cls} l-uk" x="${x}" y="${y}"${extra2}>${esc(t[1])}</text>`, "stx");
-var rr = /* @__PURE__ */ __name((x, y, w, h, cls, rx = 2) => `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/>`, "rr");
 var mkI = /* @__PURE__ */ __name((st, lab) => `<span class="mk ${st}" ${attrPair("title", lab[0], lab[1])}><i aria-hidden="true">${MARK[st].i}</i><span class="vh">${P(lab)}</span></span>`, "mkI");
 var head = /* @__PURE__ */ __name((id, t, unit) => `<div class="panel-head"><h2 id="${id}">${P(t)}${unit ? ` <span class="unit">${P(unit)}</span>` : ""}</h2></div>`, "head");
-var MAP_W = 520;
-var PIN_STEP = 36;
-var MAX_ZONE_PINS = 6;
-var LINE_WIDTHS = [470, 430, 300, 452, 386, 410, 260];
+var CARD_ICON = {
+  find: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 4.5V8M9.5 13h.01M14.5 13h.01M9.5 16.2h5M3 12.5v3M21 12.5v3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="3.8" r="1.1" fill="currentColor"/></svg>',
+  text: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M13.5 3.2V8h4.8M8.8 12h6.4M8.8 15h6.4M8.8 18h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  brand: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.4V4.6a1 1 0 0 1 1-1h7.8a1 1 0 0 1 .7.3l7.4 7.4a1 1 0 0 1 0 1.4l-7.8 7.8a1 1 0 0 1-1.4 0l-7.4-7.4a1 1 0 0 1-.3-.7z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="8.3" cy="8.3" r="1.6" fill="none" stroke="currentColor" stroke-width="1.9"/></svg>'
+};
+var EXT_ICON = '<svg class="ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CHEV = '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9.5a1 1 0 0 0 1 1h3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+var LIST_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor"/></svg>';
+var INFO_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>';
+var worstState = /* @__PURE__ */ __name((items) => items.some((f) => f.severity === "blocking") ? "block" : items.some((f) => f.severity === "high" || f.severity === "medium") ? "prob" : "ok", "worstState");
+var sevPill = /* @__PURE__ */ __name((s) => `<span class="pill sp ${s}">${pinIcon(s, null, 14)}${P(SEV[s])}</span>`, "sevPill");
+var layerPill = /* @__PURE__ */ __name((f) => f.layer === "judgement" ? `<span class="pill lp est">${P(LITE.estimate)}</span>` : `<span class="pill lp ms">${P(f.layer === "derived" ? LAYER.derived : LITE.measured)}</span>`, "layerPill");
+var modelOf = /* @__PURE__ */ __name((f) => [f.judgement?.model || UI.modelNotStated[0], f.judgement?.model || UI.modelNotStated[1]], "modelOf");
 function zoneLabel(z) {
   if (z.kind === "section" || z.kind === "js") {
     const text3 = z.label || z.headings[0] || "";
     const base = text3 ? [text3, text3] : ZONE_LABEL.untitled();
     return z.kind === "js" ? [`${base[0]} · JavaScript`, `${base[1]} · JavaScript`] : base;
   }
+  if (z.kind === "more" && z.label) return ZONE_LABEL.more(z).map((t) => `${z.label} · ${t}`);
   return (ZONE_LABEL[z.kind] || ZONE_LABEL.untitled)(z);
 }
 __name(zoneLabel, "zoneLabel");
-function zoneHeight(z, lede) {
-  if (z.kind === "header" || z.kind === "nav" || z.kind === "footer") return 44;
-  const body = 50 + Math.min(60, Math.round(Math.sqrt(Math.max(0, z.chars)) * 0.9));
-  if (z.kind === "hero") return Math.max(lede ? 104 : 80, body);
-  if (z.hidden || z.kind === "aside") return Math.max(80, body);
-  return body;
-}
-__name(zoneHeight, "zoneHeight");
-function pageSvg(model2) {
-  const lede = model2.findings.find((f) => f.code === "hero_lede_dropped");
-  const out = [];
-  let y = 0;
-  for (const z of model2.zones) {
-    const h = zoneHeight(z, lede && lede.zones.includes(z.id));
-    const pins = z.pins.slice(0, z.pins.length > MAX_ZONE_PINS ? MAX_ZONE_PINS - 1 : MAX_ZONE_PINS);
-    const extra2 = z.pins.length - pins.length;
-    const pinRoom = (pins.length + (extra2 ? 1 : 0)) * PIN_STEP;
-    const maxChars = Math.max(10, Math.floor((MAP_W - 28 - pinRoom) / 7.6));
-    const g = [`<g aria-hidden="true">`, `<rect class="z${z.kind === "js" ? " js" : ""}" x="0.75" y="${y + 0.75}" width="${MAP_W - 1.5}" height="${h - 1.5}" rx="8"/>`];
-    const lab = zoneLabel(z).map((t) => clip2(t, maxChars));
-    g.push(stx(14, y + 21, lab, "zl"));
-    const contentTop = y + 32;
-    const contentH = h - 42;
-    const unseen = z.hidden || z.kind === "aside" || z.seen !== null && z.seen !== void 0 && z.seen < 0.05 && z.kind !== "header" && z.kind !== "nav" && z.kind !== "footer";
-    if (z.kind === "header" || z.kind === "nav" || z.kind === "footer") {
-      if (z.hasNav && !z.pins.length) for (let i = 0; i < 5; i++) g.push(rr(262 + i * 48, y + 15, 38, 6, "ln"));
-      if (!z.hasNav || z.pins.length) g.push(rr(14, y + 31, 170, 4, "ln faint"));
-      else g.push(rr(14, y + 31, 170, 4, "ln faint"));
-    } else if (unseen) {
-      g.push(rr(14, contentTop, MAP_W - 28, Math.max(18, contentH), "hid", 4));
-      const t = z.hidden && z.panels > 1 ? call(UI.panelsHidden, z.panels, z.chars) : UI.notSeen;
-      g.push(stx(MAP_W / 2, contentTop + Math.max(18, contentH) / 2 + 4, t, "ht halo", ' text-anchor="middle"'));
-    } else {
-      if (z.kind === "hero") {
-        g.push(rr(14, contentTop - 2, 64, 5, "ln"));
-        g.push(rr(14, contentTop + 6, 280, 14, "ln strong", 3));
-      }
-      const start = z.kind === "hero" ? contentTop + 28 : contentTop;
-      const isLede = z.kind === "hero" && lede && lede.zones.includes(z.id);
-      if (isLede) {
-        g.push(rr(14, start, 360, 34, "hid", 4));
-        g.push(stx(194, start + 21, UI.notSeen, "ht halo", ' text-anchor="middle"'));
-      } else {
-        const partial = z.seen !== null && z.seen !== void 0 && z.seen < 0.9 && z.kind !== "hero" ? 1 - z.seen : 0;
-        const room = y + h - 10 - start;
-        const lines = Math.max(1, Math.floor(room / 10));
-        const seenLines = partial ? Math.max(0, Math.round(lines * (1 - partial))) : lines;
-        for (let i = 0; i < seenLines; i++) g.push(rr(14, start + i * 10, LINE_WIDTHS[(i + Number(z.id === "js" ? 0 : z.id || 0)) % LINE_WIDTHS.length], i ? 4 : 5, i ? "ln faint" : "ln"));
-        if (partial) {
-          const top = start + seenLines * 10;
-          const bh = Math.max(16, y + h - 8 - top);
-          g.push(rr(14, top, MAP_W - 28, bh, "hid", 4));
-          if (bh >= 16) g.push(stx(MAP_W / 2, top + bh / 2 + 4, call(UI.partSeen, Math.round(partial * 100)), "ht halo", ' text-anchor="middle"'));
-        }
-      }
-    }
-    g.push("</g>");
-    out.push(g.join(""));
-    pins.forEach((f, i) => out.push(pinLink(f, MAP_W - 22 - (pins.length - 1 - i) * PIN_STEP - (extra2 ? PIN_STEP : 0), y + 21)));
-    if (extra2) out.push(`<text class="zn" x="${MAP_W - 22}" y="${y + 25}" text-anchor="middle" aria-hidden="true">+${extra2}</text>`);
-    y += h + 12;
+var placeOf = /* @__PURE__ */ __name((f) => f.zones.length ? `z${f.zones[0]}` : f.strip ? f.strip.side : null, "placeOf");
+function locOf(f, model2) {
+  if (f.zones.length) {
+    const z = model2.zones.find((x) => x.id === f.zones[0]);
+    if (z) return zoneLabel(z).map((t) => clip2(t, 40));
   }
-  const H = Math.max(40, y - 12);
-  return `<svg class="pm-svg pm-page" id="pm-page" viewBox="0 0 ${MAP_W} ${H}" role="group" ${attrPair("aria-label", UI.mapAria[0], UI.mapAria[1])}><defs><pattern id="pm-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="7" height="7"/><line class="hl" x1="0" y1="0" x2="0" y2="7"/></pattern></defs>${out.join("")}</svg>`;
+  if (f.strip) return f.strip.side === "head" ? ["<head>", "<head>"] : ["robots.txt", "robots.txt"];
+  if (f.code === "question_missing") return LITE.notInText;
+  if (f.where) return [clip2(f.where, 40), clip2(f.where, 40)];
+  return LITE.wholePage;
 }
-__name(pageSvg, "pageSvg");
-function sideSvg(id, title, rows) {
-  const W = 320;
-  const RH = 34;
-  const top = 36;
-  const H = top + rows.length * RH + 6;
-  const o = [`<g aria-hidden="true"><rect class="z" x="0.75" y="0.75" width="${W - 1.5}" height="${H - 1.5}" rx="8"/>${stx(14, 23, [title, title], "zl mono")}`];
-  rows.forEach((r, i) => {
-    const y = top + i * RH;
-    const k = Array.isArray(r.k) ? r.k : [r.k, r.k];
-    const shown = r.pins.slice(0, 3);
-    const room = Math.floor((W - 30 - Math.max(1, shown.length) * 34 - 148) / 6.7);
-    o.push(`<line class="sep" x1="10" x2="${W - 10}" y1="${y}" y2="${y}"/>`, stx(14, y + 21, k.map((t) => clip2(t, 16)), "zk"), stx(148, y + 21, r.v.map((t) => clip2(t, room)), "zv"));
-    if (!r.pins.length) o.push(`<g class="okm" transform="translate(${W - 22} ${y + 17})"><circle r="9.5"/><path d="m-4.5 0.5 3 3 6-6.5"/></g>`);
+__name(locOf, "locOf");
+function heroBlock(model2) {
+  const r = model2.reading;
+  const h = headline(model2.findings);
+  const href = safeHref(r.fetch.finalUrl);
+  const url = href ? `<a class="url" id="audited-url" href="${esc(href)}" rel="noopener noreferrer" target="_blank">${esc(r.fetch.finalUrl)}${EXT_ICON}</a>` : `<span class="url">${esc(r.fetch.finalUrl)}</span>`;
+  const date = dateLong(r.createdAt);
+  const title = r.facts.head.title ? `<span aria-hidden="true">·</span><span class="pt">${esc(clip2(r.facts.head.title, 120))}</span>` : "";
+  const sevs = SEVERITIES.map((s) => `<li class="${s}">${pinIcon(s, null, 16)}<span>${P(call(SEV_COUNT[s], model2.counts[s]))}</span></li>`).join("");
+  return [
+    `<header class="verdict lite-verdict${h.blocked ? " is-blocked" : ""}" id="verdict">`,
+    `<p class="pageid">${url}</p>`,
+    `<p class="lite-meta"><span>${P([LITE.checked[0](date[0]), LITE.checked[1](date[1])])}</span>${title}</p>`,
+    `<h1 id="headline">${P(h.t)}</h1>`,
+    `<p class="lede" id="subtitle">${P(subtitle(model2.findings, h.blocked))}</p>`,
+    `<ul class="sevrow" id="sev-counts" ${attrPair("aria-label", UI.severity[0], UI.severity[1])}>${sevs}</ul>`,
+    `<p class="cta-row"><a class="btn btn-primary" id="see-first" href="#review-first">${P(LITE.seeFindings)}<span aria-hidden="true"> ↓</span></a></p>`,
+    "</header>"
+  ].join("\n");
+}
+__name(heroBlock, "heroBlock");
+function cardsBlock(model2) {
+  const F = model2.findings;
+  const own = /* @__PURE__ */ __name((f) => f.layer !== "judgement" && f.area !== "brand", "own");
+  const c1 = F.filter((f) => own(f) && ["find", "classic", "lang"].includes(f.area));
+  const c2 = F.filter((f) => own(f) && ["read", "quote"].includes(f.area));
+  const c3 = F.filter((f) => !own(f));
+  const cards = [];
+  const blocker = c1.find((f) => f.severity === "blocking");
+  cards.push({
+    id: "find",
+    state: worstState(c1),
+    title: blocker ? CARD_COPY.find.title.block : CARD_COPY.find.title.ok,
+    status: blocker ? [CARD_COPY.find.status.block[0](blocker.label[0]), CARD_COPY.find.status.block[1](blocker.label[1])] : c1.length ? call(CARD_COPY.find.status.notes, c1.length) : CARD_COPY.find.status.none
   });
-  o.push("</g>");
-  rows.forEach((r, i) => r.pins.slice(0, 3).forEach((f, j, arr) => o.push(pinLink(f, W - 22 - (arr.length - 1 - j) * 34, top + i * RH + 17))));
-  return `<svg class="pm-svg" id="${id}" viewBox="0 0 ${W} ${H}" role="group" ${attrPair("aria-label", title, title)}>${o.join("")}</svg>`;
+  cards.push({
+    id: "text",
+    state: worstState(c2),
+    title: !c2.length ? CARD_COPY.text.title.ok : c2.some((f) => f.hides) ? CARD_COPY.text.title.hides : CARD_COPY.text.title.notes,
+    status: c2.length ? call(CARD_COPY.text.status.notes, c2.length) : CARD_COPY.text.status.none
+  });
+  const judged2 = model2.judgement.any || c3.length > 0;
+  const B = CARD_COPY.brand;
+  cards.push({
+    id: "brand",
+    state: judged2 ? worstState(c3) : "na",
+    title: !judged2 ? B.title.na : c3.some((f) => f.area === "brand") ? B.title.brand : c3.length ? B.title.questions : B.title.ok,
+    status: !judged2 ? B.status.na : c3.some((f) => f.code === "brand_unknown") ? B.status.unknown : c3.length ? call(B.status.notes, c3.length) : B.status.ok
+  });
+  const li = cards.map((c4) => `<li class="card ${c4.state}" id="card-${c4.id}"><span class="card-i">${CARD_ICON[c4.id]}</span><span class="card-t"><h3>${P(c4.title)}</h3><span class="card-s">${P(c4.status)}</span></span></li>`).join("");
+  const note = model2.judgement.any ? call(LITE.cardsNote[0], model2.judgement.model || UI.modelNotStated[0]) : LITE.cardsNote[1];
+  if (model2.judgement.any && !model2.judgement.model) note[1] = LITE.cardsNote[0][1](UI.modelNotStated[1]);
+  return `<section class="sum" id="means" aria-labelledby="h-means"><h2 id="h-means">${P(LITE.means)}</h2><ul class="cards" id="cards">${li}</ul><p class="cards-note">${P(note)}</p></section>`;
 }
-__name(sideSvg, "sideSvg");
-function mapBlock(model2) {
-  const o = [`<section class="panel pm-panel" id="page-map" aria-labelledby="h-map">`];
-  o.push(`<div class="panel-head"><h2 id="h-map">${P(UI.pageMap)}</h2><span class="sub">${P(call(UI.marked, model2.mappedCount))}</span></div>`);
-  o.push(`<div class="pmap"><div class="pm-pagecol">${pageSvg(model2)}</div><div class="pm-side">${sideSvg("pm-head", "<head>", model2.head)}${sideSvg("pm-robots", "robots.txt · llms.txt", model2.robots)}</div></div>`);
-  const legend = [...SEVERITIES.map((s) => `<li>${pinIcon(s, null, 22)}${P(SEV[s])}</li>`), `<li><span class="sw-hatch" aria-hidden="true"></span>${P(UI.notSeen)}</li>`, `<li><span class="sw-js" aria-hidden="true"></span>${P(UI.onlyJs)}</li>`];
-  if (model2.unmappedCount) legend.push(`<li class="pm-un">${P(call(UI.unmapped, model2.unmappedCount))}</li>`);
-  o.push(`<ul class="pm-legend" id="map-legend">${legend.join("")}</ul>`);
-  const rest = model2.findings.filter((f) => !f.big);
-  if (rest.length) o.push(`<ol class="pm-key" id="map-key" ${attrPair("aria-label", UI.otherProblems[0], UI.otherProblems[1])}>${rest.map((f) => `<li id="pin-${esc(f.id)}" class="${f.severity}${f.layer === "judgement" ? " jd" : ""}">${pinIcon(f.severity, f.pin, 26)}<span class="vh">${P(SEV[f.severity])}: </span><span class="pk-l">${P(f.label)}</span>${ownerMark(f.owner)}${judgeBadge(f)}</li>`).join("")}</ol>`);
+__name(cardsBlock, "cardsBlock");
+function firstRow(f, model2) {
+  const main = `<span class="tn ${f.severity}" aria-hidden="true">${f.pin}</span><span class="tl">${P(f.label)}</span><span class="tp">${sevPill(f.severity)}${layerPill(f)}</span><span class="tloc">${P(locOf(f, model2))}</span>`;
+  if (f.layer === "judgement") {
+    const q3 = /^question_/.test(f.code);
+    const qs = q3 ? model2.findings.filter((x) => x.code === f.code && x.evidence?.question).map((x) => x.evidence.question) : [];
+    const m = modelOf(f);
+    const list2 = qs.length ? `<ul class="qx">${qs.map((t) => `<li>${pair(`“${esc(t)}”`, `«${esc(t)}»`)}</li>`).join("")}</ul>` : "";
+    const panel = `<div class="tr-x">${list2}<p class="tr-model"><b>${P([LITE.modelLine[0](m[0]), LITE.modelLine[1](m[1])])}</b><span>${P(LITE.notThree)}</span></p></div>`;
+    return `<li class="tr jd" id="top-${esc(f.id)}"><details class="tr-d"><summary class="tr-m">${main}<span class="btn btn-out btn-sm tr-b">${P(q3 ? LITE.examples : LITE.aboutEstimate)}${CHEV}</span></summary>${panel}</details></li>`;
+  }
+  const pid = placeOf(f);
+  const btn = pid ? `<a class="btn btn-out btn-sm tr-b" href="#place-${pid}" data-place="${pid}">${P(LITE.showPlace)}<span aria-hidden="true"> ›</span></a>` : `<a class="btn btn-out btn-sm tr-b" href="#pin-${esc(f.id)}">${P(LITE.showInList)}<span aria-hidden="true"> ›</span></a>`;
+  return `<li class="tr" id="top-${esc(f.id)}"><div class="tr-m">${main}${btn}</div></li>`;
+}
+__name(firstRow, "firstRow");
+function firstBlock(model2) {
+  const top = model2.bigs.slice(0, 3);
+  const body = top.length ? `<ol class="trows" id="top-rows">${top.map((f) => firstRow(f, model2)).join("")}</ol>` : `<p class="none-found">${P(UI.noProblems)}</p>`;
+  return `<section class="sum" id="review-first" aria-labelledby="h-first"><h2 id="h-first">${P(LITE.first)}</h2>${body}</section>`;
+}
+__name(firstBlock, "firstBlock");
+var HEADERISH = /* @__PURE__ */ new Set(["header", "nav", "footer"]);
+function placeList(model2) {
+  const F = model2.findings;
+  const strip = /* @__PURE__ */ __name((side) => F.filter((f) => f.strip?.side === side), "strip");
+  const out = [
+    { id: "robots", kind: "file", label: ["robots.txt · llms.txt", "robots.txt · llms.txt"], pins: strip("robots"), rows: model2.robots },
+    { id: "head", kind: "file", label: ["<head>", "<head>"], pins: strip("head"), rows: model2.head }
+  ];
+  const lede = F.find((f) => f.code === "hero_lede_dropped");
+  for (const z of model2.zones) {
+    const unseen = z.hidden || z.kind === "aside" || z.seen !== null && z.seen !== void 0 && z.seen < 0.05 && !HEADERISH.has(z.kind);
+    const partial = !unseen && z.seen !== null && z.seen !== void 0 && z.seen < 0.9 && z.kind !== "hero" && !HEADERISH.has(z.kind) ? 1 - z.seen : 0;
+    const hide = unseen ? z.hidden && z.panels > 1 ? call(UI.panelsHidden, z.panels, z.chars) : LITE.notRead : partial ? call(LITE.partRead, Math.round(partial * 100)) : z.kind === "hero" && lede && lede.zones.includes(z.id) ? LITE.notRead : null;
+    out.push({ id: `z${z.id}`, kind: z.kind, js: z.kind === "js", label: zoneLabel(z), pins: z.pins, chars: z.chars, unseen, hide });
+  }
+  return out;
+}
+__name(placeList, "placeList");
+function placeRow(p2, sel) {
+  const shown = p2.pins.slice(0, 5);
+  const extra2 = p2.pins.length - shown.length;
+  const pins = `${shown.map((f) => pinIcon(f.severity, f.pin, 32)).join("")}${extra2 ? `<span class="pr-more">+${extra2}</span>` : ""}`;
+  const sr = p2.pins.map((f) => `${f.pin} · ${SEV[f.severity][0]} · ${f.label[0]}`);
+  const srUk = p2.pins.map((f) => `${f.pin} · ${SEV[f.severity][1]} · ${f.label[1]}`);
+  const w = p2.kind === "file" ? 0 : HEADERISH.has(p2.kind) ? 34 : Math.round(Math.min(92, 22 + Math.sqrt(Math.max(0, p2.chars || 0)) * 1.1));
+  const mid = p2.hide ? `<span class="pr-hid">${P(p2.hide)}</span>` : w ? `<span class="pr-bar" style="width:${w}%" aria-hidden="true"></span>` : `<span class="pr-n">${P(call(LITE.rows, p2.rows.length))}</span>`;
+  const cls = ["pl", p2.kind === "file" ? "file" : "", p2.js ? "js" : "", p2.unseen ? "hid" : "", sel ? "sel" : ""].filter(Boolean).join(" ");
+  return `<li class="${cls}" id="place-${p2.id}"><button type="button" class="pr" data-place="${p2.id}" aria-pressed="${sel}" aria-controls="pd-${p2.id}"><span class="pr-l">${P(p2.label.map((t) => clip2(t, 46)))}</span>${mid}<span class="pr-pins" aria-hidden="true">${pins}</span>${sr.length ? `<span class="vh">: ${P([sr.join("; "), srUk.join("; ")])}</span>` : ""}</button></li>`;
+}
+__name(placeRow, "placeRow");
+function placeDetail(p2, sel) {
+  const o = [`<div class="pd" id="pd-${p2.id}"${sel ? "" : " hidden"}>`, `<h3>${P(LITE.selected)}: <span class="pd-n">${P(p2.label.map((t) => clip2(t, 60)))}</span></h3>`];
+  if (p2.pins.length) {
+    o.push(`<p class="pd-f">${P(LITE.found)}:</p><ul class="pd-list">`);
+    for (const f of p2.pins) o.push(`<li>${pinIcon(f.severity, f.pin, 24)}<span class="pd-l">${P(f.label)}</span><span class="pd-p">${sevPill(f.severity)}${layerPill(f)}</span></li>`);
+    o.push("</ul>");
+  } else o.push(`<p class="pd-f none">${P(LITE.nothingHere)}</p>`);
+  if (p2.rows) {
+    o.push(`<ul class="pd-rows">${p2.rows.map((r) => {
+      const k = Array.isArray(r.k) ? r.k : [r.k, r.k];
+      const st = r.pins.length ? r.pins.map((f) => pinIcon(f.severity, f.pin, 20)).join("") : `<span class="mk pass" aria-hidden="true"><i>${MARK.pass.i}</i></span>`;
+      return `<li><span class="rk">${P(k)}</span><span class="rv">${P(r.v.map((t) => clip2(t, 70)))}</span><span class="rs">${st}</span></li>`;
+    }).join("")}</ul>`);
+  }
+  const wheres = [...new Set(p2.pins.map((f) => String(f.where || "").trim()).filter(Boolean))];
+  if (wheres.length) {
+    const rows = wheres.map((w) => `<div class="ex-row"><code class="ex-c">${esc(w)}</code><button type="button" class="copy" data-copy data-en-done="${esc(LITE.copied[0])}" data-uk-done="${esc(LITE.copied[1])}" ${attrPair("aria-label", LITE.copy[0], LITE.copy[1])}>${COPY_ICON}</button></div>`).join("");
+    o.push(`<details class="exact"><summary class="btn btn-primary btn-sm">${P(LITE.exact)}${CHEV}</summary><div class="ex-box"><p class="ex-l">${P(LITE.path)}:</p>${rows}</div></details>`);
+  }
+  o.push("</div>");
+  return o.join("");
+}
+__name(placeDetail, "placeDetail");
+function placesBlock(model2) {
+  const places = placeList(model2);
+  const first2 = model2.findings.map(placeOf).find(Boolean);
+  const selId = first2 || places.find((p2) => p2.pins.length)?.id || places[2]?.id || places[0].id;
+  const legend = [...SEVERITIES.map((s) => `<li>${pinIcon(s, null, 20)}${P(SEV[s])}</li>`), `<li><span class="sw-hatch" aria-hidden="true"></span>${P(LITE.notRead)}</li>`, `<li><span class="sw-js" aria-hidden="true"></span>${P(UI.onlyJs)}</li>`];
+  if (model2.unmappedCount) legend.push(`<li class="pm-un"><a href="#map-key">${P(call(UI.unmapped, model2.unmappedCount))}</a></li>`);
   const zonesCap = model2.caps.find((c2) => c2.id === "zones");
-  if (zonesCap) o.push(`<p class="capnote">${P(zonesCap.t)}</p>`);
-  o.push("</section>");
-  return o.join("\n");
+  return [
+    `<section class="sum" id="page-map" aria-labelledby="h-map">`,
+    `<div class="sum-head"><h2 id="h-map">${P(LITE.where)}</h2><span class="sub">${P(LITE.schemaNote)}</span></div>`,
+    `<div class="pmap"><ol class="places" id="places" ${attrPair("aria-label", LITE.placesAria[0], LITE.placesAria[1])}>${places.map((p2) => placeRow(p2, p2.id === selId)).join("")}</ol>`,
+    `<div class="pm-side" id="place-detail">${places.map((p2) => placeDetail(p2, p2.id === selId)).join("")}<p class="vh" id="copy-live" aria-live="polite"></p></div></div>`,
+    `<ul class="pm-legend" id="map-legend">${legend.join("")}</ul>`,
+    zonesCap ? `<p class="capnote">${P(zonesCap.t)}</p>` : "",
+    "</section>"
+  ].join("\n");
 }
-__name(mapBlock, "mapBlock");
-function tilesBlock(model2) {
-  const o = [`<ul class="tiles tiles-lite" id="status" ${attrPair("aria-label", UI.statusAria[0], UI.statusAria[1])}>`];
+__name(placesBlock, "placesBlock");
+function areasBlock(model2) {
+  const o = [`<section class="panel" id="lc-areas" aria-labelledby="h-areas">${head("h-areas", LITE.areas)}<ul class="tiles areas" id="status" ${attrPair("aria-label", UI.statusAria[0], UI.statusAria[1])}>`];
   for (const t of model2.tiles) {
     const na = t.id === "brand" ? [STATE.unchecked, UI.noBrandFiles] : [STATE.na, UI.oneVersion];
     const tc = t.state === "na" ? na[1] : !t.count ? UI.nothingFound : t.minorOnly ? nMinor(t.count) : nProblems(t.count);
-    o.push(`<li class="tile ${t.state}" id="tile-${t.id}"><h2>${P(t.q)}</h2><span class="state">${STATE_ICON[t.state]}${P(t.state === "na" ? na[0] : STATE[t.state])}</span><span class="tc">${P(tc)}</span></li>`);
+    o.push(`<li class="tile ${t.state}" id="tile-${t.id}"><h3>${P(t.q)}</h3><span class="state">${STATE_ICON[t.state]}${P(t.state === "na" ? na[0] : STATE[t.state])}</span><span class="tc">${P(tc)}</span></li>`);
   }
-  o.push("</ul>");
+  o.push("</ul></section>");
   return o.join("\n");
 }
-__name(tilesBlock, "tilesBlock");
-function biggestBlock(model2) {
-  const o = [`<section class="panel" id="biggest" aria-labelledby="h-biggest">${head("h-biggest", UI.biggest)}`];
-  if (!model2.bigs.length) o.push(`<p class="none-found">${P(UI.noProblems)}</p>`);
-  else o.push(`<ol class="bchips">${model2.bigs.map((f) => `<li class="bchip ${f.severity}" id="big-${esc(f.id)}"><span class="bc-t">${pinIcon(f.severity, f.pin, 30)}<span>${P(f.label)}</span></span><span class="bc-m"><span class="sevw ${f.severity}">${P(SEV[f.severity])}</span>${ownerMark(f.owner)}</span>${judgeBadge(f)}</li>`).join("")}</ol>`);
-  o.push("</section>");
-  return o.join("\n");
+__name(areasBlock, "areasBlock");
+function stripsBlock(model2) {
+  const table = /* @__PURE__ */ __name((title, rows) => `<div class="strip"><h3 class="mono">${esc(title)}</h3><ul class="pd-rows">${rows.map((r) => {
+    const k = Array.isArray(r.k) ? r.k : [r.k, r.k];
+    const st = r.pins.length ? r.pins.map((f) => `<a href="#pin-${esc(f.id)}">${pinIcon(f.severity, f.pin, 20)}<span class="vh">${P(SEV[f.severity])}</span></a>`).join("") : `<span class="mk pass" aria-hidden="true"><i>${MARK.pass.i}</i></span>`;
+    return `<li><span class="rk">${P(k)}</span><span class="rv">${P(r.v)}</span><span class="rs">${st}</span></li>`;
+  }).join("")}</ul></div>`, "table");
+  return `<section class="panel wide" id="lc-strips" aria-labelledby="h-strips">${head("h-strips", LITE.strips)}<div class="strips">${table("<head>", model2.head)}${table("robots.txt · llms.txt", model2.robots)}</div></section>`;
 }
-__name(biggestBlock, "biggestBlock");
+__name(stripsBlock, "stripsBlock");
+function findingsBlock(model2) {
+  if (!model2.findings.length) return `<section class="panel" id="all-findings" aria-labelledby="h-allf">${head("h-allf", LITE.allFindings)}<p class="none-found">${P(UI.noProblems)}</p></section>`;
+  const items = model2.findings.map((f) => `<li id="pin-${esc(f.id)}" class="${f.severity}${f.layer === "judgement" ? " jd" : ""}">${pinIcon(f.severity, f.pin, 26)}<span class="vh">${P(SEV[f.severity])}: </span><span class="pk-l">${P(f.label)}<span class="pk-w">${P(locOf(f, model2))}</span></span>${ownerMark(f.owner)}${judgeBadge(f)}</li>`).join("");
+  return `<section class="panel" id="all-findings" aria-labelledby="h-allf">${head("h-allf", LITE.allFindings, call(UI.marked, model2.mappedCount))}<ol class="pm-key" id="map-key">${items}</ol></section>`;
+}
+__name(findingsBlock, "findingsBlock");
+function allChecksBlock(model2) {
+  return [
+    `<details class="allc" id="all-checks">`,
+    `<summary class="allc-s"><span class="allc-i">${LIST_ICON}</span><span class="allc-t"><h2 id="h-all">${P(LITE.all)}</h2><span class="sub">${P(LITE.allSub)}</span></span>${CHEV}</summary>`,
+    '<div class="allc-b">',
+    areasBlock(model2),
+    '<div class="lcharts">',
+    botsBlock(model2),
+    classicBlock(model2),
+    languagesBlock(model2),
+    severityBlock(model2),
+    waterfallBlock(model2),
+    stripsBlock(model2),
+    "</div>",
+    findingsBlock(model2),
+    cannotBlock(model2),
+    "</div>",
+    "</details>"
+  ].join("\n");
+}
+__name(allChecksBlock, "allChecksBlock");
+function infoStrip() {
+  return [
+    `<section class="info" id="info-strip" ${attrPair("aria-label", LITE.about[0], LITE.about[1])}>`,
+    `<p class="info-n">${INFO_ICON}<span>${P(LITE.info)}</span></p>`,
+    `<ul class="info-l"><li><span class="lyr-k ms" aria-hidden="true"></span><span><b>${P(LITE.measured)}</b>${P(LITE.measuredSub)}</span></li><li><span class="lyr-k est" aria-hidden="true"></span><span><b>${P(LITE.estimate)}</b>${P(LITE.estimateSub)}</span></li></ul>`,
+    `<p class="fulllink" id="full-link"><a class="btn btn-out" href="${FULL_VERSION_URL}" rel="noopener noreferrer" target="_blank">${P(LITE.full)}<span aria-hidden="true"> ↗</span></a></p>`,
+    "</section>"
+  ].join("\n");
+}
+__name(infoStrip, "infoStrip");
 function severityBlock(model2) {
   const max = Math.max(1, ...SEVERITIES.map((s) => model2.counts[s]));
   const C = { blocking: "--red", high: "--amber", medium: "--amber", low: "--pin-low" };
@@ -20727,10 +21125,20 @@ var JS = `
   for(var i=0;i<b.length;i++)b[i].addEventListener("click",function(){var t=this.getAttribute("data-set-theme");root.setAttribute("data-theme",t);put(TK,t);paint()});
   var c=document.querySelectorAll("[data-set-lang]");
   for(var j=0;j<c.length;j++)c[j].addEventListener("click",function(){var l=this.getAttribute("data-set-lang");applyLang(l);put(LK,l);paint()});
+  function openTo(n){while(n&&n!==document){if(n.tagName&&String(n.tagName).toUpperCase()==="DETAILS")n.open=true;n=n.parentNode}}
+  function select(id){var r=document.querySelectorAll(".pr[data-place]"),i;for(i=0;i<r.length;i++){var on=r[i].getAttribute("data-place")===id;r[i].setAttribute("aria-pressed",String(on));r[i].parentNode.className=r[i].parentNode.className.replace(/ sel\\b/g,"")+(on?" sel":"")}var d=document.querySelectorAll(".pd"),k;for(k=0;k<d.length;k++)d[k].hidden=d[k].id!=="pd-"+id}
+  var rows=document.querySelectorAll(".pr[data-place]");
+  for(var p=0;p<rows.length;p++)rows[p].addEventListener("click",function(){select(this.getAttribute("data-place"))});
   function isA(n){return n&&n.tagName&&String(n.tagName).toUpperCase()==="A"}
-  document.addEventListener("click",function(e){var a=e.target;while(a&&a!==document&&!isA(a))a=a.parentNode;if(!a||a===document)return;var href=a.getAttribute("href");if(!href||href.charAt(0)!=="#"||href.length<2)return;var t=document.getElementById(href.slice(1));if(!t)return;e.preventDefault();try{t.scrollIntoView({block:"center"})}catch(x){}t.classList.add("hit");setTimeout(function(){t.classList.remove("hit")},1600)});
+  document.addEventListener("click",function(e){var a=e.target;while(a&&a!==document&&!isA(a))a=a.parentNode;if(!a||a===document)return;var href=a.getAttribute("href");if(!href||href.charAt(0)!=="#"||href.length<2)return;var t=document.getElementById(href.slice(1));if(!t)return;e.preventDefault();var pl=a.getAttribute("data-place");if(pl)select(pl);openTo(t);try{t.scrollIntoView({block:"center"})}catch(x){}t.classList.add("hit");setTimeout(function(){t.classList.remove("hit")},1600)});
+  var live=document.getElementById("copy-live");
+  function said(btn,ok){var l=root.getAttribute("data-lang")||"en",m=btn.getAttribute("data-"+l+"-done")||"";btn.classList.add(ok?"done":"sel-text");if(live)live.textContent=ok?m:"";setTimeout(function(){btn.classList.remove("done","sel-text")},1600)}
+  var cp=document.querySelectorAll("[data-copy]");
+  for(var q=0;q<cp.length;q++)cp[q].addEventListener("click",function(){var btn=this,code=btn.parentNode.querySelector("code"),txt=code?code.textContent:"";function pick(){try{var r=document.createRange();r.selectNodeContents(code);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}catch(x){}said(btn,false)}try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){said(btn,true)},pick);else pick()}catch(x){pick()}});
+  if(h&&h.indexOf("=")<0&&h.length>1){var at=document.getElementById(h.slice(1));if(at)openTo(at)}
 })();
 `;
+var brandMark = /* @__PURE__ */ __name((cls) => `<span class="brand ${cls}"><img class="gll-mark" src="${GLL_MARK}" alt="" width="56" height="27"><span class="gll-word">GetLoopLoop</span></span>`, "brandMark");
 function documentStart(title) {
   return [
     "<!doctype html>",
@@ -20746,22 +21154,22 @@ function documentStart(title) {
     "</head>",
     "<body>",
     '<main class="wrap" id="report">',
-    '<div class="corner corner--tl" aria-hidden="true"></div>',
     '<div class="top">',
-    `<div class="top-l"><span class="eyebrow">${P(UI.eyebrow)}</span></div>`,
+    `<div class="top-l">${brandMark("brand--top")}<span class="divider" aria-hidden="true"></span><span class="product">${esc(LITE.product)}</span></div>`,
+    '<div class="deco deco--top" aria-hidden="true"></div>',
     '<div class="toggles">',
     `<div class="toggle" role="group" ${attrPair("aria-label", UI.langGroup[0], UI.langGroup[1])}><button type="button" id="lang-en" data-set-lang="en" aria-pressed="true">EN</button><button type="button" id="lang-uk" data-set-lang="uk" aria-pressed="false" lang="uk">UK</button></div>`,
     `<div class="toggle" role="group" ${attrPair("aria-label", UI.themeGroup[0], UI.themeGroup[1])}><button type="button" id="theme-dark" data-set-theme="dark" aria-pressed="false">${P(UI.dark)}</button><button type="button" id="theme-light" data-set-theme="light" aria-pressed="true">${P(UI.light)}</button></div>`,
-    "</div></div>",
-    '<div class="deco" aria-hidden="true"></div>'
+    "</div></div>"
   ];
 }
 __name(documentStart, "documentStart");
 function documentEnd(madeKey = "footer") {
   const links = LINKS.map(([id, name, href, k]) => `<li><a id="foot-${id}" href="${href}" rel="noopener noreferrer" target="_blank">${ICONS[id]}<span>${name}${k ? ` · ${P(k)}` : ""}</span></a></li>`).join("");
   return [
-    '<div class="deco deco--foot" aria-hidden="true"></div>',
-    `<footer class="foot"><div class="foot-made"><img class="motanka" src="${MOTANKA}" alt="" width="30" height="39"><p>${P(UI[madeKey])}</p></div><ul class="links">${links}</ul></footer>`,
+    `<footer class="foot"><div class="foot-brand">${brandMark("brand--foot")}<span class="divider" aria-hidden="true"></span><span class="tagline">${P(LITE.tagline)}</span></div>`,
+    `<ul class="links">${links}</ul>`,
+    `<div class="foot-made"><img class="motanka" src="${MOTANKA}" alt="" width="30" height="39"><p>${P(UI[madeKey])}</p></div></footer>`,
     '<div class="corner corner--br" aria-hidden="true"></div>',
     "</main>",
     `<script>${JS}</script>`,
@@ -20779,24 +21187,12 @@ __name(pageId, "pageId");
 function renderReport(model2) {
   const r = model2.reading;
   const o = documentStart(`${TOOL_NAME} Lite: ${r.fetch.finalUrl}`);
-  o.push('<header class="verdict lite-verdict" id="verdict">');
-  o.push(pageId(r.fetch.finalUrl, r.facts.head.title));
-  o.push(`<h1>${P(verdict(model2.findings))}</h1>`);
-  const date = dateOf(r.createdAt);
-  o.push(`<p class="lite-meta"><span>${P(nProblems(model2.findings.length))}</span><span aria-hidden="true">·</span><span>${P([UI.checked[0](date[0]), UI.checked[1](date[1])])}</span></p>`);
-  o.push("</header>");
-  o.push(tilesBlock(model2));
-  o.push(mapBlock(model2));
-  o.push(biggestBlock(model2));
-  o.push('<div class="lcharts">');
-  o.push(severityBlock(model2));
-  o.push(waterfallBlock(model2));
-  o.push(botsBlock(model2));
-  o.push(classicBlock(model2));
-  o.push(languagesBlock(model2));
-  o.push("</div>");
-  o.push(cannotBlock(model2));
-  o.push(`<p class="fulllink" id="full-link"><a href="${FULL_VERSION_URL}" rel="noopener noreferrer" target="_blank">${P(UI.full)}</a></p>`);
+  o.push(heroBlock(model2));
+  o.push(cardsBlock(model2));
+  o.push(firstBlock(model2));
+  o.push(placesBlock(model2));
+  o.push(allChecksBlock(model2));
+  o.push(infoStrip());
   o.push(...documentEnd());
   return o.join("\n") + "\n";
 }
@@ -20844,7 +21240,7 @@ function renderRefusal(reading2) {
 __name(renderRefusal, "renderRefusal");
 
 // scripts/lib/version.mjs
-var SKILL_VERSION = "2.102";
+var SKILL_VERSION = "2.103";
 var READING_SCHEMA = "getlooploop/ai-search-audit-reading@1";
 var EXPORT_SCHEMA = "getlooploop/ai-search-audit@1";
 var PRODUCED_BY = "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)";

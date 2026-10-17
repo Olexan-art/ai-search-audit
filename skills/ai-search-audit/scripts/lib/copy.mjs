@@ -314,3 +314,143 @@ export function dateOf(iso) {
   const d = new Date(iso);
   return [`${d.getDate()} ${MONTHS_EN[d.getMonth()]} ${d.getFullYear()}`, `${d.getDate()} ${MONTHS_UK[d.getMonth()]} ${d.getFullYear()}`];
 }
+
+// ── 2.103: the summary-first layout ──────────────────────────────────────────
+
+const MONTHS_EN_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+/** "17 October 2026" / "17 жовтня 2026", for the line under the URL. */
+export function dateLong(iso) {
+  const d = new Date(iso);
+  return [`${d.getDate()} ${MONTHS_EN_LONG[d.getMonth()]} ${d.getFullYear()}`, `${d.getDate()} ${MONTHS_UK[d.getMonth()]} ${d.getFullYear()}`];
+}
+
+const joinEn = (xs) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+const joinUk = (xs) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} та ${xs[xs.length - 1]}`);
+const notesEn = (n) => (n ? en(n, "note", "notes") : "no notes");
+const notesUk = (n) => (n ? uk(n, "зауваження", "зауваження", "зауважень") : "зауважень немає");
+
+/** The blocking codes the headline names. */
+export const BLOCKS = { index: ["noindex"], robots: ["search_engine_blocked", "robots_unreachable"], ai: ["ai_search_blocked"] };
+
+/** The big headline: what blocks the page, or that it is reachable, and how many notes there are. Built from the findings only. */
+export function headline(findings) {
+  const has = (codes) => findings.some((f) => codes.includes(f.code));
+  const n = findings.length;
+  const tail = n ? [`${notesEn(n)}.`, `Є ${notesUk(n)}.`] : ["No notes.", "Зауважень немає."];
+  let lead = null;
+  if (has(BLOCKS.index) && has(BLOCKS.robots)) lead = ["robots.txt and noindex block the page.", "robots.txt і noindex блокують сторінку."];
+  else if (has(BLOCKS.index)) lead = ["The page asks search not to index it.", "Сторінка просить пошук не індексувати її."];
+  else if (has(BLOCKS.robots)) lead = ["robots.txt blocks search robots.", "robots.txt блокує пошукових роботів."];
+  else if (has(BLOCKS.ai)) lead = ["robots.txt blocks AI search robots.", "robots.txt блокує роботів ШІ-пошуку."];
+  else if (findings.some((f) => f.severity === "blocking")) lead = ["Something blocks the page.", "Щось блокує сторінку."];
+  const blocked = Boolean(lead);
+  lead ||= ["The page is reachable.", "Сторінка доступна."];
+  return { blocked, t: [`${lead[0]} ${tail[0]}`, `${lead[1]} ${tail[1]}`] };
+}
+
+/** What each area is called inside a sentence, in the subtitle's "worth reviewing" list. */
+export const AREA_TOPIC = {
+  classic: ["the Google and Bing basics", "базові перевірки Google і Bing"],
+  find: ["robot access", "доступ роботів"],
+  read: ["how the text is read", "читання тексту"],
+  quote: ["quoting and answers to questions", "цитування й відповіді на запитання"],
+  brand: ["the brand description", "опис бренду"],
+  lang: ["the language versions", "мовні версії"],
+};
+
+/** One or two sentences under the headline, naming the areas with problems above low. */
+export function subtitle(findings, blocked) {
+  const first = blocked
+    ? ["Start with the block: until it is lifted, the other notes matter less.", "Почніть із блокування: доки його не знято, решта зауважень важить менше."]
+    : ["The check found nothing that blocks robots.", "Перевірка не знайшла блокування для роботів."];
+  const areas = AREAS.map((a) => a.id).filter((id) => findings.some((f) => f.area === id && f.severity !== "low" && f.severity !== "blocking"));
+  let second = null;
+  if (areas.length) second = [`Worth reviewing: ${joinEn(areas.map((a) => AREA_TOPIC[a][0]))}.`, `Варто переглянути ${joinUk(areas.map((a) => AREA_TOPIC[a][1]))}.`];
+  else if (findings.some((f) => f.severity === "low")) second = ["The other notes are minor.", "Решта зауважень дрібні."];
+  return second ? [`${first[0]} ${second[0]}`, `${first[1]} ${second[1]}`] : first;
+}
+
+/** "7 medium" / "7 середніх": a count with its severity word, for the row under the headline. */
+export const SEV_COUNT = {
+  blocking: [(n) => `${fmtEn(n)} blocking`, (n) => uk(n, "блокувальна", "блокувальні", "блокувальних")],
+  high: [(n) => `${fmtEn(n)} high`, (n) => uk(n, "висока", "високі", "високих")],
+  medium: [(n) => `${fmtEn(n)} medium`, (n) => uk(n, "середня", "середні", "середніх")],
+  low: [(n) => `${fmtEn(n)} low`, (n) => uk(n, "низька", "низькі", "низьких")],
+};
+
+/** The three "what it means for you" cards. */
+export const CARD_COPY = {
+  find: {
+    title: { ok: ["Robots can find it", "Роботи можуть знайти"], block: ["Robots are blocked", "Роботам закрито доступ"] },
+    status: {
+      none: ["No blocks found", "Блокування не знайдено"],
+      notes: [(n) => `No blocks found · ${notesEn(n)} on search`, (n) => `Блокування не знайдено · ${notesUk(n)} щодо пошуку`],
+      block: [(l) => `Blocked: ${l}`, (l) => `Заблоковано: ${l}`],
+    },
+  },
+  text: {
+    title: { ok: ["The text reads in full", "Текст читається повністю"], notes: ["Part of the text to check", "Частину тексту слід перевірити"], hides: ["Part of the text is hidden from AI", "Частину тексту ШІ не бачить"] },
+    status: { none: ["Nothing found", "Нічого не знайдено"], notes: [(n) => `${notesEn(n)} on reading`, (n) => `${notesUk(n)} до читання`] },
+  },
+  brand: {
+    title: {
+      na: ["Brand and questions", "Бренд і запитання"],
+      ok: ["Brand and questions: no notes", "Бренд і запитання: без зауважень"],
+      brand: ["Brand description needs attention", "Опис бренду потребує уваги"],
+      questions: ["Answers to questions need attention", "Відповіді на запитання потребують уваги"],
+    },
+    status: {
+      na: ["Not checked: no brand, reviews or questions file", "Не перевірено: немає файлів бренду, відгуків чи запитань"],
+      ok: ["The model's answers match the page", "Відповіді моделі збігаються зі сторінкою"],
+      unknown: ["The model did not recognise the brand", "Модель не впізнала бренд"],
+      notes: [(n) => `${notesEn(n)} from one model`, (n) => `${notesUk(n)} від однієї моделі`],
+    },
+  },
+};
+
+export const LITE = {
+  checked: [(d) => `Checked ${d}`, (d) => `Перевірено ${d}`],
+  about: ["About this check", "Про цю перевірку"],
+  seeFindings: ["See the main findings", "Переглянути головні знахідки"],
+  means: ["What it means for you", "Що це означає для вас"],
+  cardsAria: ["Summary in three cards", "Підсумок у трьох картках"],
+  cardsNote: [
+    [(m) => `The first two cards come from the page data. The third is one model's estimate (${m}).`, (m) => `Перші дві картки — за даними сторінки. Третя — оцінка однієї моделі (${m}).`],
+    ["The first two cards come from the page data. The third needs the agent's brand, reviews or questions file.", "Перші дві картки — за даними сторінки. Для третьої потрібен файл агента з оцінкою бренду, відгуків чи запитань."],
+  ],
+  first: ["Review these first", "Спочатку перегляньте ці знахідки"],
+  showPlace: ["Show place", "Показати місце"],
+  showInList: ["Show in the list", "Показати у списку"],
+  examples: ["Examples of questions", "Приклади запитань"],
+  aboutEstimate: ["About this estimate", "Про цю оцінку"],
+  modelLine: [(m) => `Model: ${m}`, (m) => `Модель: ${m}`],
+  notThree: ["the agent's estimate, not a check of three assistants", "оцінка агента, не перевірка трьох асистентів"],
+  notInText: ["Not found in the text", "Не знайдено у тексті"],
+  wholePage: ["The whole page", "Уся сторінка"],
+  where: ["Where on the page", "Де на сторінці це знайдено"],
+  schemaNote: ["A schema of the document, not a screenshot of the page.", "Схема документа, а не скріншот сторінки."],
+  placesAria: ["Places in the document, top to bottom", "Місця в документі згори донизу"],
+  selected: ["Selected place", "Обране місце"],
+  found: ["Found", "Знайдено"],
+  nothingHere: ["Nothing found here", "Тут нічого не знайдено"],
+  exact: ["Show exact place", "Показати точне місце"],
+  path: ["Path in the document", "Шлях у документі"],
+  copy: ["Copy", "Копіювати"],
+  copied: ["Copied", "Скопійовано"],
+  rows: [(n) => en(n, "row", "rows"), (n) => uk(n, "рядок", "рядки", "рядків")],
+  notRead: ["Not read by the reader", "Не прочитано читачем"],
+  partRead: [(p) => `${p}% not read by the reader`, (p) => `${p}% не прочитано читачем`],
+  all: ["All checks and technical details", "Усі перевірки та технічні подробиці"],
+  allSub: ["Robot access · Google and Bing · Languages · Reading the text", "Доступ роботів · Google і Bing · Мови · Читання тексту"],
+  areas: ["Status by area", "Стан за напрямами"],
+  allFindings: ["All findings", "Усі знахідки"],
+  strips: ["<head> and robots.txt", "<head> і robots.txt"],
+  info: ["This is a check of one page, not a guarantee of how it shows in search. The brand and questions estimate reflects one model's view.", "Це перевірка однієї сторінки, а не гарантія показу в пошуку. Оцінка бренду й запитань відображає погляд однієї моделі."],
+  measured: ["Measured", "Виміряно"],
+  measuredSub: ["from the page data", "за даними сторінки"],
+  estimate: ["Model's estimate", "Оцінка моделі"],
+  estimateSub: ["one model's answers", "відповіді однієї моделі"],
+  full: ["Full report with explanations", "Повний звіт із поясненнями"],
+  tagline: ["AI search that understands your business", "AI пошук, який розуміє ваш бізнес"],
+  product: "AI Search Audit · Lite",
+};

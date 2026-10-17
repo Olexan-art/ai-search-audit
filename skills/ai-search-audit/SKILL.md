@@ -3,7 +3,7 @@ name: ai-search-audit
 description: Audit one public web page for classic search and AI search (SEO and GEO): robots.txt for Googlebot and AI crawlers (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot), noindex and snippet controls, sitemap and llms.txt, title, description, headings, canonical, links, images, structured data and retired rich results, trust signals, hreflang versions and their facts, how an AI retriever reads the page (passages, the 26-passage cap, hidden or JavaScript-only text), writing patterns, the target keyword, the questions people ask, and what the agent's own model believes about the brand and its reviews. An HTML report, plus Markdown and JSON, listing problems, not fixes. Use when the user asks for an SEO or GEO audit, whether a page is ready for AI search, why Google, ChatGPT or Perplexity may not show or quote a page, or names ai-search-audit. Ukrainian too: «SEO-аудит сторінки», «аудит для ШІ-пошуку», «GEO-аудит». Scripts call no model.
 ---
 
-Version 2.102. Versions count in thousandths (2.101, 2.102, …): the first number moves only on a breaking change.
+Version 2.103. Versions count in thousandths (2.101, 2.102, 2.103, …): the first number moves only on a breaking change.
 
 # AI Search Audit (Lite)
 
@@ -193,7 +193,7 @@ The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,00
 
 ## Outputs
 
-- `report.html`: one self-contained page (inline CSS and one small script, favicons as data URIs, a content security policy that blocks every network request, every piece of page text escaped), light by default with a dark theme on the toggle, English and Ukrainian, safe down to 375 px. Judgement findings carry an "Agent's judgement · <model>" badge, and a note says that brand, reviews and questions are one model's view.
+- `report.html`: one self-contained page (inline CSS and one small script, favicons as data URIs, a content security policy that blocks every network request, every piece of page text escaped), light by default with a dark theme on the toggle, English and Ukrainian, safe down to 375 px. Summary first: a headline built from the findings, the severity counts, three cards (robots can find it, the text, the brand and questions), the three findings to review first, and the places in the document with the selected one beside them; every technical detail is in one closed section, *All checks and technical details*. Judgement findings carry an "Agent's judgement · <model>" badge, and a note says that brand, reviews and questions are one model's view.
 - `report.md`: the same audit in Markdown, in English: the status, the biggest problems, every problem with its code, place and layer, the page map as a list, the checklist, the bots, the language versions, where the text goes, and what was not checked.
 - `export.json`: `getlooploop/ai-search-audit@1`. Every finding with `code`, `severity`, `area`, `owner`, `layer`, `judgement` (`agent`, `model`, or `null`), `label` (en, uk), `where`, `map` (zones and strip rows), `passages`, `evidence` and `rules` (each `{ name, url }`), plus the tiles, the checklist, the page map, robots, sitemap, llms.txt, languages, alternates, links, structured data, `keyword`, `writingPatterns`, `localeFacts`, `judgement` (the three files as validated), the reading's waterfall, `notChecked` (every cap) and `notMeasured`.
 - `reading.json` (`getlooploop/ai-search-audit-reading@1`): everything read in step 1, so step 6 can be rerun offline.

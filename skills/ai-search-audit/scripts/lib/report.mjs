@@ -1,19 +1,23 @@
-// The audit as one self-contained HTML page, in the approved Lite layout: a verdict line, six
-// status tiles, the page map drawn from the real document, the biggest problems, the severity
-// bars, where the text goes, the bots, the classic checklist, the language grid, what the check
-// cannot see, and the footer. Lite is a picture of the problems: labels, numbers and places,
-// no descriptions and no fixes.
+// The audit as one self-contained HTML page, summary first (2.103): the header, the URL and a
+// headline built from the findings, the severity counts, three "what it means for you" cards, the
+// three findings to review first, the places in the document with the selected one beside them,
+// and one closed section holding every technical detail (status by area, bots, the Google and Bing
+// checklist, languages, severity, where the text goes, <head> and robots.txt, every finding, what
+// the check cannot see), then the notes and the footer. Lite is a picture of the problems:
+// labels, numbers and places, no descriptions and no fixes.
 //
-// Every string that came from the audited page (titles, headings, URLs) goes through esc(); the
-// CSP blocks every network request; the one inline script only switches language and theme. The
-// theme is light unless #theme=dark or the toggle asks for dark: the system preference is not read.
+// Every string that came from the audited page (titles, headings, URLs, paths) goes through esc();
+// the CSP blocks every network request; the one inline script switches language and theme,
+// selects a place, opens a section a link points into, and copies a path. The theme is light
+// unless #theme=dark or the toggle asks for dark: the system preference is not read.
 
 import { esc, FOOTER_LINKS } from "../vendor/vectorscope/html.mjs";
 import { FINDINGS, REFUSAL_COPY, SANCTIONS_LINKS } from "../vendor/vectorscope/refusal.mjs";
 import { MOTANKA } from "../vendor/vectorscope/sprites.mjs";
 import { CSS, CSS_EXTRA } from "./css.mjs";
 import { FAVICONS } from "./favicons.mjs";
-import { CANNOT, LAYER, MARK, OWNERS, SEV, STATE, UI, ZONE_LABEL, dateOf, fmtEn, fmtUk, nMinor, nProblems, verdict } from "./copy.mjs";
+import { CANNOT, CARD_COPY, LAYER, LITE, MARK, OWNERS, SEV, SEV_COUNT, STATE, UI, ZONE_LABEL, dateLong, fmtEn, fmtUk, headline, nMinor, nProblems, subtitle } from "./copy.mjs";
+import { GLL_MARK } from "./brandmark.mjs";
 import { SEVERITIES } from "./checks.mjs";
 
 export const TOOL_NAME = "AI Search Audit";
@@ -78,11 +82,6 @@ function pinShape(sev) {
   return '<rect class="sh" x="-9.5" y="-9.5" width="19" height="19" rx="4"/>';
 }
 const pinIcon = (sev, n, size = 28) => `<svg class="pi pin ${sev}" viewBox="-19 -19 38 38" width="${size}" height="${size}" aria-hidden="true">${pinShape(sev)}${n != null ? `<text dy=".36em">${n}</text>` : ""}</svg>`;
-const target = (f) => (f.big ? `big-${f.id}` : `pin-${f.id}`);
-function pinLink(f, x, y) {
-  const lab = (i) => `${f.pin} · ${SEV[f.severity][i]} · ${f.label[i]}`;
-  return `<a class="pm-a" href="#${target(f)}" ${attrPair("aria-label", lab(0), lab(1))}><g class="pin ${f.severity}" transform="translate(${x} ${y})"><circle class="ring" r="19"/>${pinShape(f.severity)}<text dy=".36em">${f.pin}</text></g></a>`;
-}
 /** The "Agent's judgement · <model>" badge, on every finding the agent's model made. */
 const judgeBadge = (f) => {
   if (f.layer !== "judgement") return "";
@@ -94,16 +93,26 @@ const ownerMark = (o) => `<span class="own" ${attrPair("title", OWNERS[o][0], OW
 /** SVG text in both languages, or once when the two are the same. */
 const stx = (x, y, t, cls, extra = "") =>
   t[0] === t[1] ? `<text class="${cls}" x="${x}" y="${y}"${extra}>${esc(t[0])}</text>` : `<text class="${cls} l-en" x="${x}" y="${y}"${extra}>${esc(t[0])}</text><text class="${cls} l-uk" x="${x}" y="${y}"${extra}>${esc(t[1])}</text>`;
-const rr = (x, y, w, h, cls, rx = 2) => `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/>`;
 const mkI = (st, lab) => `<span class="mk ${st}" ${attrPair("title", lab[0], lab[1])}><i aria-hidden="true">${MARK[st].i}</i><span class="vh">${P(lab)}</span></span>`;
 const head = (id, t, unit) => `<div class="panel-head"><h2 id="${id}">${P(t)}${unit ? ` <span class="unit">${P(unit)}</span>` : ""}</h2></div>`;
 
-// ── the page map ─────────────────────────────────────────────────────────────
+// ── the summary: headline, three cards, the first three findings ─────────────
 
-const MAP_W = 520;
-const PIN_STEP = 36;
-const MAX_ZONE_PINS = 6;
-const LINE_WIDTHS = [470, 430, 300, 452, 386, 410, 260];
+const CARD_ICON = {
+  find: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 4.5V8M9.5 13h.01M14.5 13h.01M9.5 16.2h5M3 12.5v3M21 12.5v3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="3.8" r="1.1" fill="currentColor"/></svg>',
+  text: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h7.5l4.5 4.5V20a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M13.5 3.2V8h4.8M8.8 12h6.4M8.8 15h6.4M8.8 18h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  brand: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.4V4.6a1 1 0 0 1 1-1h7.8a1 1 0 0 1 .7.3l7.4 7.4a1 1 0 0 1 0 1.4l-7.8 7.8a1 1 0 0 1-1.4 0l-7.4-7.4a1 1 0 0 1-.3-.7z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="8.3" cy="8.3" r="1.6" fill="none" stroke="currentColor" stroke-width="1.9"/></svg>',
+};
+const EXT_ICON = '<svg class="ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHEV = '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9.5a1 1 0 0 0 1 1h3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+const LIST_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor"/></svg>';
+const INFO_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>';
+
+const worstState = (items) => (items.some((f) => f.severity === "blocking") ? "block" : items.some((f) => f.severity === "high" || f.severity === "medium") ? "prob" : "ok");
+const sevPill = (s) => `<span class="pill sp ${s}">${pinIcon(s, null, 14)}${P(SEV[s])}</span>`;
+const layerPill = (f) => (f.layer === "judgement" ? `<span class="pill lp est">${P(LITE.estimate)}</span>` : `<span class="pill lp ms">${P(f.layer === "derived" ? LAYER.derived : LITE.measured)}</span>`);
+const modelOf = (f) => [f.judgement?.model || UI.modelNotStated[0], f.judgement?.model || UI.modelNotStated[1]];
 
 function zoneLabel(z) {
   if (z.kind === "section" || z.kind === "js") {
@@ -111,128 +120,231 @@ function zoneLabel(z) {
     const base = text ? [text, text] : ZONE_LABEL.untitled();
     return z.kind === "js" ? [`${base[0]} · JavaScript`, `${base[1]} · JavaScript`] : base;
   }
+  if (z.kind === "more" && z.label) return ZONE_LABEL.more(z).map((t) => `${z.label} · ${t}`);
   return (ZONE_LABEL[z.kind] || ZONE_LABEL.untitled)(z);
 }
 
-function zoneHeight(z, lede) {
-  if (z.kind === "header" || z.kind === "nav" || z.kind === "footer") return 44;
-  const body = 50 + Math.min(60, Math.round(Math.sqrt(Math.max(0, z.chars)) * 0.9));
-  if (z.kind === "hero") return Math.max(lede ? 104 : 80, body);
-  if (z.hidden || z.kind === "aside") return Math.max(80, body);
-  return body;
-}
+/** The place a finding is drawn in: a zone, the <head>, robots.txt, or none. */
+const placeOf = (f) => (f.zones.length ? `z${f.zones[0]}` : f.strip ? f.strip.side : null);
 
-function pageSvg(model) {
-  const lede = model.findings.find((f) => f.code === "hero_lede_dropped");
-  const out = [];
-  let y = 0;
-  for (const z of model.zones) {
-    const h = zoneHeight(z, lede && lede.zones.includes(z.id));
-    const pins = z.pins.slice(0, z.pins.length > MAX_ZONE_PINS ? MAX_ZONE_PINS - 1 : MAX_ZONE_PINS);
-    const extra = z.pins.length - pins.length;
-    const pinRoom = (pins.length + (extra ? 1 : 0)) * PIN_STEP;
-    const maxChars = Math.max(10, Math.floor((MAP_W - 28 - pinRoom) / 7.6));
-    const g = [`<g aria-hidden="true">`, `<rect class="z${z.kind === "js" ? " js" : ""}" x="0.75" y="${y + 0.75}" width="${MAP_W - 1.5}" height="${h - 1.5}" rx="8"/>`];
-    const lab = zoneLabel(z).map((t) => clip(t, maxChars));
-    g.push(stx(14, y + 21, lab, "zl"));
-    const contentTop = y + 32;
-    const contentH = h - 42;
-    const unseen = z.hidden || z.kind === "aside" || (z.seen !== null && z.seen !== undefined && z.seen < 0.05 && z.kind !== "header" && z.kind !== "nav" && z.kind !== "footer");
-    if (z.kind === "header" || z.kind === "nav" || z.kind === "footer") {
-      if (z.hasNav && !z.pins.length) for (let i = 0; i < 5; i++) g.push(rr(262 + i * 48, y + 15, 38, 6, "ln"));
-      if (!z.hasNav || z.pins.length) g.push(rr(14, y + 31, 170, 4, "ln faint"));
-      else g.push(rr(14, y + 31, 170, 4, "ln faint"));
-    } else if (unseen) {
-      g.push(rr(14, contentTop, MAP_W - 28, Math.max(18, contentH), "hid", 4));
-      const t = z.hidden && z.panels > 1 ? call(UI.panelsHidden, z.panels, z.chars) : UI.notSeen;
-      g.push(stx(MAP_W / 2, contentTop + Math.max(18, contentH) / 2 + 4, t, "ht halo", ' text-anchor="middle"'));
-    } else {
-      if (z.kind === "hero") {
-        g.push(rr(14, contentTop - 2, 64, 5, "ln"));
-        g.push(rr(14, contentTop + 6, 280, 14, "ln strong", 3));
-      }
-      const start = z.kind === "hero" ? contentTop + 28 : contentTop;
-      const isLede = z.kind === "hero" && lede && lede.zones.includes(z.id);
-      if (isLede) {
-        g.push(rr(14, start, 360, 34, "hid", 4));
-        g.push(stx(194, start + 21, UI.notSeen, "ht halo", ' text-anchor="middle"'));
-      } else {
-        const partial = z.seen !== null && z.seen !== undefined && z.seen < 0.9 && z.kind !== "hero" ? 1 - z.seen : 0;
-        const room = y + h - 10 - start;
-        const lines = Math.max(1, Math.floor(room / 10));
-        const seenLines = partial ? Math.max(0, Math.round(lines * (1 - partial))) : lines;
-        for (let i = 0; i < seenLines; i++) g.push(rr(14, start + i * 10, LINE_WIDTHS[(i + Number(z.id === "js" ? 0 : z.id || 0)) % LINE_WIDTHS.length], i ? 4 : 5, i ? "ln faint" : "ln"));
-        if (partial) {
-          const top = start + seenLines * 10;
-          const bh = Math.max(16, y + h - 8 - top);
-          g.push(rr(14, top, MAP_W - 28, bh, "hid", 4));
-          if (bh >= 16) g.push(stx(MAP_W / 2, top + bh / 2 + 4, call(UI.partSeen, Math.round(partial * 100)), "ht halo", ' text-anchor="middle"'));
-        }
-      }
-    }
-    g.push("</g>");
-    out.push(g.join(""));
-    pins.forEach((f, i) => out.push(pinLink(f, MAP_W - 22 - (pins.length - 1 - i) * PIN_STEP - (extra ? PIN_STEP : 0), y + 21)));
-    if (extra) out.push(`<text class="zn" x="${MAP_W - 22}" y="${y + 25}" text-anchor="middle" aria-hidden="true">+${extra}</text>`);
-    y += h + 12;
+/** Where a finding is, in a few words: its zone, its strip, or what the check knows. */
+function locOf(f, model) {
+  if (f.zones.length) {
+    const z = model.zones.find((x) => x.id === f.zones[0]);
+    if (z) return zoneLabel(z).map((t) => clip(t, 40));
   }
-  const H = Math.max(40, y - 12);
-  return `<svg class="pm-svg pm-page" id="pm-page" viewBox="0 0 ${MAP_W} ${H}" role="group" ${attrPair("aria-label", UI.mapAria[0], UI.mapAria[1])}><defs><pattern id="pm-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="7" height="7"/><line class="hl" x1="0" y1="0" x2="0" y2="7"/></pattern></defs>${out.join("")}</svg>`;
+  if (f.strip) return f.strip.side === "head" ? ["<head>", "<head>"] : ["robots.txt", "robots.txt"];
+  if (f.code === "question_missing") return LITE.notInText;
+  if (f.where) return [clip(f.where, 40), clip(f.where, 40)];
+  return LITE.wholePage;
 }
 
-function sideSvg(id, title, rows) {
-  const W = 320;
-  const RH = 34;
-  const top = 36;
-  const H = top + rows.length * RH + 6;
-  const o = [`<g aria-hidden="true"><rect class="z" x="0.75" y="0.75" width="${W - 1.5}" height="${H - 1.5}" rx="8"/>${stx(14, 23, [title, title], "zl mono")}`];
-  rows.forEach((r, i) => {
-    const y = top + i * RH;
-    const k = Array.isArray(r.k) ? r.k : [r.k, r.k];
-    const shown = r.pins.slice(0, 3);
-    const room = Math.floor((W - 30 - Math.max(1, shown.length) * 34 - 148) / 6.7);
-    o.push(`<line class="sep" x1="10" x2="${W - 10}" y1="${y}" y2="${y}"/>`, stx(14, y + 21, k.map((t) => clip(t, 16)), "zk"), stx(148, y + 21, r.v.map((t) => clip(t, room)), "zv"));
-    if (!r.pins.length) o.push(`<g class="okm" transform="translate(${W - 22} ${y + 17})"><circle r="9.5"/><path d="m-4.5 0.5 3 3 6-6.5"/></g>`);
+function heroBlock(model) {
+  const r = model.reading;
+  const h = headline(model.findings);
+  const href = safeHref(r.fetch.finalUrl);
+  const url = href ? `<a class="url" id="audited-url" href="${esc(href)}" rel="noopener noreferrer" target="_blank">${esc(r.fetch.finalUrl)}${EXT_ICON}</a>` : `<span class="url">${esc(r.fetch.finalUrl)}</span>`;
+  const date = dateLong(r.createdAt);
+  const title = r.facts.head.title ? `<span aria-hidden="true">·</span><span class="pt">${esc(clip(r.facts.head.title, 120))}</span>` : "";
+  const sevs = SEVERITIES.map((s) => `<li class="${s}">${pinIcon(s, null, 16)}<span>${P(call(SEV_COUNT[s], model.counts[s]))}</span></li>`).join("");
+  return [
+    `<header class="verdict lite-verdict${h.blocked ? " is-blocked" : ""}" id="verdict">`,
+    `<p class="pageid">${url}</p>`,
+    `<p class="lite-meta"><span>${P([LITE.checked[0](date[0]), LITE.checked[1](date[1])])}</span>${title}</p>`,
+    `<h1 id="headline">${P(h.t)}</h1>`,
+    `<p class="lede" id="subtitle">${P(subtitle(model.findings, h.blocked))}</p>`,
+    `<ul class="sevrow" id="sev-counts" ${attrPair("aria-label", UI.severity[0], UI.severity[1])}>${sevs}</ul>`,
+    `<p class="cta-row"><a class="btn btn-primary" id="see-first" href="#review-first">${P(LITE.seeFindings)}<span aria-hidden="true"> ↓</span></a></p>`,
+    "</header>",
+  ].join("\n");
+}
+
+function cardsBlock(model) {
+  const F = model.findings;
+  const own = (f) => f.layer !== "judgement" && f.area !== "brand";
+  const c1 = F.filter((f) => own(f) && ["find", "classic", "lang"].includes(f.area));
+  const c2 = F.filter((f) => own(f) && ["read", "quote"].includes(f.area));
+  const c3 = F.filter((f) => !own(f));
+  const cards = [];
+  const blocker = c1.find((f) => f.severity === "blocking");
+  cards.push({
+    id: "find",
+    state: worstState(c1),
+    title: blocker ? CARD_COPY.find.title.block : CARD_COPY.find.title.ok,
+    status: blocker ? [CARD_COPY.find.status.block[0](blocker.label[0]), CARD_COPY.find.status.block[1](blocker.label[1])] : c1.length ? call(CARD_COPY.find.status.notes, c1.length) : CARD_COPY.find.status.none,
   });
-  o.push("</g>");
-  rows.forEach((r, i) => r.pins.slice(0, 3).forEach((f, j, arr) => o.push(pinLink(f, W - 22 - (arr.length - 1 - j) * 34, top + i * RH + 17))));
-  return `<svg class="pm-svg" id="${id}" viewBox="0 0 ${W} ${H}" role="group" ${attrPair("aria-label", title, title)}>${o.join("")}</svg>`;
+  cards.push({
+    id: "text",
+    state: worstState(c2),
+    title: !c2.length ? CARD_COPY.text.title.ok : c2.some((f) => f.hides) ? CARD_COPY.text.title.hides : CARD_COPY.text.title.notes,
+    status: c2.length ? call(CARD_COPY.text.status.notes, c2.length) : CARD_COPY.text.status.none,
+  });
+  const judged = model.judgement.any || c3.length > 0;
+  const B = CARD_COPY.brand;
+  cards.push({
+    id: "brand",
+    state: judged ? worstState(c3) : "na",
+    title: !judged ? B.title.na : c3.some((f) => f.area === "brand") ? B.title.brand : c3.length ? B.title.questions : B.title.ok,
+    status: !judged ? B.status.na : c3.some((f) => f.code === "brand_unknown") ? B.status.unknown : c3.length ? call(B.status.notes, c3.length) : B.status.ok,
+  });
+  const li = cards.map((c) => `<li class="card ${c.state}" id="card-${c.id}"><span class="card-i">${CARD_ICON[c.id]}</span><span class="card-t"><h3>${P(c.title)}</h3><span class="card-s">${P(c.status)}</span></span></li>`).join("");
+  const note = model.judgement.any ? call(LITE.cardsNote[0], model.judgement.model || UI.modelNotStated[0]) : LITE.cardsNote[1];
+  if (model.judgement.any && !model.judgement.model) note[1] = LITE.cardsNote[0][1](UI.modelNotStated[1]);
+  return `<section class="sum" id="means" aria-labelledby="h-means"><h2 id="h-means">${P(LITE.means)}</h2><ul class="cards" id="cards">${li}</ul><p class="cards-note">${P(note)}</p></section>`;
 }
 
-function mapBlock(model) {
-  const o = [`<section class="panel pm-panel" id="page-map" aria-labelledby="h-map">`];
-  o.push(`<div class="panel-head"><h2 id="h-map">${P(UI.pageMap)}</h2><span class="sub">${P(call(UI.marked, model.mappedCount))}</span></div>`);
-  o.push(`<div class="pmap"><div class="pm-pagecol">${pageSvg(model)}</div><div class="pm-side">${sideSvg("pm-head", "<head>", model.head)}${sideSvg("pm-robots", "robots.txt · llms.txt", model.robots)}</div></div>`);
-  const legend = [...SEVERITIES.map((s) => `<li>${pinIcon(s, null, 22)}${P(SEV[s])}</li>`), `<li><span class="sw-hatch" aria-hidden="true"></span>${P(UI.notSeen)}</li>`, `<li><span class="sw-js" aria-hidden="true"></span>${P(UI.onlyJs)}</li>`];
-  if (model.unmappedCount) legend.push(`<li class="pm-un">${P(call(UI.unmapped, model.unmappedCount))}</li>`);
-  o.push(`<ul class="pm-legend" id="map-legend">${legend.join("")}</ul>`);
-  const rest = model.findings.filter((f) => !f.big);
-  if (rest.length) o.push(`<ol class="pm-key" id="map-key" ${attrPair("aria-label", UI.otherProblems[0], UI.otherProblems[1])}>${rest.map((f) => `<li id="pin-${esc(f.id)}" class="${f.severity}${f.layer === "judgement" ? " jd" : ""}">${pinIcon(f.severity, f.pin, 26)}<span class="vh">${P(SEV[f.severity])}: </span><span class="pk-l">${P(f.label)}</span>${ownerMark(f.owner)}${judgeBadge(f)}</li>`).join("")}</ol>`);
+function firstRow(f, model) {
+  const main = `<span class="tn ${f.severity}" aria-hidden="true">${f.pin}</span><span class="tl">${P(f.label)}</span><span class="tp">${sevPill(f.severity)}${layerPill(f)}</span><span class="tloc">${P(locOf(f, model))}</span>`;
+  if (f.layer === "judgement") {
+    const q = /^question_/.test(f.code);
+    const qs = q ? model.findings.filter((x) => x.code === f.code && x.evidence?.question).map((x) => x.evidence.question) : [];
+    const m = modelOf(f);
+    const list = qs.length ? `<ul class="qx">${qs.map((t) => `<li>${pair(`“${esc(t)}”`, `«${esc(t)}»`)}</li>`).join("")}</ul>` : "";
+    const panel = `<div class="tr-x">${list}<p class="tr-model"><b>${P([LITE.modelLine[0](m[0]), LITE.modelLine[1](m[1])])}</b><span>${P(LITE.notThree)}</span></p></div>`;
+    return `<li class="tr jd" id="top-${esc(f.id)}"><details class="tr-d"><summary class="tr-m">${main}<span class="btn btn-out btn-sm tr-b">${P(q ? LITE.examples : LITE.aboutEstimate)}${CHEV}</span></summary>${panel}</details></li>`;
+  }
+  const pid = placeOf(f);
+  const btn = pid ? `<a class="btn btn-out btn-sm tr-b" href="#place-${pid}" data-place="${pid}">${P(LITE.showPlace)}<span aria-hidden="true"> ›</span></a>` : `<a class="btn btn-out btn-sm tr-b" href="#pin-${esc(f.id)}">${P(LITE.showInList)}<span aria-hidden="true"> ›</span></a>`;
+  return `<li class="tr" id="top-${esc(f.id)}"><div class="tr-m">${main}${btn}</div></li>`;
+}
+
+function firstBlock(model) {
+  const top = model.bigs.slice(0, 3);
+  const body = top.length ? `<ol class="trows" id="top-rows">${top.map((f) => firstRow(f, model)).join("")}</ol>` : `<p class="none-found">${P(UI.noProblems)}</p>`;
+  return `<section class="sum" id="review-first" aria-labelledby="h-first"><h2 id="h-first">${P(LITE.first)}</h2>${body}</section>`;
+}
+
+// ── where on the page: the places, top to bottom, and the selected one ──────
+
+const HEADERISH = new Set(["header", "nav", "footer"]);
+
+function placeList(model) {
+  const F = model.findings;
+  const strip = (side) => F.filter((f) => f.strip?.side === side);
+  const out = [
+    { id: "robots", kind: "file", label: ["robots.txt · llms.txt", "robots.txt · llms.txt"], pins: strip("robots"), rows: model.robots },
+    { id: "head", kind: "file", label: ["<head>", "<head>"], pins: strip("head"), rows: model.head },
+  ];
+  const lede = F.find((f) => f.code === "hero_lede_dropped");
+  for (const z of model.zones) {
+    const unseen = z.hidden || z.kind === "aside" || (z.seen !== null && z.seen !== undefined && z.seen < 0.05 && !HEADERISH.has(z.kind));
+    const partial = !unseen && z.seen !== null && z.seen !== undefined && z.seen < 0.9 && z.kind !== "hero" && !HEADERISH.has(z.kind) ? 1 - z.seen : 0;
+    const hide = unseen ? (z.hidden && z.panels > 1 ? call(UI.panelsHidden, z.panels, z.chars) : LITE.notRead) : partial ? call(LITE.partRead, Math.round(partial * 100)) : z.kind === "hero" && lede && lede.zones.includes(z.id) ? LITE.notRead : null;
+    out.push({ id: `z${z.id}`, kind: z.kind, js: z.kind === "js", label: zoneLabel(z), pins: z.pins, chars: z.chars, unseen, hide });
+  }
+  return out;
+}
+
+function placeRow(p, sel) {
+  const shown = p.pins.slice(0, 5);
+  const extra = p.pins.length - shown.length;
+  const pins = `${shown.map((f) => pinIcon(f.severity, f.pin, 32)).join("")}${extra ? `<span class="pr-more">+${extra}</span>` : ""}`;
+  const sr = p.pins.map((f) => `${f.pin} · ${SEV[f.severity][0]} · ${f.label[0]}`);
+  const srUk = p.pins.map((f) => `${f.pin} · ${SEV[f.severity][1]} · ${f.label[1]}`);
+  const w = p.kind === "file" ? 0 : HEADERISH.has(p.kind) ? 34 : Math.round(Math.min(92, 22 + Math.sqrt(Math.max(0, p.chars || 0)) * 1.1));
+  const mid = p.hide ? `<span class="pr-hid">${P(p.hide)}</span>` : w ? `<span class="pr-bar" style="width:${w}%" aria-hidden="true"></span>` : `<span class="pr-n">${P(call(LITE.rows, p.rows.length))}</span>`;
+  const cls = ["pl", p.kind === "file" ? "file" : "", p.js ? "js" : "", p.unseen ? "hid" : "", sel ? "sel" : ""].filter(Boolean).join(" ");
+  return `<li class="${cls}" id="place-${p.id}"><button type="button" class="pr" data-place="${p.id}" aria-pressed="${sel}" aria-controls="pd-${p.id}"><span class="pr-l">${P(p.label.map((t) => clip(t, 46)))}</span>${mid}<span class="pr-pins" aria-hidden="true">${pins}</span>${sr.length ? `<span class="vh">: ${P([sr.join("; "), srUk.join("; ")])}</span>` : ""}</button></li>`;
+}
+
+function placeDetail(p, sel) {
+  const o = [`<div class="pd" id="pd-${p.id}"${sel ? "" : " hidden"}>`, `<h3>${P(LITE.selected)}: <span class="pd-n">${P(p.label.map((t) => clip(t, 60)))}</span></h3>`];
+  if (p.pins.length) {
+    o.push(`<p class="pd-f">${P(LITE.found)}:</p><ul class="pd-list">`);
+    for (const f of p.pins) o.push(`<li>${pinIcon(f.severity, f.pin, 24)}<span class="pd-l">${P(f.label)}</span><span class="pd-p">${sevPill(f.severity)}${layerPill(f)}</span></li>`);
+    o.push("</ul>");
+  } else o.push(`<p class="pd-f none">${P(LITE.nothingHere)}</p>`);
+  if (p.rows) {
+    o.push(`<ul class="pd-rows">${p.rows.map((r) => {
+      const k = Array.isArray(r.k) ? r.k : [r.k, r.k];
+      const st = r.pins.length ? r.pins.map((f) => pinIcon(f.severity, f.pin, 20)).join("") : `<span class="mk pass" aria-hidden="true"><i>${MARK.pass.i}</i></span>`;
+      return `<li><span class="rk">${P(k)}</span><span class="rv">${P(r.v.map((t) => clip(t, 70)))}</span><span class="rs">${st}</span></li>`;
+    }).join("")}</ul>`);
+  }
+  const wheres = [...new Set(p.pins.map((f) => String(f.where || "").trim()).filter(Boolean))];
+  if (wheres.length) {
+    const rows = wheres.map((w) => `<div class="ex-row"><code class="ex-c">${esc(w)}</code><button type="button" class="copy" data-copy data-en-done="${esc(LITE.copied[0])}" data-uk-done="${esc(LITE.copied[1])}" ${attrPair("aria-label", LITE.copy[0], LITE.copy[1])}>${COPY_ICON}</button></div>`).join("");
+    o.push(`<details class="exact"><summary class="btn btn-primary btn-sm">${P(LITE.exact)}${CHEV}</summary><div class="ex-box"><p class="ex-l">${P(LITE.path)}:</p>${rows}</div></details>`);
+  }
+  o.push("</div>");
+  return o.join("");
+}
+
+function placesBlock(model) {
+  const places = placeList(model);
+  const first = model.findings.map(placeOf).find(Boolean);
+  const selId = first || places.find((p) => p.pins.length)?.id || places[2]?.id || places[0].id;
+  const legend = [...SEVERITIES.map((s) => `<li>${pinIcon(s, null, 20)}${P(SEV[s])}</li>`), `<li><span class="sw-hatch" aria-hidden="true"></span>${P(LITE.notRead)}</li>`, `<li><span class="sw-js" aria-hidden="true"></span>${P(UI.onlyJs)}</li>`];
+  if (model.unmappedCount) legend.push(`<li class="pm-un"><a href="#map-key">${P(call(UI.unmapped, model.unmappedCount))}</a></li>`);
   const zonesCap = model.caps.find((c) => c.id === "zones");
-  if (zonesCap) o.push(`<p class="capnote">${P(zonesCap.t)}</p>`);
-  o.push("</section>");
-  return o.join("\n");
+  return [
+    `<section class="sum" id="page-map" aria-labelledby="h-map">`,
+    `<div class="sum-head"><h2 id="h-map">${P(LITE.where)}</h2><span class="sub">${P(LITE.schemaNote)}</span></div>`,
+    `<div class="pmap"><ol class="places" id="places" ${attrPair("aria-label", LITE.placesAria[0], LITE.placesAria[1])}>${places.map((p) => placeRow(p, p.id === selId)).join("")}</ol>`,
+    `<div class="pm-side" id="place-detail">${places.map((p) => placeDetail(p, p.id === selId)).join("")}<p class="vh" id="copy-live" aria-live="polite"></p></div></div>`,
+    `<ul class="pm-legend" id="map-legend">${legend.join("")}</ul>`,
+    zonesCap ? `<p class="capnote">${P(zonesCap.t)}</p>` : "",
+    "</section>",
+  ].join("\n");
 }
 
-// ── the panels ───────────────────────────────────────────────────────────────
+// ── all checks: the per-area status, the strips, every finding ──────────────
 
-function tilesBlock(model) {
-  const o = [`<ul class="tiles tiles-lite" id="status" ${attrPair("aria-label", UI.statusAria[0], UI.statusAria[1])}>`];
+function areasBlock(model) {
+  const o = [`<section class="panel" id="lc-areas" aria-labelledby="h-areas">${head("h-areas", LITE.areas)}<ul class="tiles areas" id="status" ${attrPair("aria-label", UI.statusAria[0], UI.statusAria[1])}>`];
   for (const t of model.tiles) {
     const na = t.id === "brand" ? [STATE.unchecked, UI.noBrandFiles] : [STATE.na, UI.oneVersion];
     const tc = t.state === "na" ? na[1] : !t.count ? UI.nothingFound : t.minorOnly ? nMinor(t.count) : nProblems(t.count);
-    o.push(`<li class="tile ${t.state}" id="tile-${t.id}"><h2>${P(t.q)}</h2><span class="state">${STATE_ICON[t.state]}${P(t.state === "na" ? na[0] : STATE[t.state])}</span><span class="tc">${P(tc)}</span></li>`);
+    o.push(`<li class="tile ${t.state}" id="tile-${t.id}"><h3>${P(t.q)}</h3><span class="state">${STATE_ICON[t.state]}${P(t.state === "na" ? na[0] : STATE[t.state])}</span><span class="tc">${P(tc)}</span></li>`);
   }
-  o.push("</ul>");
+  o.push("</ul></section>");
   return o.join("\n");
 }
 
-function biggestBlock(model) {
-  const o = [`<section class="panel" id="biggest" aria-labelledby="h-biggest">${head("h-biggest", UI.biggest)}`];
-  if (!model.bigs.length) o.push(`<p class="none-found">${P(UI.noProblems)}</p>`);
-  else o.push(`<ol class="bchips">${model.bigs.map((f) => `<li class="bchip ${f.severity}" id="big-${esc(f.id)}"><span class="bc-t">${pinIcon(f.severity, f.pin, 30)}<span>${P(f.label)}</span></span><span class="bc-m"><span class="sevw ${f.severity}">${P(SEV[f.severity])}</span>${ownerMark(f.owner)}</span>${judgeBadge(f)}</li>`).join("")}</ol>`);
-  o.push("</section>");
-  return o.join("\n");
+function stripsBlock(model) {
+  const table = (title, rows) => `<div class="strip"><h3 class="mono">${esc(title)}</h3><ul class="pd-rows">${rows.map((r) => {
+    const k = Array.isArray(r.k) ? r.k : [r.k, r.k];
+    const st = r.pins.length ? r.pins.map((f) => `<a href="#pin-${esc(f.id)}">${pinIcon(f.severity, f.pin, 20)}<span class="vh">${P(SEV[f.severity])}</span></a>`).join("") : `<span class="mk pass" aria-hidden="true"><i>${MARK.pass.i}</i></span>`;
+    return `<li><span class="rk">${P(k)}</span><span class="rv">${P(r.v)}</span><span class="rs">${st}</span></li>`;
+  }).join("")}</ul></div>`;
+  return `<section class="panel wide" id="lc-strips" aria-labelledby="h-strips">${head("h-strips", LITE.strips)}<div class="strips">${table("<head>", model.head)}${table("robots.txt · llms.txt", model.robots)}</div></section>`;
+}
+
+function findingsBlock(model) {
+  if (!model.findings.length) return `<section class="panel" id="all-findings" aria-labelledby="h-allf">${head("h-allf", LITE.allFindings)}<p class="none-found">${P(UI.noProblems)}</p></section>`;
+  const items = model.findings.map((f) => `<li id="pin-${esc(f.id)}" class="${f.severity}${f.layer === "judgement" ? " jd" : ""}">${pinIcon(f.severity, f.pin, 26)}<span class="vh">${P(SEV[f.severity])}: </span><span class="pk-l">${P(f.label)}<span class="pk-w">${P(locOf(f, model))}</span></span>${ownerMark(f.owner)}${judgeBadge(f)}</li>`).join("");
+  return `<section class="panel" id="all-findings" aria-labelledby="h-allf">${head("h-allf", LITE.allFindings, call(UI.marked, model.mappedCount))}<ol class="pm-key" id="map-key">${items}</ol></section>`;
+}
+
+function allChecksBlock(model) {
+  return [
+    `<details class="allc" id="all-checks">`,
+    `<summary class="allc-s"><span class="allc-i">${LIST_ICON}</span><span class="allc-t"><h2 id="h-all">${P(LITE.all)}</h2><span class="sub">${P(LITE.allSub)}</span></span>${CHEV}</summary>`,
+    '<div class="allc-b">',
+    areasBlock(model),
+    '<div class="lcharts">',
+    botsBlock(model),
+    classicBlock(model),
+    languagesBlock(model),
+    severityBlock(model),
+    waterfallBlock(model),
+    stripsBlock(model),
+    "</div>",
+    findingsBlock(model),
+    cannotBlock(model),
+    "</div>",
+    "</details>",
+  ].join("\n");
+}
+
+function infoStrip() {
+  return [
+    `<section class="info" id="info-strip" ${attrPair("aria-label", LITE.about[0], LITE.about[1])}>`,
+    `<p class="info-n">${INFO_ICON}<span>${P(LITE.info)}</span></p>`,
+    `<ul class="info-l"><li><span class="lyr-k ms" aria-hidden="true"></span><span><b>${P(LITE.measured)}</b>${P(LITE.measuredSub)}</span></li><li><span class="lyr-k est" aria-hidden="true"></span><span><b>${P(LITE.estimate)}</b>${P(LITE.estimateSub)}</span></li></ul>`,
+    `<p class="fulllink" id="full-link"><a class="btn btn-out" href="${FULL_VERSION_URL}" rel="noopener noreferrer" target="_blank">${P(LITE.full)}<span aria-hidden="true"> ↗</span></a></p>`,
+    "</section>",
+  ].join("\n");
 }
 
 function severityBlock(model) {
@@ -336,6 +448,9 @@ function cannotBlock(model) {
 
 // ── the page frame ───────────────────────────────────────────────────────────
 
+// Language, theme, the selected place, opening a closed <details> a link points into, and copy.
+// Without it the page still reads: the first place stays selected and every detail is in
+// "All checks and technical details".
 const JS = `
 (function(){
   var root=document.documentElement,TK="ai-search-audit-theme",LK="ai-search-audit-lang";
@@ -351,10 +466,21 @@ const JS = `
   for(var i=0;i<b.length;i++)b[i].addEventListener("click",function(){var t=this.getAttribute("data-set-theme");root.setAttribute("data-theme",t);put(TK,t);paint()});
   var c=document.querySelectorAll("[data-set-lang]");
   for(var j=0;j<c.length;j++)c[j].addEventListener("click",function(){var l=this.getAttribute("data-set-lang");applyLang(l);put(LK,l);paint()});
+  function openTo(n){while(n&&n!==document){if(n.tagName&&String(n.tagName).toUpperCase()==="DETAILS")n.open=true;n=n.parentNode}}
+  function select(id){var r=document.querySelectorAll(".pr[data-place]"),i;for(i=0;i<r.length;i++){var on=r[i].getAttribute("data-place")===id;r[i].setAttribute("aria-pressed",String(on));r[i].parentNode.className=r[i].parentNode.className.replace(/ sel\\b/g,"")+(on?" sel":"")}var d=document.querySelectorAll(".pd"),k;for(k=0;k<d.length;k++)d[k].hidden=d[k].id!=="pd-"+id}
+  var rows=document.querySelectorAll(".pr[data-place]");
+  for(var p=0;p<rows.length;p++)rows[p].addEventListener("click",function(){select(this.getAttribute("data-place"))});
   function isA(n){return n&&n.tagName&&String(n.tagName).toUpperCase()==="A"}
-  document.addEventListener("click",function(e){var a=e.target;while(a&&a!==document&&!isA(a))a=a.parentNode;if(!a||a===document)return;var href=a.getAttribute("href");if(!href||href.charAt(0)!=="#"||href.length<2)return;var t=document.getElementById(href.slice(1));if(!t)return;e.preventDefault();try{t.scrollIntoView({block:"center"})}catch(x){}t.classList.add("hit");setTimeout(function(){t.classList.remove("hit")},1600)});
+  document.addEventListener("click",function(e){var a=e.target;while(a&&a!==document&&!isA(a))a=a.parentNode;if(!a||a===document)return;var href=a.getAttribute("href");if(!href||href.charAt(0)!=="#"||href.length<2)return;var t=document.getElementById(href.slice(1));if(!t)return;e.preventDefault();var pl=a.getAttribute("data-place");if(pl)select(pl);openTo(t);try{t.scrollIntoView({block:"center"})}catch(x){}t.classList.add("hit");setTimeout(function(){t.classList.remove("hit")},1600)});
+  var live=document.getElementById("copy-live");
+  function said(btn,ok){var l=root.getAttribute("data-lang")||"en",m=btn.getAttribute("data-"+l+"-done")||"";btn.classList.add(ok?"done":"sel-text");if(live)live.textContent=ok?m:"";setTimeout(function(){btn.classList.remove("done","sel-text")},1600)}
+  var cp=document.querySelectorAll("[data-copy]");
+  for(var q=0;q<cp.length;q++)cp[q].addEventListener("click",function(){var btn=this,code=btn.parentNode.querySelector("code"),txt=code?code.textContent:"";function pick(){try{var r=document.createRange();r.selectNodeContents(code);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}catch(x){}said(btn,false)}try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){said(btn,true)},pick);else pick()}catch(x){pick()}});
+  if(h&&h.indexOf("=")<0&&h.length>1){var at=document.getElementById(h.slice(1));if(at)openTo(at)}
 })();
 `;
+
+const brandMark = (cls) => `<span class="brand ${cls}"><img class="gll-mark" src="${GLL_MARK}" alt="" width="56" height="27"><span class="gll-word">GetLoopLoop</span></span>`;
 
 function documentStart(title) {
   return [
@@ -371,22 +497,22 @@ function documentStart(title) {
     "</head>",
     "<body>",
     '<main class="wrap" id="report">',
-    '<div class="corner corner--tl" aria-hidden="true"></div>',
     '<div class="top">',
-    `<div class="top-l"><span class="eyebrow">${P(UI.eyebrow)}</span></div>`,
+    `<div class="top-l">${brandMark("brand--top")}<span class="divider" aria-hidden="true"></span><span class="product">${esc(LITE.product)}</span></div>`,
+    '<div class="deco deco--top" aria-hidden="true"></div>',
     '<div class="toggles">',
     `<div class="toggle" role="group" ${attrPair("aria-label", UI.langGroup[0], UI.langGroup[1])}><button type="button" id="lang-en" data-set-lang="en" aria-pressed="true">EN</button><button type="button" id="lang-uk" data-set-lang="uk" aria-pressed="false" lang="uk">UK</button></div>`,
     `<div class="toggle" role="group" ${attrPair("aria-label", UI.themeGroup[0], UI.themeGroup[1])}><button type="button" id="theme-dark" data-set-theme="dark" aria-pressed="false">${P(UI.dark)}</button><button type="button" id="theme-light" data-set-theme="light" aria-pressed="true">${P(UI.light)}</button></div>`,
     "</div></div>",
-    '<div class="deco" aria-hidden="true"></div>',
   ];
 }
 
 function documentEnd(madeKey = "footer") {
   const links = LINKS.map(([id, name, href, k]) => `<li><a id="foot-${id}" href="${href}" rel="noopener noreferrer" target="_blank">${ICONS[id]}<span>${name}${k ? ` · ${P(k)}` : ""}</span></a></li>`).join("");
   return [
-    '<div class="deco deco--foot" aria-hidden="true"></div>',
-    `<footer class="foot"><div class="foot-made"><img class="motanka" src="${MOTANKA}" alt="" width="30" height="39"><p>${P(UI[madeKey])}</p></div><ul class="links">${links}</ul></footer>`,
+    `<footer class="foot"><div class="foot-brand">${brandMark("brand--foot")}<span class="divider" aria-hidden="true"></span><span class="tagline">${P(LITE.tagline)}</span></div>`,
+    `<ul class="links">${links}</ul>`,
+    `<div class="foot-made"><img class="motanka" src="${MOTANKA}" alt="" width="30" height="39"><p>${P(UI[madeKey])}</p></div></footer>`,
     '<div class="corner corner--br" aria-hidden="true"></div>',
     "</main>",
     `<script>${JS}</script>`,
@@ -401,31 +527,20 @@ function pageId(url, title) {
   return `<div class="pageid">${link}${title ? `<span class="pt">${esc(clip(title, 140))}</span>` : ""}</div>`;
 }
 
-/** The report for an audited page. */
+/** The report for an audited page: the summary first, every technical detail in one closed section. */
 export function renderReport(model) {
   const r = model.reading;
   const o = documentStart(`${TOOL_NAME} Lite: ${r.fetch.finalUrl}`);
-  o.push('<header class="verdict lite-verdict" id="verdict">');
-  o.push(pageId(r.fetch.finalUrl, r.facts.head.title));
-  o.push(`<h1>${P(verdict(model.findings))}</h1>`);
-  const date = dateOf(r.createdAt);
-  o.push(`<p class="lite-meta"><span>${P(nProblems(model.findings.length))}</span><span aria-hidden="true">·</span><span>${P([UI.checked[0](date[0]), UI.checked[1](date[1])])}</span></p>`);
-  o.push("</header>");
-  o.push(tilesBlock(model));
-  o.push(mapBlock(model));
-  o.push(biggestBlock(model));
-  o.push('<div class="lcharts">');
-  o.push(severityBlock(model));
-  o.push(waterfallBlock(model));
-  o.push(botsBlock(model));
-  o.push(classicBlock(model));
-  o.push(languagesBlock(model));
-  o.push("</div>");
-  o.push(cannotBlock(model));
-  o.push(`<p class="fulllink" id="full-link"><a href="${FULL_VERSION_URL}" rel="noopener noreferrer" target="_blank">${P(UI.full)}</a></p>`);
+  o.push(heroBlock(model));
+  o.push(cardsBlock(model));
+  o.push(firstBlock(model));
+  o.push(placesBlock(model));
+  o.push(allChecksBlock(model));
+  o.push(infoStrip());
   o.push(...documentEnd());
   return o.join("\n") + "\n";
 }
+
 
 // ── the refusal: pages in Russian are not analysed ───────────────────────────
 

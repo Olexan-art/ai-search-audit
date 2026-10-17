@@ -41,9 +41,9 @@ export function themes(css) {
 }
 
 const SURFACES = ["bg", "bg-2", "panel", "panel-2"];
-const TEXT = ["text", "muted", "faint", "accent", "amber", "red", "green", "lm", "ld", "lj"];
-const ON_SOFT = [["accent", "accent-soft"], ["amber", "amber-soft"], ["red", "red-soft"], ["green", "green-soft"], ["lm", "lm-soft"], ["ld", "ld-soft"], ["lj", "lj-soft"], ["text", "amber-soft"], ["text", "lj-soft"]];
-const GRAPHICS = ["accent", "amber", "red", "green", "gone", "control"];
+const TEXT = ["text", "muted", "faint", "accent", "amber", "red", "green", "lm", "ld", "lj", "est"];
+const ON_SOFT = [["accent", "accent-soft"], ["amber", "amber-soft"], ["red", "red-soft"], ["green", "green-soft"], ["lm", "lm-soft"], ["ld", "ld-soft"], ["lj", "lj-soft"], ["text", "amber-soft"], ["text", "lj-soft"], ["est", "est-soft"], ["text", "est-soft"], ["text", "sel-soft"], ["muted", "sel-soft"], ["accent", "sel-soft"]];
+const GRAPHICS = ["accent", "amber", "red", "green", "gone", "control", "est", "pin-low"];
 /** The Lite report's own pairs: the low-severity blue as text and marker, and the numbers inside filled markers. */
 export const LITE_PAIRS = [["pin-low", "panel", 4.5], ["pin-low", "panel-2", 4.5], ["pin-low", "bg", 4.5], ["red-ink", "red", 4.5], ["amber-ink", "amber", 4.5], ["pin-low", "empty", 3]];
 

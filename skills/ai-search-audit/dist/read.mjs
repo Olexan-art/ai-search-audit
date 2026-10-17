@@ -18471,7 +18471,7 @@ async function checkSite(pageUrl, extras, { canonical = null, now = Date.now(), 
 __name(checkSite, "checkSite");
 
 // scripts/lib/version.mjs
-var SKILL_VERSION = "2.102";
+var SKILL_VERSION = "2.103";
 var READING_SCHEMA2 = "getlooploop/ai-search-audit-reading@1";
 
 // scripts/lib/reading.mjs
