@@ -3,7 +3,8 @@
 // one reading. All the network is here: the page, its robots.txt, its sitemap, its llms.txt, its
 // hreflang alternates, a HEAD (or GET) of up to 30 of its links and 20 of its images, and one
 // request each for the favicon, a path that does not exist, up to 3 URL variants, a Markdown copy,
-// ai-catalog.json and a declared IndexNow key. Each list has a cap and the reading says how much
+// ai-catalog.json and a declared IndexNow key; before the page, one DNS lookup of its host and one
+// RDAP request to rdap.org with its IP address, for the hosting country. Each list has a cap and the reading says how much
 // of it went unchecked. An empty single-page-app shell is rendered on its own when a browser is found.
 //   node scripts/read.mjs <url> [--out reading.json] [--render] [--save-html page.html]
 //   node scripts/read.mjs <url> --html saved.html [--final-url <url>] [--robots saved-robots.txt]
@@ -12,6 +13,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { readAudit } from "./lib/reading.mjs";
 import { findBrowser } from "./vendor/vectorscope/render.mjs";
+import { isRefusalCode, refusalReason } from "./vendor/vectorscope/refusal.mjs";
 
 const USAGE = [
   "Usage: node scripts/read.mjs <url> [--out reading.json] [--render] [--save-html page.html]",
@@ -40,7 +42,7 @@ const fmt = (n) => Number(n ?? 0).toLocaleString("en-US");
 function summarise(r, file) {
   if (!r.ok) {
     console.log(`REFUSED   ${r.reasonCode}${r.status ? ` (HTTP ${r.status})` : ""}`);
-    if (r.reasonCode === "refused_language_ru") console.log("reason    pages in Russian are not analysed; nothing of the page was kept. Run audit.mjs on this reading to write the report that says why.");
+    if (isRefusalCode(r.reasonCode)) console.log(`reason    ${refusalReason(r.reasonCode, "en").replace(/^Why: /, "")} Nothing of the page was kept. Run audit.mjs on this reading to write the report that says why.`);
     console.log(`reading   ${file}`);
     return;
   }
@@ -59,6 +61,7 @@ function summarise(r, file) {
   if (r.images) console.log(`images    ${r.images.checked} of ${r.images.total} sized${r.images.unchecked ? ` · ${r.images.unchecked} not checked (cap ${r.images.cap})` : ""}`);
   if (r.site) console.log(`site      favicon ${r.site.favicon.ok ? "ok" : r.site.favicon.status ?? r.site.favicon.reason} · missing path ${r.site.soft404.status ?? r.site.soft404.reason} · variants ${r.site.variants.map((v) => `${v.kind} ${v.ends ? "ok" : v.status ?? v.reason}`).join(", ")} · markdown ${r.site.markdown.ok ? "yes" : "no"} · ai-catalog ${r.site.aiCatalog?.present ? (r.site.aiCatalog.valid ? "valid" : "invalid") : "none"}${r.site.indexnow ? ` · IndexNow key ${r.site.indexnow.ok ? "ok" : "missing"}` : ""}`);
   if (r.shell?.detected) console.log(`app shell ${r.shell.roots.join(", ")} · ${r.shell.words} words without JavaScript · ${r.render ? (r.render.ok ? "rendered automatically" : `not rendered: ${r.render.reason}`) : "not rendered (saved page)"}`);
+  if (r.hosting) console.log(`hosting   ${r.hosting.status === "checked" ? `${r.hosting.country} (${r.hosting.ip}, RDAP)` : r.hosting.status === "not_determined" ? "not determined (DNS or RDAP gave no country)" : "not checked (saved page)"}`);
   if (fetch.saved) console.log("network   none: a saved page was read; robots.txt, sitemap, llms.txt, alternates and links are not measured");
   if (render) console.log(render.ok ? `render    with JS ${fmt(render.wordCount)} words · ${render.passages} passages (without JS ${fmt(vs.page.wordCount)} · ${vs.passages.length}) · ${render.jsZones.length} sections only with JS` : `render    not done: ${render.reason === "no_browser" ? "no Chrome or Chromium found (set CHROME_PATH)" : render.reason}`);
   console.log(`reading   ${file}`);

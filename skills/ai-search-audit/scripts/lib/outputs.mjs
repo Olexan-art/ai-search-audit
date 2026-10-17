@@ -6,7 +6,7 @@ import { CANNOT, LAYER, MARK, SEV, UI, dateOf, verdict, ZONE_LABEL } from "./cop
 import { CODES, SEVERITIES } from "./checks.mjs";
 import { EXPORT_SCHEMA, PRODUCED_BY, SKILL_VERSION } from "./version.mjs";
 import { FULL_VERSION_URL, refusalLead, TOOL_NAME } from "./report.mjs";
-import { FINDINGS, REFUSAL_COPY } from "../vendor/vectorscope/refusal.mjs";
+import { FINDINGS, REFUSAL_COPY, isRefusalCode, refusalReason } from "../vendor/vectorscope/refusal.mjs";
 
 const cell = (s) => String(s ?? "").replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
 const fmt = (n) => Number(n ?? 0).toLocaleString("en-US");
@@ -139,15 +139,15 @@ export function buildExport(model) {
 /** Markdown and JSON for a refused reading: the code, and for a page in Russian the reason. */
 export function renderRefusalMarkdown(reading) {
   const url = reading.page?.url || reading.fetch?.finalUrl || reading.requestedInput || "";
-  if (reading.reasonCode !== "refused_language_ru") return `# ${TOOL_NAME} Lite: ${url}\n\nThe page could not be audited: \`${reading.reasonCode}\`${reading.status ? ` (HTTP ${reading.status})` : ""}.\n`;
-  const lines = [`# ${TOOL_NAME} Lite: ${url}`, "", `**${REFUSAL_COPY.title.en}.** ${refusalLead("en")}`, ""];
+  if (!isRefusalCode(reading.reasonCode)) return `# ${TOOL_NAME} Lite: ${url}\n\nThe page could not be audited: \`${reading.reasonCode}\`${reading.status ? ` (HTTP ${reading.status})` : ""}.\n`;
+  const lines = [`# ${TOOL_NAME} Lite: ${url}`, "", `**${REFUSAL_COPY.title.en}.** ${refusalLead("en")}`, "", refusalReason(reading.reasonCode, "en"), ""];
   for (const f of FINDINGS) {
     if (f.items) {
       lines.push(`- **${f.source.en}**`);
       for (const it of f.items) lines.push(`  - ${it.text.en} ${it.url}`);
     } else lines.push(`- **${f.source.en}**${f.joiner.en}${f.text.en} ${f.url}`);
   }
-  lines.push("", `${REFUSAL_COPY.sanctions.en}`, "", REFUSAL_COPY.lastLine.en, "");
+  lines.push("", `${REFUSAL_COPY.sanctions.en}`, "");
   return lines.join("\n");
 }
 
@@ -162,6 +162,8 @@ export function buildRefusalExport(reading) {
     reasonCode: reading.reasonCode,
     status: reading.status ?? null,
     page: { url: reading.page?.url || reading.fetch?.finalUrl || null, requestedUrl: reading.page?.requestedUrl || reading.fetch?.requestedUrl || reading.requestedInput },
+    ...(reading.refusal ? { refusal: reading.refusal } : {}),
+    ...(reading.hosting ? { hosting: reading.hosting } : {}),
     ...(reading.language ? { language: reading.language } : {}),
   };
 }

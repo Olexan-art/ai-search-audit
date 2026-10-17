@@ -69,19 +69,20 @@ test("a set without this page, without x-default, with a bad code and a broken a
   assert.deepEqual(findings.find((x) => x.code === "hreflang_invalid_code").evidence.codes, ["english"]);
 });
 
-test("an alternate declared Russian is not fetched; its row says not analysed", async () => {
+test("a page that declares a Russian alternate is refused as a whole (2.108); a Russian alternate is never fetched", async () => {
   const html = doc({ lang: "en", title: "Pricing for every team", description: "d".repeat(80), alternates: [["en", EN], ["ru", "https://example.org/ru/page"], ["x-default", EN]] });
   const r = await readingOf(html, {}, { url: EN });
+  assert.equal(r.ok, false);
+  assert.equal(r.reasonCode, "refused_ru_audience");
+  assert.deepEqual(r.refusal.signals[0], { kind: "hreflang", value: "ru" });
   const calls = [];
-  r.alternates = await withFetch({}, async (c) => {
-    const out = await checkAlternates(EN, r.facts.head.hreflang);
+  const out = await withFetch({}, async (c) => {
+    const o = await checkAlternates(EN, [{ hreflang: "ru", href: "https://example.org/ru/page" }]);
     calls.push(...c);
-    return out;
+    return o;
   });
   assert.equal(calls.length, 0);
-  assert.equal(r.alternates.results[0].refused, "refused_language_ru");
-  const m = buildModel(r);
-  assert.equal(m.languages.rows.find((x) => x.hreflang === "ru").refused, true);
+  assert.equal(out.results[0].refused, "refused_language_ru");
 });
 
 test("the alternates cap: past ALTERNATES_CAP they are listed as not read", async () => {

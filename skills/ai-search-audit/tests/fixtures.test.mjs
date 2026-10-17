@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { readAudit } from "../scripts/lib/reading.mjs";
 import { buildModel } from "../scripts/lib/model.mjs";
 import { renderReport } from "../scripts/lib/report.mjs";
-import { vsFixture } from "./helpers.mjs";
+import { vsFixture, withoutRuSwitcher } from "./helpers.mjs";
 
 const CASES = [
   ["example-com.html", "https://example.com/", ["h1_missing", "meta_description_missing", "canonical_missing", "internal_links_none", "social_tags_missing", "structured_data_none", "about_contact_missing", "organization_details_missing", "privacy_terms_missing", "site_name_missing"]],
@@ -17,7 +17,9 @@ const CASES = [
 
 for (const [file, url, codes] of CASES) {
   test(`${file}: the same findings as the live run`, async () => {
-    const r = await readAudit({ url, html: vsFixture(file), finalUrl: url });
+    // MDN links its Russian version, so the page as saved is refused; its numbers are read without that one link.
+    const saved = file === "mdn-http-caching.html" ? withoutRuSwitcher(vsFixture(file)) : vsFixture(file);
+    const r = await readAudit({ url, html: saved, finalUrl: url });
     assert.equal(r.ok, true);
     const m = buildModel(r);
     assert.deepEqual(m.findings.map((f) => f.code).sort(), codes.slice().sort());
@@ -26,9 +28,17 @@ for (const [file, url, codes] of CASES) {
   });
 }
 
+test("MDN as saved links its Russian version, and is refused for it (2.108)", async () => {
+  const url = CASES[1][1];
+  const r = await readAudit({ url, html: vsFixture("mdn-http-caching.html"), finalUrl: url });
+  assert.equal(r.reasonCode, "refused_ru_audience");
+  assert.deepEqual(r.refusal.signals, [{ kind: "switcher_path", value: "developer.mozilla.org/ru/docs/Web/HTTP/Guides/Caching" }]);
+  assert.equal(r.facts, undefined, "nothing of the page");
+});
+
 test("MDN fills all 26 slots and draws its sections on the map, the tail merged and counted", async () => {
   const url = CASES[1][1];
-  const m = buildModel(await readAudit({ url, html: vsFixture("mdn-http-caching.html"), finalUrl: url }));
+  const m = buildModel(await readAudit({ url, html: withoutRuSwitcher(vsFixture("mdn-http-caching.html")), finalUrl: url }));
   assert.equal(m.passages.used, 26);
   assert.ok(m.zones.some((z) => z.label === "Types of caches"));
   assert.ok(m.caps.some((c) => c.id === "zones"));

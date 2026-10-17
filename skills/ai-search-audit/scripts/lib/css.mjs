@@ -256,7 +256,7 @@ export const CSS_EXTRA = `
 .refusal b{font-weight:700;color:var(--text)}
 .refusal .src-link{white-space:nowrap;margin-left:4px;font-size:13px}
 .refusal .sanctions{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);max-width:860px}
-.refusal .last{margin:12px 0 0;color:var(--muted)}
+.refusal .why{margin:-6px 0 14px;font-weight:600;color:var(--text)}
 .lb-uk{display:none}
 :root[data-lang="uk"] .lb-en{display:none}
 :root[data-lang="uk"] .lb-uk{display:block}

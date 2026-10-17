@@ -55,6 +55,16 @@ export async function findingOf(html, code, patch, opts, extra = {}) {
   return auditFindings(r, extra).find((f) => f.code === code);
 }
 
+/** The hosting check's DNS lookup and RDAP fetch, stubbed: a test read never leaves the machine. */
+export const hostingDeps = (country = "US", calls = []) => ({
+  lookup: async (host) => (calls.push({ dns: host }), [{ address: "192.0.2.10", family: 4 }]),
+  fetch: async (url) => (calls.push({ rdap: String(url) }), new Response(JSON.stringify(country ? { country } : {}), { status: 200, headers: { "content-type": "application/rdap+json" } })),
+});
+
+/** MDN's saved page with its language switcher's link to the Russian version taken out: the page
+ * itself is refused (refused_ru_audience) since 2.108, and the extraction tests still need it. */
+export const withoutRuSwitcher = (html) => html.replace(/<a\s+class="language-switcher__option"\s+href="\/ru\/[^"]*"[^>]*>[\s\S]*?<\/a\s*>/, "");
+
 /** The Vectorscope skill's saved public pages copied to tests/fixtures/vectorscope/ by
  * tools/sync-vectorscope.mjs (MDN's page has its ATTRIBUTION file beside it). */
 export const vsFixture = (name) => readFileSync(new URL(`./fixtures/vectorscope/${name}`, import.meta.url), "utf8");

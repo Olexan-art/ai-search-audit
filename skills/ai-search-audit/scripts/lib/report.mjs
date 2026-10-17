@@ -12,7 +12,7 @@
 // unless #theme=dark or the toggle asks for dark: the system preference is not read.
 
 import { esc, FOOTER_LINKS } from "../vendor/vectorscope/html.mjs";
-import { FINDINGS, REFUSAL_COPY, SANCTIONS_LINKS } from "../vendor/vectorscope/refusal.mjs";
+import { FINDINGS, REFUSAL_COPY, SANCTIONS_LINKS, isRefusalCode, refusalReason } from "../vendor/vectorscope/refusal.mjs";
 import { MOTANKA } from "../vendor/vectorscope/sprites.mjs";
 import { CSS, CSS_EXTRA } from "./css.mjs";
 import { FAVICONS } from "./favicons.mjs";
@@ -557,8 +557,11 @@ function sourceLink(url) {
 }
 /** The Vectorscope's approved refusal copy, with only the tool's name changed. */
 export const refusalLead = (lang) => REFUSAL_COPY.lead[lang].replace("Vectorscope", TOOL_NAME);
-function refusalBody(lang) {
-  const out = [`<p class="lead">${esc(refusalLead(lang))}</p>`, "<ul>"];
+function refusalBody(lang, code) {
+  const out = [`<p class="lead">${esc(refusalLead(lang))}</p>`];
+  const why = refusalReason(code, lang);
+  if (why) out.push(`<p class="why">${esc(why)}</p>`);
+  out.push("<ul>");
   for (const f of FINDINGS) {
     if (f.items) {
       out.push(`<li><b>${esc(f.source[lang])}</b><ul>`);
@@ -569,7 +572,6 @@ function refusalBody(lang) {
   out.push("</ul>");
   const lists = SANCTIONS_LINKS.map((l) => `<a href="${esc(l.url)}" rel="noopener noreferrer" target="_blank">${esc(l.name)}</a>`).join(" · ");
   out.push(`<p class="sanctions"><b>${esc(REFUSAL_COPY.sanctionsLabel[lang])}:</b> ${esc(REFUSAL_COPY.sanctions[lang])} ${lists}</p>`);
-  out.push(`<p class="last">${esc(REFUSAL_COPY.lastLine[lang])}</p>`);
   return out.join("");
 }
 
@@ -578,8 +580,8 @@ export function renderRefusal(reading) {
   const url = reading.page?.url || reading.fetch?.finalUrl || reading.requestedInput || "";
   const o = documentStart(`${TOOL_NAME} Lite: ${REFUSAL_COPY.title.en}`);
   o.push(`<header class="verdict lite-verdict" id="verdict">${pageId(url, "")}</header>`);
-  if (reading.reasonCode === "refused_language_ru") {
-    o.push(`<section class="refusal" role="alert"><div class="refusal-head">${STOP}<h2>${P([REFUSAL_COPY.title.en, REFUSAL_COPY.title.uk])}</h2></div><div class="lb-en">${refusalBody("en")}</div><div class="lb-uk" lang="uk">${refusalBody("uk")}</div></section>`);
+  if (isRefusalCode(reading.reasonCode)) {
+    o.push(`<section class="refusal" role="alert"><div class="refusal-head">${STOP}<h2>${P([REFUSAL_COPY.title.en, REFUSAL_COPY.title.uk])}</h2></div><div class="lb-en">${refusalBody("en", reading.reasonCode)}</div><div class="lb-uk" lang="uk">${refusalBody("uk", reading.reasonCode)}</div></section>`);
   } else {
     const code = `${reading.reasonCode}${reading.status ? ` · HTTP ${reading.status}` : ""}`;
     o.push(`<section class="refusal" role="alert"><div class="refusal-head">${STOP}<h2>${P(["The page could not be audited", "Сторінку не вдалося перевірити"])}</h2></div><p class="lead mono">${esc(code)}</p></section>`);

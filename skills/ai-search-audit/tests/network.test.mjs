@@ -7,7 +7,7 @@ import { gzipSync } from "node:zlib";
 import { readAudit } from "../scripts/lib/reading.mjs";
 import { LINK_CHECK_CAP, parseSitemap, robotsSitemaps } from "../scripts/lib/collect.mjs";
 import { buildModel } from "../scripts/lib/model.mjs";
-import { page, withFetch } from "./helpers.mjs";
+import { hostingDeps, page, withFetch } from "./helpers.mjs";
 
 const O = "https://example.org";
 const body = page({ body: Array.from({ length: 35 }, (_, i) => `<p><a href="/l${i}">Link ${i}</a> and some words.</p>`).join("") });
@@ -40,7 +40,7 @@ test("a full read: redirects, robots.txt, a gzipped child sitemap, llms.txt, 30 
   };
   let reading;
   try {
-    reading = await readAudit({ url: `${O}/start` });
+    reading = await readAudit({ url: `${O}/start`, deps: hostingDeps() });
   } finally {
     globalThis.fetch = original;
   }
@@ -82,7 +82,7 @@ test("refusals: an error status, a site that blocks readers, a file, a private h
     [`${O}/file.pdf`, { [`${O}/file.pdf`]: { headers: { "content-type": "application/pdf" }, body: "%PDF" } }, "not_html", 200],
   ];
   for (const [url, table, code, status] of cases) {
-    const r = await withFetch(table, () => readAudit({ url }));
+    const r = await withFetch(table, () => readAudit({ url, deps: hostingDeps() }));
     assert.equal(r.ok, false, url);
     assert.equal(r.reasonCode, code, url);
     if (status !== 200) assert.equal(r.status, status, url);

@@ -3,7 +3,7 @@ name: ai-search-audit
 description: Audit one public web page for classic search and AI search (SEO and GEO): robots.txt for Googlebot and AI crawlers (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot), noindex and snippet controls, sitemap and llms.txt, title, description, headings, canonical, links, images, structured data and retired rich results, trust signals, hreflang versions and their facts, how an AI retriever reads the page (passages, the 26-passage cap, hidden or JavaScript-only text), writing patterns, the target keyword, the questions people ask, and what the agent's own model believes about the brand and its reviews. An HTML report, plus Markdown and JSON, listing problems, not fixes. Use when the user asks for an SEO or GEO audit, whether a page is ready for AI search, why Google, ChatGPT or Perplexity may not show or quote a page, or names ai-search-audit. Ukrainian too: «SEO-аудит сторінки», «аудит для ШІ-пошуку», «GEO-аудит». Scripts call no model.
 ---
 
-Version 2.107. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105, 2.106, 2.107, …): the first number moves only on a breaking change.
+Version 2.108. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105, 2.106, 2.107, 2.108, …): the first number moves only on a breaking change.
 
 # AI Search Audit (Lite)
 
@@ -18,7 +18,7 @@ Version 2.107. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105,
 - **`$SKILL` below is this skill's folder**, the one this SKILL.md is in. In Claude Code it is `${CLAUDE_SKILL_DIR}`. On claude.ai the skill's whole folder is copied into the code-execution sandbox; use the path you read this file from. Work in a writable directory of your own and call the scripts by their path.
 - **No install.** `dist/read.mjs` and `dist/audit.mjs` (with the code they share in `dist/chunks/`) are the scripts bundled with everything they need (cheerio and the Vectorscope skill's reading code), so plain `node` runs them: no `npm install`, no network for packages, no other skill folder needed.
 - **Node 20.18 or later.** Check with `node --version`. If there is no Node, or an older one, say so and stop.
-- **Network:** the read makes requests to the page, its site's `/robots.txt`, its sitemap (the robots.txt `Sitemap:` lines on the same site, else `/sitemap.xml`, and at most 5 child sitemaps of an index), `/llms.txt`, its hreflang alternates (at most 10), a HEAD (or a bodiless GET) of at most 30 of its links and at most 20 of its images, and one request each for the favicon, a path that does not exist (the soft-404 check), at most 3 URL variants (http, www or not, the trailing slash), a Markdown copy of the page, `/.well-known/ai-catalog.json` (then `/ai-catalog.json`) and, only when the page declares one, its IndexNow key file. When the page is an empty single-page-app shell, it is also rendered in a local Chrome or Chromium (see *Limits*). Nothing else, and every cap is reported in the report and the export.
+- **Network:** the read makes requests to the page, its site's `/robots.txt`, its sitemap (the robots.txt `Sitemap:` lines on the same site, else `/sitemap.xml`, and at most 5 child sitemaps of an index), `/llms.txt`, its hreflang alternates (at most 10), a HEAD (or a bodiless GET) of at most 30 of its links and at most 20 of its images, and one request each for the favicon, a path that does not exist (the soft-404 check), at most 3 URL variants (http, www or not, the trailing slash), a Markdown copy of the page, `/.well-known/ai-catalog.json` (then `/ai-catalog.json`) and, only when the page declares one, its IndexNow key file. Before the page, one DNS lookup of its host and one RDAP request to `rdap.org` (`https://rdap.org/ip/<the site's IP address>`) for the country its server is registered in: that request sends the site's IP address to rdap.org and nothing of the page, and a saved page (`--html`) makes neither. When the page is an empty single-page-app shell, it is also rendered in a local Chrome or Chromium (see *Limits*). Nothing else, and every cap is reported in the report and the export.
 - **Never re-create the audit by hand.** If the scripts cannot run here (no Node, no code execution, the network blocked), say so, say what would make them run, and stop. Do not fetch the page another way and check it yourself: findings made by hand are not the tool's.
 
 ## Steps
@@ -34,7 +34,7 @@ Version 2.107. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105,
    It runs every check and prints the problems, numbered as on the report's map, with where each one is; judgement findings are marked `(judgement)`.
 7. **Show the report** (required; see *Show the report*). A chat summary goes with it, never instead of it.
 
-**`REFUSED refused_language_ru`** means the page is in Russian, and pages in Russian are not analysed. Skip steps 2 to 5, run step 6 without the judgement files (the report holds the reason and its sources), show it, say in one line in the chat that this tool does not analyse pages in Russian, and stop. Do not analyse the page in any other way.
+**`REFUSED refused_ru_domain`, `refused_ru_hosting`, `refused_ru_audience` or `refused_language_ru`** means the page is not analysed: its address is in a Russian domain zone, its site is hosted in Russia, its site has a Russian-language version, or the page is in Russian (the table at the end has the line for each). Skip steps 2 to 5, run step 6 without the judgement files (the report holds the reason and its sources), show it, say in one line in the chat why it was not analysed (the code's line in the table), and stop. Do not analyse the page in any other way.
 
 `--html saved.html --final-url <url>` audits a saved copy instead (add `--robots saved-robots.txt` for its robots.txt); then nothing is fetched, and the sitemap, llms.txt, language versions, links, images and site checks are reported as not measured. `--save-html page.html` keeps the fetched copy.
 
@@ -189,6 +189,9 @@ The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,00
 | `not_html` | The URL is a file such as a PDF or an image, not an HTML page. |
 | `too_large` | The page is over the 3 MB ceiling. |
 | `empty` | The page answered, but no readable text was left once navigation and boilerplate were removed. |
+| `refused_ru_domain` | The address is in a Russian domain zone (.ru, .su, .рф, .москва, .moscow), and this tool does not analyse it; the page was not fetched. One line in the chat, the report, nothing more. |
+| `refused_ru_hosting` | The site is hosted in Russia (RDAP gives its server's country as RU), and this tool does not analyse it; the page was not fetched. One line in the chat, the report, nothing more. |
+| `refused_ru_audience` | The site has a Russian-language version (hreflang, og:locale, Content-Language or a language switcher to /ru), and this tool does not analyse it. One line in the chat, the report, nothing more. |
 | `refused_language_ru` | The page is in Russian, and this tool does not analyse pages in Russian. One line in the chat, the report, nothing more. |
 
 ## Outputs
