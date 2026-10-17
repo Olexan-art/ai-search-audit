@@ -28,8 +28,6 @@ Lite — це картина проблем: кожна має коротку н
 
 ![AI Search Audit Lite, темна тема](docs/ai-search-audit-dark-1280.png)
 
-![AI Search Audit Lite на 500 px](docs/ai-search-audit-light-500.png) ![AI Search Audit Lite на 500 px українською: example.com](docs/ai-search-audit-light-uk-500.png)
-
 Посібник MDN про HTTP-кешування заповнює всі 26 уривків; його останні розділи на мапі злито в одну зону, а посилання понад ліміт перевірки пораховано. Цей запуск без файлів суджень, тож плитка бренду показує *не перевірено*:
 
 ![AI Search Audit Lite на посібнику MDN про HTTP-кешування](docs/ai-search-audit-mdn-1280.png)

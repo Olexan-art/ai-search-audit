@@ -28,8 +28,6 @@ The same report in Ukrainian, with the dark theme switched on, and on a narrow s
 
 ![AI Search Audit Lite, dark theme](docs/ai-search-audit-dark-1280.png)
 
-![AI Search Audit Lite at 500 px](docs/ai-search-audit-light-500.png) ![AI Search Audit Lite at 500 px, Ukrainian: example.com](docs/ai-search-audit-light-uk-500.png)
-
 MDN's HTTP caching guide fills all 26 passages; its last sections are merged into one zone on the map, and the links past the check's cap are counted. This run has no judgement files, so its brand tile reads *not checked*:
 
 ![AI Search Audit Lite on MDN's HTTP caching guide](docs/ai-search-audit-mdn-1280.png)
