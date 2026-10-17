@@ -5,7 +5,8 @@
 // no descriptions and no fixes.
 //
 // Every string that came from the audited page (titles, headings, URLs) goes through esc(); the
-// CSP blocks every network request; the one inline script only switches language and theme.
+// CSP blocks every network request; the one inline script only switches language and theme. The
+// theme is light unless #theme=dark or the toggle asks for dark: the system preference is not read.
 
 import { esc, FOOTER_LINKS } from "../vendor/vectorscope/html.mjs";
 import { FINDINGS, REFUSAL_COPY, SANCTIONS_LINKS } from "../vendor/vectorscope/refusal.mjs";
@@ -340,7 +341,7 @@ const JS = `
   var root=document.documentElement,TK="ai-search-audit-theme",LK="ai-search-audit-lang";
   function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function put(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-  function effective(){var t=root.getAttribute("data-theme");if(t)return t;try{return matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}catch(e){return "dark"}}
+  function effective(){return root.getAttribute("data-theme")==="dark"?"dark":"light"}
   function paint(){var t=effective(),l=root.getAttribute("data-lang")||"en",b=document.querySelectorAll("[data-set-theme]"),c=document.querySelectorAll("[data-set-lang]"),i;for(i=0;i<b.length;i++)b[i].setAttribute("aria-pressed",String(b[i].getAttribute("data-set-theme")===t));for(i=0;i<c.length;i++)c[i].setAttribute("aria-pressed",String(c[i].getAttribute("data-set-lang")===l))}
   function applyLang(l){root.setAttribute("data-lang",l);root.setAttribute("lang",l);var els=document.querySelectorAll("[data-i18n]"),pre="data-"+l+"-";for(var i=0;i<els.length;i++){var el=els[i],set=[];for(var j=0;j<el.attributes.length;j++){var a=el.attributes[j];if(a.name.indexOf(pre)===0)set.push([a.name.slice(pre.length),a.value])}for(var k=0;k<set.length;k++)el.setAttribute(set[k][0],set[k][1])}}
   var h=location.hash,hl=/(?:^#|&)lang=(en|uk)/.exec(h),ht=/(?:^#|&)theme=(dark|light)/.exec(h);
@@ -350,7 +351,6 @@ const JS = `
   for(var i=0;i<b.length;i++)b[i].addEventListener("click",function(){var t=this.getAttribute("data-set-theme");root.setAttribute("data-theme",t);put(TK,t);paint()});
   var c=document.querySelectorAll("[data-set-lang]");
   for(var j=0;j<c.length;j++)c[j].addEventListener("click",function(){var l=this.getAttribute("data-set-lang");applyLang(l);put(LK,l);paint()});
-  try{matchMedia("(prefers-color-scheme: light)").addEventListener("change",paint)}catch(e){}
   function isA(n){return n&&n.tagName&&String(n.tagName).toUpperCase()==="A"}
   document.addEventListener("click",function(e){var a=e.target;while(a&&a!==document&&!isA(a))a=a.parentNode;if(!a||a===document)return;var href=a.getAttribute("href");if(!href||href.charAt(0)!=="#"||href.length<2)return;var t=document.getElementById(href.slice(1));if(!t)return;e.preventDefault();try{t.scrollIntoView({block:"center"})}catch(x){}t.classList.add("hit");setTimeout(function(){t.classList.remove("hit")},1600)});
 })();
@@ -376,7 +376,7 @@ function documentStart(title) {
     `<div class="top-l"><span class="eyebrow">${P(UI.eyebrow)}</span></div>`,
     '<div class="toggles">',
     `<div class="toggle" role="group" ${attrPair("aria-label", UI.langGroup[0], UI.langGroup[1])}><button type="button" id="lang-en" data-set-lang="en" aria-pressed="true">EN</button><button type="button" id="lang-uk" data-set-lang="uk" aria-pressed="false" lang="uk">UK</button></div>`,
-    `<div class="toggle" role="group" ${attrPair("aria-label", UI.themeGroup[0], UI.themeGroup[1])}><button type="button" id="theme-dark" data-set-theme="dark" aria-pressed="false">${P(UI.dark)}</button><button type="button" id="theme-light" data-set-theme="light" aria-pressed="false">${P(UI.light)}</button></div>`,
+    `<div class="toggle" role="group" ${attrPair("aria-label", UI.themeGroup[0], UI.themeGroup[1])}><button type="button" id="theme-dark" data-set-theme="dark" aria-pressed="false">${P(UI.dark)}</button><button type="button" id="theme-light" data-set-theme="light" aria-pressed="true">${P(UI.light)}</button></div>`,
     "</div></div>",
     '<div class="deco" aria-hidden="true"></div>',
   ];

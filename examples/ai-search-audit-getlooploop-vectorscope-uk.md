@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://www.getlooploop.com/uk/vectorscope
 
-Семантичне розбиття сторінки — Vectorscope · checked 17 Oct 2026 · skill 2.101
+Семантичне розбиття сторінки — Vectorscope · checked 17 Oct 2026 · skill 2.102
 
 **Nothing hides text from AI** · 20 problems (blocking 0, high 0, medium 9, low 11)
 

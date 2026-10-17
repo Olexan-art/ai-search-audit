@@ -2,13 +2,13 @@ English · [Українська](README.uk.md)
 
 # AI Search Audit Lite
 
-AI Search Audit Lite **2.101**, an Agent Skill from [GetLoopLoop](https://www.getlooploop.com) for claude.ai and the Claude desktop app, Claude Code, Codex, opencode, Hermes Agent and other agents that load `SKILL.md` skills. Versions count in thousandths (2.101, 2.102, …), so the first number moves only on a breaking change.
+AI Search Audit Lite **2.102**, an Agent Skill from [GetLoopLoop](https://www.getlooploop.com) for claude.ai and the Claude desktop app, Claude Code, Codex, opencode, Hermes Agent and other agents that load `SKILL.md` skills. Versions count in thousandths (2.101, 2.102, …), so the first number moves only on a breaking change.
 
 Before Google, Bing or an AI assistant can show or quote a page, a crawler has to be allowed in, the page has to say what it is, and the text has to survive the machine's reading. `ai-search-audit` checks one public page against the standard, published rules for all three, adds three readings only an AI can make (the questions people ask, how the agent's own model describes the brand, and what it believes about the brand's reviews), and draws the result as one report: six status tiles, a map of the page built from its real document with every problem marked where it is, the biggest problems, the bots in robots.txt, the Google and Bing checklist, the language versions, and where the text goes on its way to an AI retriever.
 
 Lite is a picture of the problems: each one is a short label, a severity and a place. It does not describe the problems or say how to fix them. A full version with explanations is available from [GetLoopLoop](https://www.getlooploop.com).
 
-![AI Search Audit Lite, dark: the tiles and the page map of the Vectorscope page](docs/ai-search-audit-dark-1280.png)
+![AI Search Audit Lite: the tiles and the page map of the Vectorscope page](docs/ai-search-audit-light-1280.png)
 
 ## What it checks
 
@@ -22,11 +22,13 @@ The scripts call no model and no embedding API. Every finding carries its layer:
 - **AI gets the brand right:** the agent's model answers Brandscope's five buyer questions from its own knowledge (no browsing; "doesn't know" allowed), and the script compares them with the page: a price or a count the page states differently, a fact the page lacks, a brand the model does not know. For reviews, the model states its belief about the brand's rating on Reviewscope's 12 platforms and one invented control platform; a rating for the control is a hallucination, and a rating with no source on the page is flagged; ratings shown on the page without markup are measured. This is one model's view: the web [Brandscope](https://www.getlooploop.com/brandscope) and [Reviewscope](https://www.getlooploop.com/reviewscope) ask three assistants.
 - **Languages:** the hreflang set (self-reference, x-default, valid codes), each alternate fetched to see whether it links back, titles and descriptions compared across versions, html lang against hreflang, and **the same facts**: the numbers in each h2 section compared across the versions, aligned by section order.
 
-The same report in Ukrainian and light, and on a narrow screen:
+The same report in Ukrainian, with the dark theme switched on, and on a narrow screen:
 
-![AI Search Audit Lite in Ukrainian, light](docs/ai-search-audit-light-uk-1280.png)
+![AI Search Audit Lite in Ukrainian](docs/ai-search-audit-light-uk-1280.png)
 
-![AI Search Audit Lite at 500 px, dark](docs/ai-search-audit-dark-500.png) ![AI Search Audit Lite at 500 px, Ukrainian, light: example.com](docs/ai-search-audit-light-uk-500.png)
+![AI Search Audit Lite, dark theme](docs/ai-search-audit-dark-1280.png)
+
+![AI Search Audit Lite at 500 px](docs/ai-search-audit-light-500.png) ![AI Search Audit Lite at 500 px, Ukrainian: example.com](docs/ai-search-audit-light-uk-500.png)
 
 MDN's HTTP caching guide fills all 26 passages; its last sections are merged into one zone on the map, and the links past the check's cap are counted. This run has no judgement files, so its brand tile reads *not checked*:
 
@@ -130,7 +132,7 @@ node dist/audit.mjs reading.json --questions questions.json --brand brand.json -
 node dist/audit.mjs reading.json --questions questions.json --brand brand.json --reviews reviews.json --html report.html --md report.md --json export.json
 ```
 
-**Network:** the page, its site's `/robots.txt`, its sitemap (up to 5 child sitemaps), `/llms.txt`, up to 10 hreflang alternates, a HEAD (or a bodiless GET) of up to 30 links and up to 20 images, and one request each for the favicon, a path that does not exist, up to 3 URL variants, a Markdown copy, `ai-catalog.json` and a declared IndexNow key; every cap is reported, never silent. **Outputs:** a self-contained `report.html` (EN | UK, dark and light, no network requests, every piece of page text escaped), `report.md`, and `export.json` (`getlooploop/ai-search-audit@1`), which carries every finding with its layer, its evidence and the rules it rests on.
+**Network:** the page, its site's `/robots.txt`, its sitemap (up to 5 child sitemaps), `/llms.txt`, up to 10 hreflang alternates, a HEAD (or a bodiless GET) of up to 30 links and up to 20 images, and one request each for the favicon, a path that does not exist, up to 3 URL variants, a Markdown copy, `ai-catalog.json` and a declared IndexNow key; every cap is reported, never silent. **Outputs:** a self-contained `report.html` (EN | UK, light by default with a dark theme on the toggle, no network requests, every piece of page text escaped), `report.md`, and `export.json` (`getlooploop/ai-search-audit@1`), which carries every finding with its layer, its evidence and the rules it rests on.
 
 ### This skill's own thresholds
 

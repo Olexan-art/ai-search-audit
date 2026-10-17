@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
 
-HTTP caching - HTTP \| MDN · checked 17 Oct 2026 · skill 2.101
+HTTP caching - HTTP \| MDN · checked 17 Oct 2026 · skill 2.102
 
 **Nothing hides text from AI** · 10 problems (blocking 0, high 0, medium 3, low 7)
 

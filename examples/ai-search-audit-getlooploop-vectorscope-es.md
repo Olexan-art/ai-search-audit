@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://www.getlooploop.com/es/vectorscope
 
-Fragmentado semántico de tu página — Vectorscope · checked 17 Oct 2026 · skill 2.101
+Fragmentado semántico de tu página — Vectorscope · checked 17 Oct 2026 · skill 2.102
 
 **Nothing hides text from AI** · 17 problems (blocking 0, high 0, medium 7, low 10)
 

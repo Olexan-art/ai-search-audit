@@ -74,3 +74,23 @@ test("the export: the schema id, every finding with its rule sources, the same p
   assert.ok(md.startsWith("# AI Search Audit Lite: https://example.org/page"));
   for (const f of m.findings) assert.ok(md.includes(`\`${f.code}\``), f.code);
 });
+
+test("light by default whatever the system prefers; dark only from the toggle or #theme=dark", async () => {
+  const { out } = await report();
+  assert.ok(!out.includes("prefers-color-scheme"), "the system preference does not pick the theme");
+  assert.match(/:root\{([^}]*)\}/.exec(out)[1], /color-scheme:light/);
+  assert.match(out, /:root\[data-theme="dark"\]\{[^}]*color-scheme:dark/);
+  assert.ok(out.includes("theme=(dark|light)"), "#theme= still works");
+  assert.match(out, /data-set-theme="dark" aria-pressed="false"/);
+  assert.match(out, /data-set-theme="light" aria-pressed="true"/);
+  assert.match(out, /prefers-reduced-motion:reduce/);
+  assert.match(out, /:focus-visible/);
+});
+
+test("severity carries a shape and a word, not colour alone", async () => {
+  const { out } = await report();
+  // Every marker in a key, a chip or a bar row is a severity shape, and a severity word sits beside it.
+  const pins = [...out.matchAll(/<svg class="pi pin (blocking|high|medium|low)"[^>]*>(<polygon|<circle|<rect)/g)];
+  assert.ok(pins.length > 0);
+  for (const m of out.matchAll(/<li class="bchip (\w+)"[\s\S]*?<\/li>/g)) assert.match(m[0], /class="sevw /, m[0].slice(0, 60));
+});
