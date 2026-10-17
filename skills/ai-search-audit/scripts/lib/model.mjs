@@ -55,7 +55,7 @@ function isHome(reading) {
   }
 }
 
-/** The checklist: 33 standard checks, each one a cell. `codes` are the findings that fail or warn it. */
+/** The checklist: 35 standard checks, each one a cell. `codes` are the findings that fail or warn it. */
 function checklist(reading, findings) {
   const by = (codes) => findings.filter((f) => codes.includes(f.code));
   const hl = reading.facts.head.hreflang;
@@ -66,18 +66,19 @@ function checklist(reading, findings) {
     ["robots_search_bots", ["Robots", "Robots"], ["Googlebot and Bingbot may fetch the page", "Googlebot і Bingbot можуть завантажити сторінку"], ["search_engine_blocked", "robots_unreachable"], reading.robots.status === "not_checked" ? "na" : null],
     ["noindex", ["noindex", "noindex"], ["Not marked noindex", "Не позначено noindex"], ["noindex"], null],
     ["canonical", ["Canonical", "Canonical"], ["One absolute canonical to the page itself", "Один абсолютний canonical на саму сторінку"], ["canonical_missing", "canonical_relative", "canonical_other", "canonical_multiple"], null],
-    ["in_sitemap", ["Sitemap", "Sitemap"], ["Listed in the sitemap", "Є в sitemap"], ["sitemap_missing", "sitemap_not_listed"], !reading.sitemap || (reading.sitemap.found && reading.sitemap.listsPage === null) ? "na" : null],
+    ["in_sitemap", ["Sitemap", "Sitemap"], ["Listed in the sitemap", "Є в sitemap"], ["sitemap_missing", "sitemap_not_listed", "robots_no_sitemap", "sitemap_lastmod_invalid"], !reading.sitemap || (reading.sitemap.found && reading.sitemap.listsPage === null) ? "na" : null],
     ["indexed", ["Index", "Індекс"], ["In Google's index", "В індексі Google"], [], "na"],
     ["title_length", ["Title", "Title"], ["Title present, 10–60 characters", "Title є, 10–60 символів"], ["title_missing", "title_too_long", "title_too_short"], null],
     ["title_unique", ["Title ×lang", "Title ×мови"], ["A different title per language version", "Різний title у кожній мовній версії"], ["title_duplicate_locales"], !hl.length ? "none" : !reading.alternates ? "na" : null],
     ["meta_description", ["Description", "Опис"], ["Description present, 70–160 characters", "Опис є, 70–160 символів"], ["meta_description_missing", "meta_description_short", "meta_description_long"], null],
-    ["social_preview", ["Preview", "Прев’ю"], ["Open Graph and Twitter card tags", "Теги Open Graph і Twitter card"], ["social_tags_missing"], null],
+    ["social_preview", ["Preview", "Прев’ю"], ["Open Graph and Twitter card tags", "Теги Open Graph і Twitter card"], ["social_tags_missing", "og_image_broken"], null],
     ["h1", ["H1", "H1"], ["One h1", "Один h1"], ["h1_missing", "h1_multiple"], null],
     ["heading_order", ["Headings", "Заголовки"], ["No skipped heading levels", "Без пропущених рівнів заголовків"], ["heading_order_skip"], null],
-    ["image_alt", ["Alt", "Alt"], ["Images carry alt", "Зображення мають alt"], ["image_alt_missing"], reading.facts.images.length ? null : "none"],
-    ["html_lang", ["lang", "lang"], ["html lang declared", "html lang оголошено"], ["html_lang_missing"], null],
+    ["image_alt", ["Alt", "Alt"], ["Images carry alt", "Зображення мають alt"], ["image_alt_missing", "image_link_alt_empty", "image_alt_repeated"], reading.facts.images.length ? null : "none"],
+    ["html_lang", ["lang", "lang"], ["html lang declared", "html lang оголошено"], ["html_lang_missing", "html_lang_invalid"], null],
     ["url_readable", ["URL", "URL"], ["A readable URL", "Зручна адреса"], ["url_unreadable"], null],
     ["internal_links", ["Links", "Посилання"], ["Internal links present", "Є внутрішні посилання"], ["internal_links_none"], null],
+    ["link_text", ["Link text", "Текст посилань"], ["Links say where they lead, #links have a target, no nofollow inside the site", "Посилання кажуть, куди ведуть, # мають ціль, без nofollow усередині сайту"], ["link_text_generic", "fragment_link_broken", "internal_nofollow"], reading.facts.links.length || (reading.facts.fragments || []).length ? null : "none"],
     ["broken_links", ["404", "404"], ["Links answer without errors", "Посилання відповідають без помилок"], ["broken_links"], !reading.links ? "na" : reading.links.total === 0 ? "none" : null],
     ["viewport", ["Viewport", "Viewport"], ["A mobile viewport", "Мобільний viewport"], ["viewport_missing"], null],
     ["page_weight", ["Weight", "Вага"], ["HTML size and scripts", "Розмір HTML і скрипти"], ["page_weight_heavy"], null],
@@ -93,6 +94,7 @@ function checklist(reading, findings) {
     ["soft404", ["Soft 404", "Soft 404"], ["A missing page answers 404", "Неіснуюча сторінка відповідає 404"], ["soft_404"], !reading.site ? "na" : null],
     ["variants", ["Variants", "Варіанти"], ["http, www and slash variants end at the page", "Варіанти http, www і слеш ведуть на сторінку"], ["url_variants_inconsistent"], !reading.site ? "na" : null],
     ["hsts", ["HSTS", "HSTS"], ["Strict-Transport-Security header", "Заголовок Strict-Transport-Security"], ["hsts_missing"], reading.fetch.saved ? "na" : null],
+    ["response", ["Headers", "Заголовки HTTP"], ["Compression, Cache-Control and security headers", "Стиснення, Cache-Control і заголовки безпеки"], ["html_not_compressed", "html_no_cache_control", "security_headers_missing"], reading.fetch.saved ? "na" : null],
     ["trust", ["Trust", "Довіра"], ["Author, About, Contact, organisation, dates, privacy and terms", "Автор, «Про нас», контакти, організація, дати, конфіденційність і умови"], ["author_missing", "about_contact_missing", "organization_details_missing", "article_date_missing", "privacy_terms_missing", "date_mismatch"], null],
   ];
   return cells.map(([id, short, name, codes, fixed]) => {

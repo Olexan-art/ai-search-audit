@@ -17352,6 +17352,7 @@ var REFUSAL_CODE = "refused_language_ru";
 
 // scripts/lib/reading.mjs
 import { basename as basename2 } from "node:path";
+import { gzipSync } from "node:zlib";
 
 // scripts/lib/net.mjs
 async function guardedFetch(startUrl, { method = "GET", accept = "*/*", maxBytes = MAX_HTML_BYTES, timeoutMs = FETCH_TIMEOUT_MS, body = true, binary = false } = {}) {
@@ -17431,7 +17432,14 @@ function headersOf(response) {
     contentLength: response.headers.get("content-length"),
     contentLanguage: response.headers.get("content-language"),
     xRobotsTag: response.headers.get("x-robots-tag"),
-    hsts: response.headers.get("strict-transport-security")
+    hsts: response.headers.get("strict-transport-security"),
+    // 2.102: the security headers and the compression of the page itself.
+    csp: response.headers.get("content-security-policy"),
+    xContentTypeOptions: response.headers.get("x-content-type-options"),
+    referrerPolicy: response.headers.get("referrer-policy"),
+    xFrameOptions: response.headers.get("x-frame-options"),
+    contentEncoding: response.headers.get("content-encoding"),
+    cacheControl: response.headers.get("cache-control")
   };
 }
 __name(headersOf, "headersOf");
@@ -17644,6 +17652,55 @@ function textOf(n) {
   return n.children.map(textOf).join("");
 }
 __name(textOf, "textOf");
+function visibleText(n) {
+  if (!n) return "";
+  if (n.type === "text") return n.data || "";
+  if (!n.children) return "";
+  if (isEl(n) && (NEVER_RENDERED.has(n.name) || isHiddenEl(n))) return " ";
+  return ` ${n.children.map(visibleText).join("")} `;
+}
+__name(visibleText, "visibleText");
+var FRAGMENT_CAP = 5e3;
+function accessibleName(a) {
+  const text3 = fold2(visibleText(a));
+  if (text3) return text3;
+  const label = fold2(attr2(a, "aria-label") || attr2(a, "aria-labelledby") || attr2(a, "title") || "");
+  if (label) return label;
+  const alts = [];
+  const look = /* @__PURE__ */ __name((x) => {
+    if (!isEl(x)) return;
+    if (x.name === "img" && attr2(x, "alt")) alts.push(attr2(x, "alt"));
+    if (x.name === "svg" || x.name === "img") {
+      const l = attr2(x, "aria-label") || "";
+      if (l) alts.push(l);
+    }
+    (x.children || []).forEach(look);
+  }, "look");
+  (a.children || []).forEach(look);
+  return fold2(alts.join(" "));
+}
+__name(accessibleName, "accessibleName");
+function fragmentFound(fragment, ids) {
+  let decoded = fragment;
+  try {
+    decoded = decodeURIComponent(fragment);
+  } catch {
+  }
+  if (!decoded || decoded.toLowerCase() === "top" || /^[/!]/.test(decoded)) return true;
+  return ids.has(fragment) || ids.has(decoded);
+}
+__name(fragmentFound, "fragmentFound");
+function linkImages(a) {
+  const imgs = [];
+  const look = /* @__PURE__ */ __name((x) => {
+    if (!isEl(x)) return;
+    if (x.name === "img") imgs.push(attr2(x, "alt"));
+    (x.children || []).forEach(look);
+  }, "look");
+  (a.children || []).forEach(look);
+  return { count: imgs.length, emptyAlt: imgs.filter((alt) => alt !== null && !alt.trim()).length };
+}
+__name(linkImages, "linkImages");
 function pathOf3(n) {
   const name = /* @__PURE__ */ __name((x) => {
     const id = attr2(x, "id") ? `#${attr2(x, "id").trim().split(/\s+/)[0]}` : "";
@@ -17735,6 +17792,7 @@ __name(hostKey, "hostKey");
 function headFacts($2, resolve, htmlEl) {
   const titles = $2("title").toArray().filter((n) => !within(n, (p) => p.name === "svg"));
   const named = /* @__PURE__ */ __name((name) => $2("meta[name]").toArray().filter((n) => (attr2(n, "name") || "").trim().toLowerCase() === name), "named");
+  const httpEquiv = /* @__PURE__ */ __name((name) => $2("meta[http-equiv]").toArray().filter((n) => (attr2(n, "http-equiv") || "").trim().toLowerCase() === name), "httpEquiv");
   const robotsMeta = $2("meta[name]").toArray().filter((n) => ["robots", "googlebot", "bingbot"].includes((attr2(n, "name") || "").trim().toLowerCase())).map((n) => ({ name: attr2(n, "name").trim().toLowerCase(), content: fold2(attr2(n, "content")) }));
   const viewport = named("viewport")[0];
   const hreflang = $2("link[rel][hreflang]").toArray().filter((n) => (attr2(n, "rel") || "").toLowerCase().split(/\s+/).includes("alternate")).map((n) => ({ hreflang: fold2(attr2(n, "hreflang")), href: resolve(attr2(n, "href") || ""), raw: attr2(n, "href") })).filter((x) => x.hreflang);
@@ -17757,6 +17815,9 @@ function headFacts($2, resolve, htmlEl) {
     title: titles.length ? fold2($2(titles[0]).text()) : "",
     titleCount: titles.length,
     metaDescriptions: named("description").map((n) => fold2(attr2(n, "content"))),
+    // 2.102: the security policies a page can set in markup instead of headers.
+    cspMeta: httpEquiv("content-security-policy")[0] ? fold2(attr2(httpEquiv("content-security-policy")[0], "content")) : null,
+    referrerMeta: named("referrer")[0] ? fold2(attr2(named("referrer")[0], "content")) : null,
     robotsMeta,
     viewport: viewport ? fold2(attr2(viewport, "content")) : null,
     lang: htmlEl ? fold2(attr2(htmlEl, "lang") || attr2(htmlEl, "xml:lang") || "") || null : null,
@@ -17830,6 +17891,8 @@ function collectFacts(html3, pageUrl) {
   const headings = [];
   const images = [];
   const links = [];
+  const fragments = [];
+  const anchors = /* @__PURE__ */ new Set();
   const placeholders = [];
   const removedHeaders = [];
   const hiddenHeadings = [];
@@ -17917,17 +17980,27 @@ function collectFacts(html3, pageUrl) {
     if (!never && tag === "img" && !hidden) {
       const rawSrc = attr2(n, "src") || attr2(n, "data-src") || "";
       const sources = n.parent && n.parent.name === "picture" ? n.parent.children.filter((c) => isEl(c) && c.name === "source").map((c) => (attr2(c, "type") || attr2(c, "srcset") || "").toLowerCase()) : [];
-      images.push({ index: images.length, src: clip(rawSrc, 120), url: rawSrc && !/^data:/i.test(rawSrc) ? resolve(rawSrc) : null, hasAlt: attr2(n, "alt") !== null, decorative: ["presentation", "none"].includes(role(n)), width: attr2(n, "width"), height: attr2(n, "height"), loading: (attr2(n, "loading") || "").trim().toLowerCase() || null, fetchpriority: (attr2(n, "fetchpriority") || "").trim().toLowerCase() || null, srcset: Boolean(attr2(n, "srcset") || attr2(n, "data-srcset")) || sources.length > 0, modernSource: sources.some((t) => /avif|webp/.test(t)), zone: z.id, path: pathOf3(n) });
+      images.push({ index: images.length, src: clip(rawSrc, 120), url: rawSrc && !/^data:/i.test(rawSrc) ? resolve(rawSrc) : null, hasAlt: attr2(n, "alt") !== null, alt: attr2(n, "alt") === null ? null : clip(attr2(n, "alt"), 120), decorative: ["presentation", "none"].includes(role(n)), width: attr2(n, "width"), height: attr2(n, "height"), loading: (attr2(n, "loading") || "").trim().toLowerCase() || null, fetchpriority: (attr2(n, "fetchpriority") || "").trim().toLowerCase() || null, srcset: Boolean(attr2(n, "srcset") || attr2(n, "data-srcset")) || sources.length > 0, modernSource: sources.some((t) => /avif|webp/.test(t)), zone: z.id, path: pathOf3(n) });
     }
     if (!never && tag === "a" && attr2(n, "href") !== null) {
       const raw = attr2(n, "href").trim();
-      if (raw && !/^(?:javascript|mailto|tel|sms|data|blob):/i.test(raw) && !raw.startsWith("#")) {
+      const rel = (attr2(n, "rel") || "").trim().toLowerCase();
+      const name = accessibleName(n);
+      if (raw.startsWith("#")) fragments.push({ fragment: raw.slice(1), zone: z.id, hidden, path: pathOf3(n), name: clip(name, 60) });
+      else if (raw && !/^(?:javascript|mailto|tel|sms|data|blob):/i.test(raw)) {
         const url = resolve(raw);
         if (url && /^https?:/i.test(url)) {
           const noHash = url.replace(/#.*$/, "");
-          links.push({ url: noHash, internal: hostKey(noHash) === pageHost, zone: z.id, hidden, text: clip(textOf(n), 60), path: pathOf3(n), self: samePage(noHash, pageUrl) });
+          const self = samePage(noHash, pageUrl);
+          if (self && /#./.test(url)) fragments.push({ fragment: url.replace(/^[^#]*#/, ""), zone: z.id, hidden, path: pathOf3(n), name: clip(name, 60) });
+          const imgs = linkImages(n);
+          links.push({ url: noHash, internal: hostKey(noHash) === pageHost, zone: z.id, hidden, text: clip(textOf(n), 60), name: clip(name, 60), rel, imgs: imgs.count, imgsEmptyAlt: imgs.emptyAlt, path: pathOf3(n), self });
         }
       }
+    }
+    if (!never && (attr2(n, "id") || tag === "a" && attr2(n, "name"))) {
+      if (attr2(n, "id")) anchors.add(attr2(n, "id"));
+      if (tag === "a" && attr2(n, "name")) anchors.add(attr2(n, "name"));
     }
     const childCtx = { never, hidden, hiddenRoot, overlay, furniture };
     for (const c of n.children || []) walk(c, childCtx);
@@ -17945,6 +18018,11 @@ function collectFacts(html3, pageUrl) {
     headings,
     images,
     links,
+    // Each #link looked up as the HTML Standard finds its target: an id, else an a[name]; an empty
+    // fragment and "top" mean the top of the page. Up to FRAGMENT_CAP, the rest counted.
+    fragments: fragments.slice(0, FRAGMENT_CAP).map((f) => ({ ...f, found: fragmentFound(f.fragment, anchors) })),
+    fragmentTotal: fragments.length,
+    fragmentCap: FRAGMENT_CAP,
     placeholders,
     removedHeaders,
     hiddenHeadings,
@@ -17957,7 +18035,7 @@ function collectFacts(html3, pageUrl) {
 }
 __name(collectFacts, "collectFacts");
 function tidyZones(raw, facts) {
-  const lists = [facts.headings, facts.images, facts.links, facts.placeholders, facts.removedHeaders, facts.hiddenHeadings];
+  const lists = [facts.headings, facts.images, facts.links, facts.fragments, facts.placeholders, facts.removedHeaders, facts.hiddenHeadings];
   const used = new Set(lists.flat().map((x) => x.zone));
   const parent2 = raw.map((z) => z.id);
   const find4 = /* @__PURE__ */ __name((i) => {
@@ -18065,9 +18143,19 @@ function parseSitemap(xml2) {
   const text3 = String(xml2 || "");
   const kind = /<sitemapindex[\s>]/i.test(text3) ? "sitemapindex" : /<urlset[\s>]/i.test(text3) ? "urlset" : "unknown";
   const locs = [...text3.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((m) => decodeXml(m[1])).filter(Boolean);
-  return { kind, locs };
+  const lastmods = [...text3.matchAll(/<lastmod>([\s\S]*?)<\/lastmod>/gi)].map((m) => decodeXml(m[1]));
+  return { kind, locs, lastmods };
 }
 __name(parseSitemap, "parseSitemap");
+var W3C_DATETIME = /^\d{4}(?:-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01])(?:T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d))?)?)?$/;
+var LASTMOD_FUTURE_MS = 24 * 60 * 60 * 1e3;
+function lastmodStats(lastmods, now = Date.now()) {
+  const valid = /* @__PURE__ */ __name((v) => W3C_DATETIME.test(v), "valid");
+  const invalid = lastmods.filter((v) => !valid(v));
+  const future = lastmods.filter((v) => valid(v) && Date.parse(v.length === 4 ? `${v}-01-01` : v.length === 7 ? `${v}-01` : v) > now + LASTMOD_FUTURE_MS);
+  return { total: lastmods.length, invalid: invalid.length, future: future.length, samples: [...invalid, ...future].slice(0, 4).map((v) => v.slice(0, 40)) };
+}
+__name(lastmodStats, "lastmodStats");
 function robotsSitemaps(robotsText) {
   return String(robotsText || "").split(/\r\n|\r|\n/).map((l) => l.replace(/#.*$/, "").trim()).filter((l) => /^sitemap\s*:/i.test(l)).map((l) => l.replace(/^sitemap\s*:\s*/i, "").trim()).filter(Boolean);
 }
@@ -18077,7 +18165,7 @@ var sameSite = /* @__PURE__ */ __name((a, b) => {
   const y = hostKey(b);
   return Boolean(x) && (x === y || x.endsWith(`.${y}`) || y.endsWith(`.${x}`));
 }, "sameSite");
-async function checkSitemap(pageUrl, robotsText, pageUrls) {
+async function checkSitemap(pageUrl, robotsText, pageUrls, { now = Date.now() } = {}) {
   const origin = new URL(pageUrl).origin;
   const declared = robotsSitemaps(robotsText);
   const offSite = declared.filter((u) => !sameSite(u, pageUrl));
@@ -18090,26 +18178,26 @@ async function checkSitemap(pageUrl, robotsText, pageUrls) {
   let listsPage = false;
   let matchedIn = null;
   const matches = /* @__PURE__ */ __name((loc) => pageUrls.some((u) => u && samePage(loc, u)), "matches");
-  const read = /* @__PURE__ */ __name(async (url) => {
+  const read = /* @__PURE__ */ __name(async (url, from) => {
     const r = await guardedFetch(url, { accept: "application/xml,text/xml;q=0.9,*/*;q=0.5", maxBytes: SITEMAP_MAX_BYTES, binary: true });
     if (!r.ok || r.status !== 200) {
-      fetched.push({ url, status: r.status ?? null, reason: r.ok ? "http_error" : r.reason, kind: null, count: 0, read: false });
+      fetched.push({ url, from, status: r.status ?? null, reason: r.ok ? "http_error" : r.reason, kind: null, count: 0, read: false });
       return null;
     }
     let text3;
     try {
       text3 = r.body[0] === 31 && r.body[1] === 139 ? gunzipSync(r.body, { maxOutputLength: SITEMAP_MAX_BYTES }).toString("utf8") : r.body.toString("utf8");
     } catch {
-      fetched.push({ url, status: r.status, reason: "unreadable", kind: null, count: 0, read: false });
+      fetched.push({ url, from, status: r.status, reason: "unreadable", kind: null, count: 0, read: false });
       return null;
     }
     const parsed = parseSitemap(text3);
-    fetched.push({ url, status: r.status, kind: parsed.kind, count: parsed.locs.length, read: parsed.kind !== "unknown" });
+    fetched.push({ url, from, status: r.status, kind: parsed.kind, count: parsed.locs.length, read: parsed.kind !== "unknown", lastmod: lastmodStats(parsed.lastmods, now) });
     if (parsed.kind !== "unknown") found = true;
     return parsed;
   }, "read");
   for (const url of candidates.slice(0, 3)) {
-    const parsed = await read(url);
+    const parsed = await read(url, source);
     if (!parsed) continue;
     if (parsed.kind === "urlset" && parsed.locs.some(matches)) {
       listsPage = true;
@@ -18125,7 +18213,7 @@ async function checkSitemap(pageUrl, robotsText, pageUrls) {
     const ranked = children2.slice().sort((a, b) => hit(b) - hit(a));
     for (const url of ranked.slice(0, SITEMAP_CHILD_CAP)) {
       childrenRead++;
-      const parsed = await read(url);
+      const parsed = await read(url, "index");
       if (parsed?.locs.some(matches)) {
         listsPage = true;
         matchedIn = url;
@@ -18318,7 +18406,7 @@ function improbablePath(pageUrl, seed = Date.now()) {
   return `${u.origin}/getlooploop-audit-missing-${seed.toString(36)}-page`;
 }
 __name(improbablePath, "improbablePath");
-async function checkSite(pageUrl, extras, { canonical = null, now = Date.now() } = {}) {
+async function checkSite(pageUrl, extras, { canonical = null, now = Date.now(), ogImage = null } = {}) {
   const u = new URL(pageUrl);
   const out = {};
   const icon = extras.icons[0] || `${u.origin}/favicon.ico`;
@@ -18364,7 +18452,20 @@ async function checkSite(pageUrl, extras, { canonical = null, now = Date.now() }
     const r = await guardedFetch(`${u.origin}/${key}.txt`, { method: "GET", accept: "text/plain", maxBytes: 4096, timeoutMs: LINK_TIMEOUT_MS });
     out.indexnow = { key, url: `${u.origin}/${key}.txt`, status: r.status ?? null, ok: Boolean(r.ok && r.status === 200 && r.text.trim() === key) };
   } else out.indexnow = null;
-  out.requests = (/^data:/i.test(icon) ? 3 : 4) + out.variants.length + (out.aiCatalog && out.aiCatalog.url.endsWith("/ai-catalog.json") && !out.aiCatalog.url.includes(".well-known") ? 1 : 0) + (out.indexnow ? 1 : 0);
+  out.ogImage = null;
+  if (ogImage && !/^data:/i.test(ogImage)) {
+    let url = null;
+    try {
+      url = new URL(ogImage, pageUrl).toString();
+    } catch {
+    }
+    if (url && /^https?:/i.test(url)) {
+      const r = await guardedFetch(url, { method: "GET", body: false, accept: "image/*", timeoutMs: LINK_TIMEOUT_MS });
+      const type = r.ok ? r.headers?.contentType || "" : "";
+      out.ogImage = { url, status: r.status ?? null, contentType: type || null, ok: Boolean(r.ok && r.status === 200 && /^image\//i.test(type)), unverified: !r.ok || [401, 403, 429].includes(r.status), reason: r.ok ? null : r.reason };
+    } else out.ogImage = { url: String(ogImage).slice(0, 160), status: null, contentType: null, ok: false, unverified: false, reason: "invalid_url" };
+  }
+  out.requests = (/^data:/i.test(icon) ? 3 : 4) + out.variants.length + (out.aiCatalog && out.aiCatalog.url.endsWith("/ai-catalog.json") && !out.aiCatalog.url.includes(".well-known") ? 1 : 0) + (out.indexnow ? 1 : 0) + (out.ogImage && out.ogImage.reason !== "invalid_url" ? 1 : 0);
   return out;
 }
 __name(checkSite, "checkSite");
@@ -18443,12 +18544,12 @@ async function readAudit({ url, html: html3, finalUrl, robotsText, network, rend
   const robots = { ...robotsReport(robotsFetched, page.url), sitemaps: robotsSitemaps(robotsFetched.text) };
   const canonical = vs.technical?.canonical?.resolved || null;
   const pageUrls = [page.url, urlKey, canonical].filter(Boolean);
-  const sitemap = online ? await checkSitemap(page.url, robotsFetched.text, pageUrls) : null;
+  const sitemap = online ? await checkSitemap(page.url, robotsFetched.text, pageUrls, { now: now.getTime() }) : null;
   const llms = online ? await checkLlms(page.url) : null;
   const alternates = online ? await checkAlternates(page.url, facts.head.hreflang) : null;
   const links = online ? await checkLinks(facts.links) : null;
   const images = online ? await checkImages(facts.images) : null;
-  const site = online ? await checkSite(page.url, facts.extras, { canonical, now: now.getTime() }) : null;
+  const site = online ? await checkSite(page.url, facts.extras, { canonical, now: now.getTime(), ogImage: facts.head.og["og:image"] || null }) : null;
   const emptyRoots = facts.extras.roots.filter((x) => x.chars < SHELL_ROOT_MAX_CHARS);
   const shell = { detected: vs.page.wordCount < SHELL_MAX_WORDS && emptyRoots.length > 0 && facts.head.scripts.total > 0, roots: emptyRoots.map((x) => x.selector), words: vs.page.wordCount, scripts: facts.head.scripts.total };
   const autoRender = shell.detected && !render3 && online;
@@ -18484,7 +18585,16 @@ async function readAudit({ url, html: html3, finalUrl, robotsText, network, rend
       contentType: page.headers.contentType ?? null,
       xRobotsTag: page.headers.xRobotsTag ?? null,
       hsts: page.headers.hsts ?? null,
-      contentLanguage: page.headers.contentLanguage ?? null
+      contentLanguage: page.headers.contentLanguage ?? null,
+      // 2.102: what the security-header and compression checks read, and the page gzipped here once,
+      // so the compression check has its saving without a second request.
+      csp: page.headers.csp ?? null,
+      xContentTypeOptions: page.headers.xContentTypeOptions ?? null,
+      referrerPolicy: page.headers.referrerPolicy ?? null,
+      xFrameOptions: page.headers.xFrameOptions ?? null,
+      contentEncoding: page.headers.contentEncoding ?? null,
+      cacheControl: page.headers.cacheControl ?? null,
+      gzipBytes: saved ? null : gzipSync(Buffer.from(page.html, "utf8")).length
     },
     facts,
     vs: { page: vs.page, passages: vs.passages, technical: vs.technical, losses: vs.losses, layout: vs.layout, ...rendered?.ok ? { render: { ok: true, browser: rendered.browser, wordCount: rendered.wordCount, passages: rendered.passages, charsIndexed: rendered.charsIndexed, headings: rendered.headings } } : {} },

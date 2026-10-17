@@ -2,7 +2,7 @@
   "schema": "getlooploop/ai-search-audit@1",
   "skillVersion": "2.102",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T10:55:26.930Z",
+  "createdAt": "2026-10-17T12:46:59.738Z",
   "edition": "lite",
   "page": {
     "url": "https://example.com/",
@@ -21,11 +21,11 @@
     "uk": "Ніщо не ховає текст від ШІ"
   },
   "counts": {
-    "total": 22,
+    "total": 24,
     "blocking": 0,
     "high": 0,
     "medium": 6,
-    "low": 16
+    "low": 18
   },
   "tiles": [
     {
@@ -35,7 +35,7 @@
         "uk": "Добре видно в пошуку?"
       },
       "state": "prob",
-      "problems": 14
+      "problems": 16
     },
     {
       "id": "find",
@@ -881,8 +881,83 @@
       ]
     },
     {
-      "id": "hsts_missing",
+      "id": "html_no_cache_control",
       "pin": 20,
+      "big": false,
+      "code": "html_no_cache_control",
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "hidesText": false,
+      "informational": true,
+      "layer": "measured",
+      "judgement": null,
+      "label": {
+        "en": "No Cache-Control on the HTML",
+        "uk": "Немає Cache-Control для HTML"
+      },
+      "where": "Cache-Control",
+      "map": {
+        "zones": [],
+        "strip": null
+      },
+      "passages": [],
+      "evidence": {},
+      "rules": [
+        {
+          "name": "MDN: Cache-Control",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"
+        }
+      ]
+    },
+    {
+      "id": "security_headers_missing",
+      "pin": 21,
+      "big": false,
+      "code": "security_headers_missing",
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "hidesText": false,
+      "informational": true,
+      "layer": "measured",
+      "judgement": null,
+      "label": {
+        "en": "4 security headers missing",
+        "uk": "Бракує 4 заголовків безпеки"
+      },
+      "where": "Content-Security-Policy, X-Content-Type-Options, Referrer-Policy, frame-ancestors",
+      "map": {
+        "zones": [],
+        "strip": null
+      },
+      "passages": [],
+      "evidence": {
+        "missing": [
+          "Content-Security-Policy",
+          "X-Content-Type-Options",
+          "Referrer-Policy",
+          "frame-ancestors"
+        ]
+      },
+      "rules": [
+        {
+          "name": "MDN: CSP frame-ancestors",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors"
+        },
+        {
+          "name": "MDN: X-Content-Type-Options",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options"
+        },
+        {
+          "name": "MDN: Referrer-Policy",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy"
+        }
+      ]
+    },
+    {
+      "id": "hsts_missing",
+      "pin": 22,
       "big": false,
       "code": "hsts_missing",
       "severity": "low",
@@ -918,7 +993,7 @@
     },
     {
       "id": "about_contact_missing",
-      "pin": 21,
+      "pin": 23,
       "big": false,
       "code": "about_contact_missing",
       "severity": "low",
@@ -957,7 +1032,7 @@
     },
     {
       "id": "privacy_terms_missing",
-      "pin": 22,
+      "pin": 24,
       "big": false,
       "code": "privacy_terms_missing",
       "severity": "low",
@@ -1202,6 +1277,66 @@
       "owner": "seo",
       "layer": "measured"
     },
+    "html_not_compressed": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "html_no_cache_control": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "security_headers_missing": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "html_lang_invalid": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "link_text_generic": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "content",
+      "layer": "measured"
+    },
+    "fragment_link_broken": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "internal_nofollow": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
+    "robots_no_sitemap": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
+    "sitemap_lastmod_invalid": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
+    "og_image_broken": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
     "jsonld_invalid": {
       "severity": "medium",
       "area": "classic",
@@ -1272,6 +1407,18 @@
       "severity": "low",
       "area": "classic",
       "owner": "dev",
+      "layer": "measured"
+    },
+    "image_link_alt_empty": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "content",
+      "layer": "measured"
+    },
+    "image_alt_repeated": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "content",
       "layer": "measured"
     },
     "favicon_missing": {
@@ -2047,6 +2194,15 @@
       ]
     },
     {
+      "id": "link_text",
+      "name": {
+        "en": "Links say where they lead, #links have a target, no nofollow inside the site",
+        "uk": "Посилання кажуть, куди ведуть, # мають ціль, без nofollow усередині сайту"
+      },
+      "state": "none",
+      "codes": []
+    },
+    {
       "id": "broken_links",
       "name": {
         "en": "Links answer without errors",
@@ -2187,6 +2343,18 @@
       "state": "warn",
       "codes": [
         "hsts_missing"
+      ]
+    },
+    {
+      "id": "response",
+      "name": {
+        "en": "Compression, Cache-Control and security headers",
+        "uk": "Стиснення, Cache-Control і заголовки безпеки"
+      },
+      "state": "warn",
+      "codes": [
+        "html_no_cache_control",
+        "security_headers_missing"
       ]
     },
     {
@@ -2499,6 +2667,7 @@
     "fetched": [
       {
         "url": "https://example.com/sitemap.xml",
+        "from": "default",
         "status": 404,
         "reason": "http_error",
         "kind": null,

@@ -2,7 +2,7 @@
 
 Semantic Chunking Visualizer for Any URL — Vectorscope · checked 17 Oct 2026 · skill 2.102
 
-**Nothing hides text from AI** · 18 problems (blocking 0, high 0, medium 7, low 11)
+**Nothing hides text from AI** · 19 problems (blocking 0, high 0, medium 7, low 12)
 
 Lite lists problems, not fixes: labels, severities and places. The checks are deterministic (measured or derived); the questions, the brand and the reviews are the agent's judgement, marked as such.
 
@@ -14,7 +14,7 @@ Main phrase: “Semantic chunking” (read off the h1).
 
 | Question | State | Problems |
 |---|---|---|
-| Shown well in search? | Problems | 6 |
+| Shown well in search? | Problems | 7 |
 | AI finds it? | OK | 0 |
 | AI reads all of it? | Problems | 2 |
 | AI quotes it right? | Problems | 8 |
@@ -50,7 +50,8 @@ Main phrase: “Semantic chunking” (read off the h1).
 | 15 | Low | How-to: no rich result any more | `HowTo` | Measured | `rich_result_retired` |
 | 16 | Low | 131 KB, 40 scripts | `HTML` | Derived | `page_weight_heavy` |
 | 17 | Low | llms.txt: one language only | `/llms.txt` | Measured | `llms_txt_one_language` |
-| 18 | Low | No contact link | `contact link` | Measured | `about_contact_missing` |
+| 18 | Low | 3 security headers missing | `Content-Security-Policy, X-Content-Type-Options, frame-ancestors` | Measured | `security_headers_missing` |
+| 19 | Low | No contact link | `contact link` | Measured | `about_contact_missing` |
 
 ## Page map
 
@@ -116,6 +117,7 @@ Top to bottom; the numbers are the problems above. Unseen: the text reaches no p
 | html lang declared | Passed |
 | A readable URL | Passed |
 | Internal links present | Passed |
+| Links say where they lead, #links have a target, no nofollow inside the site | Passed |
 | Links answer without errors | Problem |
 | A mobile viewport | Passed |
 | HTML size and scripts | Warning |
@@ -131,6 +133,7 @@ Top to bottom; the numbers are the problems above. Unseen: the text reaches no p
 | A missing page answers 404 | Passed |
 | http, www and slash variants end at the page | Passed |
 | Strict-Transport-Security header | Passed |
+| Compression, Cache-Control and security headers | Warning |
 | Author, About, Contact, organisation, dates, privacy and terms | Warning |
 
 ## Bots in robots.txt (path `/vectorscope`)

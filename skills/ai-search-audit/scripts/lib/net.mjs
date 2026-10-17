@@ -91,6 +91,13 @@ function headersOf(response) {
     contentLanguage: response.headers.get("content-language"),
     xRobotsTag: response.headers.get("x-robots-tag"),
     hsts: response.headers.get("strict-transport-security"),
+    // 2.102: the security headers and the compression of the page itself.
+    csp: response.headers.get("content-security-policy"),
+    xContentTypeOptions: response.headers.get("x-content-type-options"),
+    referrerPolicy: response.headers.get("referrer-policy"),
+    xFrameOptions: response.headers.get("x-frame-options"),
+    contentEncoding: response.headers.get("content-encoding"),
+    cacheControl: response.headers.get("cache-control"),
   };
 }
 

@@ -91,6 +91,54 @@ function visibleText(n) {
   return ` ${n.children.map(visibleText).join("")} `;
 }
 
+/** How many in-page #links are looked up against the page's ids (this skill's rule); the rest are counted. */
+export const FRAGMENT_CAP = 5000;
+
+/** A link's accessible name, as a reader of it hears it: its text, else aria-label, title, or the alt of an image inside. */
+export function accessibleName(a) {
+  const text = fold(visibleText(a));
+  if (text) return text;
+  const label = fold(attr(a, "aria-label") || attr(a, "aria-labelledby") || attr(a, "title") || "");
+  if (label) return label;
+  const alts = [];
+  const look = (x) => {
+    if (!isEl(x)) return;
+    if (x.name === "img" && attr(x, "alt")) alts.push(attr(x, "alt"));
+    if (x.name === "svg" || x.name === "img") {
+      const l = attr(x, "aria-label") || "";
+      if (l) alts.push(l);
+    }
+    (x.children || []).forEach(look);
+  };
+  (a.children || []).forEach(look);
+  return fold(alts.join(" "));
+}
+
+/**
+ * Whether a #fragment has a target: an empty one or "top" is the top of the page; a hash route
+ * ("#/…", "#!…") is a script's business, not an anchor, and counts as found.
+ */
+export function fragmentFound(fragment, ids) {
+  let decoded = fragment;
+  try {
+    decoded = decodeURIComponent(fragment);
+  } catch {}
+  if (!decoded || decoded.toLowerCase() === "top" || /^[/!]/.test(decoded)) return true;
+  return ids.has(fragment) || ids.has(decoded);
+}
+
+/** The images inside a link, and whether each one's alt is present but empty. */
+function linkImages(a) {
+  const imgs = [];
+  const look = (x) => {
+    if (!isEl(x)) return;
+    if (x.name === "img") imgs.push(attr(x, "alt"));
+    (x.children || []).forEach(look);
+  };
+  (a.children || []).forEach(look);
+  return { count: imgs.length, emptyAlt: imgs.filter((alt) => alt !== null && !alt.trim()).length };
+}
+
 /** A short CSS-like path for an element: up to three ancestors below body, then the element. */
 export function pathOf(n) {
   const name = (x) => {
@@ -207,6 +255,7 @@ export function hostKey(url) {
 function headFacts($, resolve, htmlEl) {
   const titles = $("title").toArray().filter((n) => !within(n, (p) => p.name === "svg"));
   const named = (name) => $("meta[name]").toArray().filter((n) => (attr(n, "name") || "").trim().toLowerCase() === name);
+  const httpEquiv = (name) => $("meta[http-equiv]").toArray().filter((n) => (attr(n, "http-equiv") || "").trim().toLowerCase() === name);
   const robotsMeta = $("meta[name]")
     .toArray()
     .filter((n) => ["robots", "googlebot", "bingbot"].includes((attr(n, "name") || "").trim().toLowerCase()))
@@ -236,6 +285,9 @@ function headFacts($, resolve, htmlEl) {
     title: titles.length ? fold($(titles[0]).text()) : "",
     titleCount: titles.length,
     metaDescriptions: named("description").map((n) => fold(attr(n, "content"))),
+    // 2.102: the security policies a page can set in markup instead of headers.
+    cspMeta: httpEquiv("content-security-policy")[0] ? fold(attr(httpEquiv("content-security-policy")[0], "content")) : null,
+    referrerMeta: named("referrer")[0] ? fold(attr(named("referrer")[0], "content")) : null,
     robotsMeta,
     viewport: viewport ? fold(attr(viewport, "content")) : null,
     lang: htmlEl ? fold(attr(htmlEl, "lang") || attr(htmlEl, "xml:lang") || "") || null : null,
@@ -316,6 +368,9 @@ export function collectFacts(html, pageUrl) {
   const headings = [];
   const images = [];
   const links = [];
+  // 2.102: in-page #links, and every id and a[name] they could point at.
+  const fragments = [];
+  const anchors = new Set();
   const placeholders = [];
   const removedHeaders = [];
   const hiddenHeadings = [];
@@ -417,17 +472,27 @@ export function collectFacts(html, pageUrl) {
     if (!never && tag === "img" && !hidden) {
       const rawSrc = attr(n, "src") || attr(n, "data-src") || "";
       const sources = n.parent && n.parent.name === "picture" ? n.parent.children.filter((c) => isEl(c) && c.name === "source").map((c) => (attr(c, "type") || attr(c, "srcset") || "").toLowerCase()) : [];
-      images.push({ index: images.length, src: clip(rawSrc, 120), url: rawSrc && !/^data:/i.test(rawSrc) ? resolve(rawSrc) : null, hasAlt: attr(n, "alt") !== null, decorative: ["presentation", "none"].includes(role(n)), width: attr(n, "width"), height: attr(n, "height"), loading: (attr(n, "loading") || "").trim().toLowerCase() || null, fetchpriority: (attr(n, "fetchpriority") || "").trim().toLowerCase() || null, srcset: Boolean(attr(n, "srcset") || attr(n, "data-srcset")) || sources.length > 0, modernSource: sources.some((t) => /avif|webp/.test(t)), zone: z.id, path: pathOf(n) });
+      images.push({ index: images.length, src: clip(rawSrc, 120), url: rawSrc && !/^data:/i.test(rawSrc) ? resolve(rawSrc) : null, hasAlt: attr(n, "alt") !== null, alt: attr(n, "alt") === null ? null : clip(attr(n, "alt"), 120), decorative: ["presentation", "none"].includes(role(n)), width: attr(n, "width"), height: attr(n, "height"), loading: (attr(n, "loading") || "").trim().toLowerCase() || null, fetchpriority: (attr(n, "fetchpriority") || "").trim().toLowerCase() || null, srcset: Boolean(attr(n, "srcset") || attr(n, "data-srcset")) || sources.length > 0, modernSource: sources.some((t) => /avif|webp/.test(t)), zone: z.id, path: pathOf(n) });
     }
     if (!never && tag === "a" && attr(n, "href") !== null) {
       const raw = attr(n, "href").trim();
-      if (raw && !/^(?:javascript|mailto|tel|sms|data|blob):/i.test(raw) && !raw.startsWith("#")) {
+      const rel = (attr(n, "rel") || "").trim().toLowerCase();
+      const name = accessibleName(n);
+      if (raw.startsWith("#")) fragments.push({ fragment: raw.slice(1), zone: z.id, hidden, path: pathOf(n), name: clip(name, 60) });
+      else if (raw && !/^(?:javascript|mailto|tel|sms|data|blob):/i.test(raw)) {
         const url = resolve(raw);
         if (url && /^https?:/i.test(url)) {
           const noHash = url.replace(/#.*$/, "");
-          links.push({ url: noHash, internal: hostKey(noHash) === pageHost, zone: z.id, hidden, text: clip(textOf(n), 60), path: pathOf(n), self: samePage(noHash, pageUrl) });
+          const self = samePage(noHash, pageUrl);
+          if (self && /#./.test(url)) fragments.push({ fragment: url.replace(/^[^#]*#/, ""), zone: z.id, hidden, path: pathOf(n), name: clip(name, 60) });
+          const imgs = linkImages(n);
+          links.push({ url: noHash, internal: hostKey(noHash) === pageHost, zone: z.id, hidden, text: clip(textOf(n), 60), name: clip(name, 60), rel, imgs: imgs.count, imgsEmptyAlt: imgs.emptyAlt, path: pathOf(n), self });
         }
       }
+    }
+    if (!never && (attr(n, "id") || (tag === "a" && attr(n, "name")))) {
+      if (attr(n, "id")) anchors.add(attr(n, "id"));
+      if (tag === "a" && attr(n, "name")) anchors.add(attr(n, "name"));
     }
 
     const childCtx = { never, hidden, hiddenRoot, overlay, furniture };
@@ -449,6 +514,11 @@ export function collectFacts(html, pageUrl) {
     headings,
     images,
     links,
+    // Each #link looked up as the HTML Standard finds its target: an id, else an a[name]; an empty
+    // fragment and "top" mean the top of the page. Up to FRAGMENT_CAP, the rest counted.
+    fragments: fragments.slice(0, FRAGMENT_CAP).map((f) => ({ ...f, found: fragmentFound(f.fragment, anchors) })),
+    fragmentTotal: fragments.length,
+    fragmentCap: FRAGMENT_CAP,
     placeholders,
     removedHeaders,
     hiddenHeadings,
@@ -466,7 +536,7 @@ export function collectFacts(html, pageUrl) {
  * "more sections" zone whose count is kept. Every fact's zone id is rewritten to match.
  */
 function tidyZones(raw, facts) {
-  const lists = [facts.headings, facts.images, facts.links, facts.placeholders, facts.removedHeaders, facts.hiddenHeadings];
+  const lists = [facts.headings, facts.images, facts.links, facts.fragments, facts.placeholders, facts.removedHeaders, facts.hiddenHeadings];
   const used = new Set(lists.flat().map((x) => x.zone));
   const parent = raw.map((z) => z.id);
   const find = (i) => {

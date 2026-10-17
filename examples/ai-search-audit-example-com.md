@@ -2,7 +2,7 @@
 
 Example Domain · checked 17 Oct 2026 · skill 2.102
 
-**Nothing hides text from AI** · 22 problems (blocking 0, high 0, medium 6, low 16)
+**Nothing hides text from AI** · 24 problems (blocking 0, high 0, medium 6, low 18)
 
 Lite lists problems, not fixes: labels, severities and places. The checks are deterministic (measured or derived); the questions, the brand and the reviews are the agent's judgement, marked as such.
 
@@ -12,7 +12,7 @@ Lite lists problems, not fixes: labels, severities and places. The checks are de
 
 | Question | State | Problems |
 |---|---|---|
-| Shown well in search? | Problems | 14 |
+| Shown well in search? | Problems | 16 |
 | AI finds it? | OK | 1 |
 | AI reads all of it? | OK | 0 |
 | AI quotes it right? | Problems | 6 |
@@ -50,9 +50,11 @@ Lite lists problems, not fixes: labels, severities and places. The checks are de
 | 17 | Low | No sitemap found | `sitemap.xml` | Measured | `sitemap_missing` |
 | 18 | Low | No llms.txt | `/llms.txt` | Measured | `llms_txt_missing` |
 | 19 | Low | No internal links | `<a href>` | Measured | `internal_links_none` |
-| 20 | Low | No HSTS header | `Strict-Transport-Security` | Measured | `hsts_missing` |
-| 21 | Low | No about or contact link | `about link, contact link` | Measured | `about_contact_missing` |
-| 22 | Low | No privacy or terms link | `privacy link, terms link` | Measured | `privacy_terms_missing` |
+| 20 | Low | No Cache-Control on the HTML | `Cache-Control` | Measured | `html_no_cache_control` |
+| 21 | Low | 4 security headers missing | `Content-Security-Policy, X-Content-Type-Options, Referrer-Policy, frame-ancestors` | Measured | `security_headers_missing` |
+| 22 | Low | No HSTS header | `Strict-Transport-Security` | Measured | `hsts_missing` |
+| 23 | Low | No about or contact link | `about link, contact link` | Measured | `about_contact_missing` |
+| 24 | Low | No privacy or terms link | `privacy link, terms link` | Measured | `privacy_terms_missing` |
 
 ## Page map
 
@@ -105,6 +107,7 @@ Top to bottom; the numbers are the problems above. Unseen: the text reaches no p
 | html lang declared | Passed |
 | A readable URL | Passed |
 | Internal links present | Warning |
+| Links say where they lead, #links have a target, no nofollow inside the site | Not on this page |
 | Links answer without errors | Not on this page |
 | A mobile viewport | Passed |
 | HTML size and scripts | Passed |
@@ -120,6 +123,7 @@ Top to bottom; the numbers are the problems above. Unseen: the text reaches no p
 | A missing page answers 404 | Passed |
 | http, www and slash variants end at the page | Problem |
 | Strict-Transport-Security header | Warning |
+| Compression, Cache-Control and security headers | Warning |
 | Author, About, Contact, organisation, dates, privacy and terms | Warning |
 
 ## Bots in robots.txt (path `/`)

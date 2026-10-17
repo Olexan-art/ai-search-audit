@@ -2,7 +2,7 @@
   "schema": "getlooploop/ai-search-audit@1",
   "skillVersion": "2.102",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T10:55:47.333Z",
+  "createdAt": "2026-10-17T12:47:00.297Z",
   "edition": "lite",
   "page": {
     "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching",
@@ -822,6 +822,66 @@
       "owner": "seo",
       "layer": "measured"
     },
+    "html_not_compressed": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "html_no_cache_control": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "security_headers_missing": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "html_lang_invalid": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "link_text_generic": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "content",
+      "layer": "measured"
+    },
+    "fragment_link_broken": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "dev",
+      "layer": "measured"
+    },
+    "internal_nofollow": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
+    "robots_no_sitemap": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
+    "sitemap_lastmod_invalid": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
+    "og_image_broken": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "seo",
+      "layer": "measured"
+    },
     "jsonld_invalid": {
       "severity": "medium",
       "area": "classic",
@@ -892,6 +952,18 @@
       "severity": "low",
       "area": "classic",
       "owner": "dev",
+      "layer": "measured"
+    },
+    "image_link_alt_empty": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "content",
+      "layer": "measured"
+    },
+    "image_alt_repeated": {
+      "severity": "low",
+      "area": "classic",
+      "owner": "content",
       "layer": "measured"
     },
     "favicon_missing": {
@@ -1528,6 +1600,15 @@
       "codes": []
     },
     {
+      "id": "link_text",
+      "name": {
+        "en": "Links say where they lead, #links have a target, no nofollow inside the site",
+        "uk": "Посилання кажуть, куди ведуть, # мають ціль, без nofollow усередині сайту"
+      },
+      "state": "pass",
+      "codes": []
+    },
+    {
       "id": "broken_links",
       "name": {
         "en": "Links answer without errors",
@@ -1660,6 +1741,15 @@
       "name": {
         "en": "Strict-Transport-Security header",
         "uk": "Заголовок Strict-Transport-Security"
+      },
+      "state": "pass",
+      "codes": []
+    },
+    {
+      "id": "response",
+      "name": {
+        "en": "Compression, Cache-Control and security headers",
+        "uk": "Стиснення, Cache-Control і заголовки безпеки"
       },
       "state": "pass",
       "codes": []
@@ -2167,17 +2257,31 @@
     "fetched": [
       {
         "url": "https://developer.mozilla.org/sitemap.xml",
+        "from": "robots",
         "status": 200,
         "kind": "sitemapindex",
         "count": 10,
-        "read": true
+        "read": true,
+        "lastmod": {
+          "total": 10,
+          "invalid": 0,
+          "future": 0,
+          "samples": []
+        }
       },
       {
         "url": "https://developer.mozilla.org/sitemaps/en-us/sitemap.xml.gz",
+        "from": "index",
         "status": 200,
         "kind": "urlset",
         "count": 14840,
-        "read": true
+        "read": true,
+        "lastmod": {
+          "total": 14703,
+          "invalid": 0,
+          "future": 0,
+          "samples": []
+        }
       }
     ],
     "found": true,

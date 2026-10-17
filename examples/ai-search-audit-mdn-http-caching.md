@@ -106,6 +106,7 @@ Top to bottom; the numbers are the problems above. Unseen: the text reaches no p
 | html lang declared | Passed |
 | A readable URL | Passed |
 | Internal links present | Passed |
+| Links say where they lead, #links have a target, no nofollow inside the site | Passed |
 | Links answer without errors | Passed |
 | A mobile viewport | Passed |
 | HTML size and scripts | Passed |
@@ -121,6 +122,7 @@ Top to bottom; the numbers are the problems above. Unseen: the text reaches no p
 | A missing page answers 404 | Passed |
 | http, www and slash variants end at the page | Passed |
 | Strict-Transport-Security header | Passed |
+| Compression, Cache-Control and security headers | Passed |
 | Author, About, Contact, organisation, dates, privacy and terms | Warning |
 
 ## Bots in robots.txt (path `/en-US/docs/Web/HTTP/Guides/Caching`)

@@ -84,6 +84,17 @@ export const CODES = {
   social_tags_missing: { severity: "low", area: "classic", owner: "seo", rules: ["ogp"] },
   page_weight_heavy: { severity: "low", area: "classic", owner: "dev", rules: ["skill"], layer: "derived" },
   url_unreadable: { severity: "low", area: "classic", owner: "seo", rules: ["gUrl", "skill"] },
+  // 2.102: the response, the headings, the links and their anchors, one page at a time
+  html_not_compressed: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCompression"] },
+  html_no_cache_control: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCache"], info: true },
+  security_headers_missing: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCsp", "mdnNosniff", "mdnReferrer"], info: true },
+  html_lang_invalid: { severity: "low", area: "classic", owner: "dev", rules: ["i18n"] },
+  link_text_generic: { severity: "low", area: "classic", owner: "content", rules: ["gLinks", "skill"] },
+  fragment_link_broken: { severity: "low", area: "classic", owner: "dev", rules: ["htmlFragment"] },
+  internal_nofollow: { severity: "low", area: "classic", owner: "seo", rules: ["skill"] },
+  robots_no_sitemap: { severity: "low", area: "classic", owner: "seo", rules: ["sitemaps"] },
+  sitemap_lastmod_invalid: { severity: "low", area: "classic", owner: "seo", rules: ["sitemaps", "skill"] },
+  og_image_broken: { severity: "low", area: "classic", owner: "seo", rules: ["ogp"] },
   // Rich results and markup
   jsonld_invalid: { severity: "medium", area: "classic", owner: "dev", rules: ["gSdIntro"] },
   structured_data_none: { severity: "low", area: "classic", owner: "seo", rules: ["gSdIntro"], info: true },
@@ -98,6 +109,8 @@ export const CODES = {
   image_legacy_format: { severity: "low", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
   image_oversized: { severity: "medium", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
   image_no_srcset: { severity: "low", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
+  image_link_alt_empty: { severity: "low", area: "classic", owner: "content", rules: ["wcagH30", "wImages"] },
+  image_alt_repeated: { severity: "low", area: "classic", owner: "content", rules: ["wImages", "skill"] },
   // The site around the page
   favicon_missing: { severity: "low", area: "classic", owner: "dev", rules: ["gFavicon"] },
   site_name_missing: { severity: "low", area: "classic", owner: "seo", rules: ["gSiteName"] },
@@ -583,6 +596,85 @@ function trustChecks(r, out) {
   if (home && !ofType(["WebSite"]).some((n) => has(n.node, "name"))) out.push({ code: "site_name_missing", evidence: {}, strip: { side: "head", rows: ["jsonld"] }, where: "WebSite name" });
 }
 
+// ── 2.102: the response, link text, anchors, the sitemap's dates, the preview image ──────────
+
+/** This skill's rule: compression is reported when gzip would save at least this share and 2 KB. */
+export const COMPRESSION_SAVING = 0.2;
+/** This skill's rule: the same alt on this many different images or more reads as boilerplate. */
+export const ALT_REPEAT_MIN = 3;
+/** This skill's rule: link text that names nothing, per language (lowercase, matched whole). */
+export const GENERIC_ANCHORS = {
+  en: ["click here", "click", "here", "read more", "learn more", "more", "this link"],
+  uk: ["тут", "натисніть тут", "детальніше", "докладніше", "читати далі", "більше"],
+  es: ["aquí", "haz clic aquí", "clic aquí", "leer más", "más información", "ver más"],
+};
+const GENERIC = new Set(Object.values(GENERIC_ANCHORS).flat());
+const anchorKey = (s) => fold(s).toLowerCase().replace(/[.…:!»›→>\s]+$/u, "").replace(/^[«‹←<\s]+/u, "");
+const q2 = (t) => `“${fold(t).slice(0, 40)}”`;
+
+/** BCP 47 in the shape a page uses: a 2–3 letter language, an optional script, an optional region. */
+export const LANG_SHAPE = /^[a-z]{2,3}(?:-[a-z]{4})?(?:-(?:[a-z]{2}|\d{3}))?$/i;
+
+function responseChecks(r, out) {
+  const f = r.fetch;
+  if (f.saved) return;
+  const encoding = (f.contentEncoding || "").toLowerCase();
+  const bytes = r.facts.htmlBytes || 0;
+  const saving = f.gzipBytes ? bytes - f.gzipBytes : 0;
+  if (!/\b(?:gzip|br|zstd|deflate)\b/.test(encoding) && saving >= 2048 && saving / bytes >= COMPRESSION_SAVING) out.push({ code: "html_not_compressed", evidence: { bytes, gzipBytes: f.gzipBytes, encoding: f.contentEncoding || null }, where: "Content-Encoding" });
+  if (!f.cacheControl) out.push({ code: "html_no_cache_control", evidence: {}, where: "Cache-Control" });
+  const head = r.facts.head;
+  const missing = [];
+  if (!f.csp && !head.cspMeta) missing.push("Content-Security-Policy");
+  if (!/^\s*nosniff\s*$/i.test(f.xContentTypeOptions || "")) missing.push("X-Content-Type-Options");
+  if (!f.referrerPolicy && !head.referrerMeta) missing.push("Referrer-Policy");
+  if (!f.xFrameOptions && !/frame-ancestors/i.test(f.csp || "")) missing.push("frame-ancestors");
+  if (missing.length) out.push({ code: "security_headers_missing", evidence: { missing }, where: missing.join(", ") });
+}
+
+function linkTextChecks(r, out) {
+  const facts = r.facts;
+  const lang = facts.head.lang || "";
+  if (lang && !LANG_SHAPE.test(lang)) out.push({ code: "html_lang_invalid", evidence: { lang }, strip: { side: "head", rows: ["lang"] }, where: `<html lang="${lang}">` });
+  const shown = facts.links.filter((l) => !l.hidden);
+  const generic = shown.filter((l) => GENERIC.has(anchorKey(l.name ?? l.text)));
+  if (generic.length) out.push({ code: "link_text_generic", evidence: { count: generic.length, samples: [...new Set(generic.map((l) => fold(l.name ?? l.text)))].slice(0, 5) }, zones: [...new Set(generic.map((l) => l.zone))], where: generic.slice(0, 3).map((l) => l.path).join(", ") });
+  const emptyImg = shown.filter((l) => l.imgs > 0 && l.imgsEmptyAlt === l.imgs && !fold(l.name ?? ""));
+  if (emptyImg.length) out.push({ code: "image_link_alt_empty", evidence: { count: emptyImg.length, samples: emptyImg.slice(0, 5).map((l) => l.url) }, zones: [...new Set(emptyImg.map((l) => l.zone))], where: emptyImg.slice(0, 3).map((l) => l.path).join(", ") });
+  const nofollow = facts.links.filter((l) => l.internal && !l.self && /\bnofollow\b/.test(l.rel || ""));
+  if (nofollow.length) out.push({ code: "internal_nofollow", evidence: { count: nofollow.length, samples: nofollow.slice(0, 5).map((l) => l.url) }, zones: [...new Set(nofollow.map((l) => l.zone))], where: nofollow.slice(0, 3).map((l) => l.path).join(", ") });
+  const frags = facts.fragments || [];
+  const broken = frags.filter((x) => !x.found && !x.hidden);
+  if (broken.length) out.push({ code: "fragment_link_broken", evidence: { count: broken.length, checked: frags.length, total: facts.fragmentTotal ?? frags.length, cap: facts.fragmentCap ?? null, samples: [...new Set(broken.map((x) => `#${x.fragment}`))].slice(0, 5) }, zones: [...new Set(broken.map((x) => x.zone))], where: broken.slice(0, 3).map((x) => x.path).join(", ") });
+  const byAlt = new Map();
+  for (const i of facts.images) {
+    const alt = fold(i.alt ?? "");
+    if (!alt || i.decorative) continue;
+    const key = alt.toLowerCase();
+    const set = byAlt.get(key) || { alt, srcs: new Set(), zones: new Set(), paths: [] };
+    set.srcs.add(i.url || i.src);
+    set.zones.add(i.zone);
+    set.paths.push(i.path);
+    byAlt.set(key, set);
+  }
+  const repeated = [...byAlt.values()].filter((s) => s.srcs.size >= ALT_REPEAT_MIN);
+  if (repeated.length) out.push({ code: "image_alt_repeated", evidence: { groups: repeated.length, min: ALT_REPEAT_MIN, samples: repeated.slice(0, 4).map((s) => `${q2(s.alt)} × ${s.srcs.size}`) }, zones: [...new Set(repeated.flatMap((s) => [...s.zones]))], where: repeated[0].paths.slice(0, 3).join(", ") });
+}
+
+function feedChecks(r, out) {
+  const s = r.sitemap;
+  if (r.robots?.status === "ok" && s && !s.declared.length) out.push({ code: "robots_no_sitemap", evidence: {}, strip: { side: "robots", rows: ["sitemap"] }, where: "/robots.txt" });
+  if (s) {
+    const stats = s.fetched.map((x) => x.lastmod).filter(Boolean);
+    const invalid = stats.reduce((n, x) => n + x.invalid, 0);
+    const future = stats.reduce((n, x) => n + x.future, 0);
+    const total = stats.reduce((n, x) => n + x.total, 0);
+    if (invalid || future) out.push({ code: "sitemap_lastmod_invalid", evidence: { invalid, future, total, samples: stats.flatMap((x) => x.samples).slice(0, 4) }, strip: { side: "robots", rows: ["sitemap"] }, where: "<lastmod>" });
+  }
+  const og = r.site?.ogImage;
+  if (og && !og.ok && !og.unverified) out.push({ code: "og_image_broken", evidence: { url: og.url, status: og.status, contentType: og.contentType, reason: og.reason }, strip: { side: "head", rows: ["social"] }, where: "og:image" });
+}
+
 function shellChecks(r, out) {
   const s = r.shell;
   if (!s?.detected) return;
@@ -737,6 +829,9 @@ export function auditFindings(reading, extra = {}) {
   snippetChecks(reading, raw);
   siteChecks(reading, loc, raw);
   trustChecks(reading, raw);
+  responseChecks(reading, raw);
+  linkTextChecks(reading, raw);
+  feedChecks(reading, raw);
   shellChecks(reading, raw);
   const mod = extra.modules || textModules(reading, extra);
   patternChecks(mod, loc, raw);

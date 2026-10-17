@@ -16785,7 +16785,18 @@ var SOURCES = {
   hsts: ["RFC 6797: HTTP Strict Transport Security", "https://www.rfc-editor.org/rfc/rfc6797"],
   indexnow: ["IndexNow: documentation (the key file)", "https://www.indexnow.org/documentation"],
   gCwv: ["Google Search Central: Core Web Vitals", "https://developers.google.com/search/docs/appearance/core-web-vitals"],
-  gInspect: ["Search Console Help: URL Inspection tool", "https://support.google.com/webmasters/answer/9012289"]
+  gInspect: ["Search Console Help: URL Inspection tool", "https://support.google.com/webmasters/answer/9012289"],
+  // 2.102: the HTTP response, anchors and link text.
+  mdnCsp: ["MDN: CSP frame-ancestors", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors"],
+  mdnNosniff: ["MDN: X-Content-Type-Options", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options"],
+  mdnReferrer: ["MDN: Referrer-Policy", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy"],
+  mdnCompression: ["MDN: compression in HTTP", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Compression"],
+  mdnCache: ["MDN: Cache-Control", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"],
+  htmlFragment: ["HTML Standard: find a potential indicated element", "https://html.spec.whatwg.org/multipage/browsing-the-web.html#find-a-potential-indicated-element"],
+  gNofollow: ["Google Search Central: qualify your outbound links", "https://developers.google.com/search/docs/crawling-indexing/qualify-outbound-links"],
+  wcagH30: ["W3C WCAG technique H30: link text for anchor elements", "https://www.w3.org/WAI/WCAG22/Techniques/html/H30"],
+  wcagF41: ["W3C WCAG failure F41: meta refresh to reload the page", "https://www.w3.org/WAI/WCAG22/Techniques/failures/F41"],
+  gLazy: ["Google Search Central: fix lazy-loaded content", "https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading"]
 };
 var source = /* @__PURE__ */ __name((key) => {
   const s = SOURCES[key];
@@ -17264,8 +17275,8 @@ function foldForQuote(text3) {
 }
 __name(foldForQuote, "foldForQuote");
 function quoteIn(quote, text3) {
-  const q2 = foldForQuote(quote);
-  return q2.length > 0 && foldForQuote(text3).includes(q2);
+  const q3 = foldForQuote(quote);
+  return q3.length > 0 && foldForQuote(text3).includes(q3);
 }
 __name(quoteIn, "quoteIn");
 function validateIdentity(input) {
@@ -17297,49 +17308,49 @@ function validateQuestions(input, passages, { keyword = null } = {}) {
   const ids = /* @__PURE__ */ new Set();
   const used = /* @__PURE__ */ new Set();
   const warnings = [];
-  const questions = list2.map((q2, i) => {
+  const questions = list2.map((q3, i) => {
     const where = `questions[${i}]`;
-    if (!q2 || typeof q2 !== "object") throw new Error(`${where} is not an object.`);
-    const id = str(q2.id) ? q2.id.trim() : `q${i + 1}`;
+    if (!q3 || typeof q3 !== "object") throw new Error(`${where} is not an object.`);
+    const id = str(q3.id) ? q3.id.trim() : `q${i + 1}`;
     if (!/^[A-Za-z0-9_-]{1,20}$/.test(id)) throw new Error(`${where}.id must be a short id such as "q1".`);
     if (ids.has(id)) throw new Error(`question id ${id} appears twice.`);
     ids.add(id);
-    if (!str(q2.question) || q2.question.length > MAX_QUESTION_CHARS) throw new Error(`${where}.question must be 1–${MAX_QUESTION_CHARS} characters.`);
-    if (RUSSIAN_ONLY.test(q2.question) || RUSSIAN_ONLY.test(q2.quote || "")) throw new Error(`${where}: Russian letters found. Questions are written in the page's language, and never in Russian.`);
-    const axes = Array.isArray(q2.axes) ? q2.axes : [];
+    if (!str(q3.question) || q3.question.length > MAX_QUESTION_CHARS) throw new Error(`${where}.question must be 1–${MAX_QUESTION_CHARS} characters.`);
+    if (RUSSIAN_ONLY.test(q3.question) || RUSSIAN_ONLY.test(q3.quote || "")) throw new Error(`${where}: Russian letters found. Questions are written in the page's language, and never in Russian.`);
+    const axes = Array.isArray(q3.axes) ? q3.axes : [];
     if (!axes.length || axes.length > 3 || axes.some((a) => !AXES.includes(a))) throw new Error(`${where}.axes must name 1 to 3 of ${AXES.join(", ")} (never all four in one question).`);
     for (const a of axes) used.add(a);
-    if (!VERDICTS.includes(q2.verdict)) throw new Error(`${where}.verdict must be one of ${VERDICTS.join(", ")}.`);
-    const passage = q2.passage ?? null;
+    if (!VERDICTS.includes(q3.verdict)) throw new Error(`${where}.verdict must be one of ${VERDICTS.join(", ")}.`);
+    const passage = q3.passage ?? null;
     if (passage !== null && !byIndex.has(passage)) throw new Error(`${where}.passage ${JSON.stringify(passage)} is not a passage index of this reading (0–${passages.length - 1}).`);
-    const quote = typeof q2.quote === "string" ? q2.quote.trim() : "";
-    if (q2.verdict === "missing") {
-      if (q2.citable === true) throw new Error(`${where}: a missing answer cannot be citable.`);
-      return { id, question: q2.question.trim(), axes, passage, verdict: "missing", citable: false, quote: null };
+    const quote = typeof q3.quote === "string" ? q3.quote.trim() : "";
+    if (q3.verdict === "missing") {
+      if (q3.citable === true) throw new Error(`${where}: a missing answer cannot be citable.`);
+      return { id, question: q3.question.trim(), axes, passage, verdict: "missing", citable: false, quote: null };
     }
-    if (typeof q2.citable !== "boolean") throw new Error(`${where}.citable must be true or false.`);
-    if (passage === null) throw new Error(`${where}.passage is required for a ${q2.verdict} answer.`);
-    if (!quote) throw new Error(`${where}.quote is required for a ${q2.verdict} answer: the words in the passage that answer.`);
+    if (typeof q3.citable !== "boolean") throw new Error(`${where}.citable must be true or false.`);
+    if (passage === null) throw new Error(`${where}.passage is required for a ${q3.verdict} answer.`);
+    if (!quote) throw new Error(`${where}.quote is required for a ${q3.verdict} answer: the words in the passage that answer.`);
     if (quote.length > MAX_QUOTE_CHARS) throw new Error(`${where}.quote is over ${MAX_QUOTE_CHARS} characters; quote the answering sentence.`);
     if (!quoteIn(quote, byIndex.get(passage).text)) throw new Error(`${where}.quote is not verbatim text from passage ${passage}. Copy it exactly (whitespace, quote marks and case may differ).`);
-    return { id, question: q2.question.trim(), axes, passage, verdict: q2.verdict, citable: q2.citable, quote };
+    return { id, question: q3.question.trim(), axes, passage, verdict: q3.verdict, citable: q3.citable, quote };
   });
   const unused = AXES.filter((a) => !used.has(a));
   if (unused.length) throw new Error(`no question uses the ${unused.join(", ")} axis; vary the circumstance along all four.`);
   if (keyword) {
     const k = keyword.toLowerCase();
-    const withKey = questions.filter((q2) => q2.question.toLowerCase().includes(k)).length;
+    const withKey = questions.filter((q3) => q3.question.toLowerCase().includes(k)).length;
     if (withKey > questions.length / 2) warnings.push(`${withKey} of ${questions.length} questions contain the keyword "${keyword}"; people describe the problem, not the jargon.`);
   }
-  if (!questions.some((q2) => q2.verdict === "missing")) warnings.push("every question is answered; include at least one the page probably does not answer.");
+  if (!questions.some((q3) => q3.verdict === "missing")) warnings.push("every question is answered; include at least one the page probably does not answer.");
   const topic = str(input.topic) ? input.topic.replace(/\s+/g, " ").trim().slice(0, 120) : null;
   return { questions, topic, judgement: validateIdentity(input), warnings };
 }
 __name(validateQuestions, "validateQuestions");
-function questionFindings(q2) {
-  if (!q2) return [];
+function questionFindings(q3) {
+  if (!q3) return [];
   const out = [];
-  q2.questions.forEach((x, i) => {
+  q3.questions.forEach((x, i) => {
     if (x.verdict === "complete") return;
     out.push({
       id: `${x.verdict === "missing" ? "question_missing" : "question_partial"}-${x.id}`,
@@ -17347,7 +17358,7 @@ function questionFindings(q2) {
       evidence: { id: x.id, n: i + 1, question: x.question, axes: x.axes, passage: x.passage, quote: x.quote, citable: x.citable },
       passages: x.verdict === "partial" && x.passage !== null ? [x.passage] : [],
       where: x.verdict === "partial" ? `question ${i + 1} · passage #${x.passage}` : `question ${i + 1} · no passage`,
-      judgement: q2.judgement
+      judgement: q3.judgement
     });
   });
   return out;
@@ -17362,7 +17373,7 @@ var QUESTIONS = [
   { id: "weaknesses", ask: /* @__PURE__ */ __name((b) => `What are the main weaknesses or complaints about ${b} compared with its alternatives?`, "ask") },
   { id: "alternatives", ask: /* @__PURE__ */ __name((b) => `What are the main alternatives to ${b}, and when would somebody pick one of them instead?`, "ask") }
 ];
-var QUESTION_IDS = QUESTIONS.map((q2) => q2.id);
+var QUESTION_IDS = QUESTIONS.map((q3) => q3.id);
 var FACT_QUESTIONS = ["what_is", "pricing", "integrations"];
 var MAX_ANSWER_CHARS = 1500;
 var BASIS = "own_knowledge";
@@ -17435,7 +17446,7 @@ function validateBrand(input) {
     if (a.knows && !text3) throw new Error(`${where}: knows is true, so the answer text is required.`);
     return { question: a.question, knows: a.knows && !disclaimsKnowledge(text3), text: text3 };
   });
-  const missing = QUESTION_IDS.filter((q2) => !seen.has(q2));
+  const missing = QUESTION_IDS.filter((q3) => !seen.has(q3));
   if (missing.length) throw new Error(`brand.json has no answer to ${missing.join(", ")}; all five are answered, "knows": false included.`);
   answers.sort((a, b) => QUESTION_IDS.indexOf(a.question) - QUESTION_IDS.indexOf(b.question));
   return { brand, answers, judgement: validateIdentity(input) };
@@ -17678,6 +17689,17 @@ var CODES = {
   social_tags_missing: { severity: "low", area: "classic", owner: "seo", rules: ["ogp"] },
   page_weight_heavy: { severity: "low", area: "classic", owner: "dev", rules: ["skill"], layer: "derived" },
   url_unreadable: { severity: "low", area: "classic", owner: "seo", rules: ["gUrl", "skill"] },
+  // 2.102: the response, the headings, the links and their anchors, one page at a time
+  html_not_compressed: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCompression"] },
+  html_no_cache_control: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCache"], info: true },
+  security_headers_missing: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCsp", "mdnNosniff", "mdnReferrer"], info: true },
+  html_lang_invalid: { severity: "low", area: "classic", owner: "dev", rules: ["i18n"] },
+  link_text_generic: { severity: "low", area: "classic", owner: "content", rules: ["gLinks", "skill"] },
+  fragment_link_broken: { severity: "low", area: "classic", owner: "dev", rules: ["htmlFragment"] },
+  internal_nofollow: { severity: "low", area: "classic", owner: "seo", rules: ["skill"] },
+  robots_no_sitemap: { severity: "low", area: "classic", owner: "seo", rules: ["sitemaps"] },
+  sitemap_lastmod_invalid: { severity: "low", area: "classic", owner: "seo", rules: ["sitemaps", "skill"] },
+  og_image_broken: { severity: "low", area: "classic", owner: "seo", rules: ["ogp"] },
   // Rich results and markup
   jsonld_invalid: { severity: "medium", area: "classic", owner: "dev", rules: ["gSdIntro"] },
   structured_data_none: { severity: "low", area: "classic", owner: "seo", rules: ["gSdIntro"], info: true },
@@ -17692,6 +17714,8 @@ var CODES = {
   image_legacy_format: { severity: "low", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
   image_oversized: { severity: "medium", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
   image_no_srcset: { severity: "low", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
+  image_link_alt_empty: { severity: "low", area: "classic", owner: "content", rules: ["wcagH30", "wImages"] },
+  image_alt_repeated: { severity: "low", area: "classic", owner: "content", rules: ["wImages", "skill"] },
   // The site around the page
   favicon_missing: { severity: "low", area: "classic", owner: "dev", rules: ["gFavicon"] },
   site_name_missing: { severity: "low", area: "classic", owner: "seo", rules: ["gSiteName"] },
@@ -17903,9 +17927,9 @@ function structuredChecks(r, out) {
         if (rule.oneOf && !rule.oneOf.some((k) => has2(node, k))) missing.push(rule.oneOf.join(" | "));
         if (type === "FAQPage" && has2(node, "mainEntity")) {
           const qs = asList(node.mainEntity);
-          const bad = qs.filter((q2) => !q2 || typeof q2 !== "object" || !has2(q2, "name") || !q2.acceptedAnswer || !has2(asList(q2.acceptedAnswer)[0] || {}, "text"));
+          const bad = qs.filter((q3) => !q3 || typeof q3 !== "object" || !has2(q3, "name") || !q3.acceptedAnswer || !has2(asList(q3.acceptedAnswer)[0] || {}, "text"));
           if (bad.length) missing.push(`mainEntity[${bad.length}] name | acceptedAnswer.text`);
-          faqQuestions = faqQuestions.concat(qs.filter((q2) => q2 && typeof q2 === "object" && typeof q2.name === "string").map((q2) => fold2(q2.name)));
+          faqQuestions = faqQuestions.concat(qs.filter((q3) => q3 && typeof q3 === "object" && typeof q3.name === "string").map((q3) => fold2(q3.name)));
           faqBlock ??= block.index;
         }
         if (type === "BreadcrumbList" && has2(node, "itemListElement")) {
@@ -17929,7 +17953,7 @@ function structuredChecks(r, out) {
   const hasFaq = jsonLd.some((b) => b.types.includes("FAQPage")) || microdata.includes("FAQPage");
   if (hasFaq) {
     const visible = norm(r.facts.visibleText);
-    const notVisible = faqQuestions.filter((q2) => q2 && !visible.includes(norm(q2)));
+    const notVisible = faqQuestions.filter((q3) => q3 && !visible.includes(norm(q3)));
     if (notVisible.length) out.push({ code: "faq_schema_not_visible", evidence: { questions: faqQuestions.length, notVisible: notVisible.length, samples: notVisible.slice(0, 5) }, strip: { side: "head", rows: ["jsonld"] }, where: `script[type="application/ld+json"] #${faqBlock}` });
     out.push({ code: "faq_rich_result_retired", evidence: { date: "2026-05-07" }, strip: { side: "head", rows: ["jsonld"] }, where: "FAQPage" });
   }
@@ -18139,6 +18163,77 @@ function trustChecks(r, out) {
   if (home && !ofType(["WebSite"]).some((n) => has2(n.node, "name"))) out.push({ code: "site_name_missing", evidence: {}, strip: { side: "head", rows: ["jsonld"] }, where: "WebSite name" });
 }
 __name(trustChecks, "trustChecks");
+var COMPRESSION_SAVING = 0.2;
+var ALT_REPEAT_MIN = 3;
+var GENERIC_ANCHORS = {
+  en: ["click here", "click", "here", "read more", "learn more", "more", "this link"],
+  uk: ["тут", "натисніть тут", "детальніше", "докладніше", "читати далі", "більше"],
+  es: ["aquí", "haz clic aquí", "clic aquí", "leer más", "más información", "ver más"]
+};
+var GENERIC = new Set(Object.values(GENERIC_ANCHORS).flat());
+var anchorKey = /* @__PURE__ */ __name((s) => fold2(s).toLowerCase().replace(/[.…:!»›→>\s]+$/u, "").replace(/^[«‹←<\s]+/u, ""), "anchorKey");
+var q2 = /* @__PURE__ */ __name((t) => `“${fold2(t).slice(0, 40)}”`, "q2");
+var LANG_SHAPE = /^[a-z]{2,3}(?:-[a-z]{4})?(?:-(?:[a-z]{2}|\d{3}))?$/i;
+function responseChecks(r, out) {
+  const f = r.fetch;
+  if (f.saved) return;
+  const encoding = (f.contentEncoding || "").toLowerCase();
+  const bytes = r.facts.htmlBytes || 0;
+  const saving = f.gzipBytes ? bytes - f.gzipBytes : 0;
+  if (!/\b(?:gzip|br|zstd|deflate)\b/.test(encoding) && saving >= 2048 && saving / bytes >= COMPRESSION_SAVING) out.push({ code: "html_not_compressed", evidence: { bytes, gzipBytes: f.gzipBytes, encoding: f.contentEncoding || null }, where: "Content-Encoding" });
+  if (!f.cacheControl) out.push({ code: "html_no_cache_control", evidence: {}, where: "Cache-Control" });
+  const head2 = r.facts.head;
+  const missing = [];
+  if (!f.csp && !head2.cspMeta) missing.push("Content-Security-Policy");
+  if (!/^\s*nosniff\s*$/i.test(f.xContentTypeOptions || "")) missing.push("X-Content-Type-Options");
+  if (!f.referrerPolicy && !head2.referrerMeta) missing.push("Referrer-Policy");
+  if (!f.xFrameOptions && !/frame-ancestors/i.test(f.csp || "")) missing.push("frame-ancestors");
+  if (missing.length) out.push({ code: "security_headers_missing", evidence: { missing }, where: missing.join(", ") });
+}
+__name(responseChecks, "responseChecks");
+function linkTextChecks(r, out) {
+  const facts = r.facts;
+  const lang = facts.head.lang || "";
+  if (lang && !LANG_SHAPE.test(lang)) out.push({ code: "html_lang_invalid", evidence: { lang }, strip: { side: "head", rows: ["lang"] }, where: `<html lang="${lang}">` });
+  const shown = facts.links.filter((l) => !l.hidden);
+  const generic = shown.filter((l) => GENERIC.has(anchorKey(l.name ?? l.text)));
+  if (generic.length) out.push({ code: "link_text_generic", evidence: { count: generic.length, samples: [...new Set(generic.map((l) => fold2(l.name ?? l.text)))].slice(0, 5) }, zones: [...new Set(generic.map((l) => l.zone))], where: generic.slice(0, 3).map((l) => l.path).join(", ") });
+  const emptyImg = shown.filter((l) => l.imgs > 0 && l.imgsEmptyAlt === l.imgs && !fold2(l.name ?? ""));
+  if (emptyImg.length) out.push({ code: "image_link_alt_empty", evidence: { count: emptyImg.length, samples: emptyImg.slice(0, 5).map((l) => l.url) }, zones: [...new Set(emptyImg.map((l) => l.zone))], where: emptyImg.slice(0, 3).map((l) => l.path).join(", ") });
+  const nofollow = facts.links.filter((l) => l.internal && !l.self && /\bnofollow\b/.test(l.rel || ""));
+  if (nofollow.length) out.push({ code: "internal_nofollow", evidence: { count: nofollow.length, samples: nofollow.slice(0, 5).map((l) => l.url) }, zones: [...new Set(nofollow.map((l) => l.zone))], where: nofollow.slice(0, 3).map((l) => l.path).join(", ") });
+  const frags = facts.fragments || [];
+  const broken = frags.filter((x) => !x.found && !x.hidden);
+  if (broken.length) out.push({ code: "fragment_link_broken", evidence: { count: broken.length, checked: frags.length, total: facts.fragmentTotal ?? frags.length, cap: facts.fragmentCap ?? null, samples: [...new Set(broken.map((x) => `#${x.fragment}`))].slice(0, 5) }, zones: [...new Set(broken.map((x) => x.zone))], where: broken.slice(0, 3).map((x) => x.path).join(", ") });
+  const byAlt = /* @__PURE__ */ new Map();
+  for (const i of facts.images) {
+    const alt = fold2(i.alt ?? "");
+    if (!alt || i.decorative) continue;
+    const key = alt.toLowerCase();
+    const set = byAlt.get(key) || { alt, srcs: /* @__PURE__ */ new Set(), zones: /* @__PURE__ */ new Set(), paths: [] };
+    set.srcs.add(i.url || i.src);
+    set.zones.add(i.zone);
+    set.paths.push(i.path);
+    byAlt.set(key, set);
+  }
+  const repeated = [...byAlt.values()].filter((s) => s.srcs.size >= ALT_REPEAT_MIN);
+  if (repeated.length) out.push({ code: "image_alt_repeated", evidence: { groups: repeated.length, min: ALT_REPEAT_MIN, samples: repeated.slice(0, 4).map((s) => `${q2(s.alt)} × ${s.srcs.size}`) }, zones: [...new Set(repeated.flatMap((s) => [...s.zones]))], where: repeated[0].paths.slice(0, 3).join(", ") });
+}
+__name(linkTextChecks, "linkTextChecks");
+function feedChecks(r, out) {
+  const s = r.sitemap;
+  if (r.robots?.status === "ok" && s && !s.declared.length) out.push({ code: "robots_no_sitemap", evidence: {}, strip: { side: "robots", rows: ["sitemap"] }, where: "/robots.txt" });
+  if (s) {
+    const stats = s.fetched.map((x) => x.lastmod).filter(Boolean);
+    const invalid = stats.reduce((n, x) => n + x.invalid, 0);
+    const future = stats.reduce((n, x) => n + x.future, 0);
+    const total = stats.reduce((n, x) => n + x.total, 0);
+    if (invalid || future) out.push({ code: "sitemap_lastmod_invalid", evidence: { invalid, future, total, samples: stats.flatMap((x) => x.samples).slice(0, 4) }, strip: { side: "robots", rows: ["sitemap"] }, where: "<lastmod>" });
+  }
+  const og = r.site?.ogImage;
+  if (og && !og.ok && !og.unverified) out.push({ code: "og_image_broken", evidence: { url: og.url, status: og.status, contentType: og.contentType, reason: og.reason }, strip: { side: "head", rows: ["social"] }, where: "og:image" });
+}
+__name(feedChecks, "feedChecks");
 function shellChecks(r, out) {
   const s = r.shell;
   if (!s?.detected) return;
@@ -18274,6 +18369,9 @@ function auditFindings(reading2, extra2 = {}) {
   snippetChecks(reading2, raw);
   siteChecks(reading2, loc, raw);
   trustChecks(reading2, raw);
+  responseChecks(reading2, raw);
+  linkTextChecks(reading2, raw);
+  feedChecks(reading2, raw);
   shellChecks(reading2, raw);
   const mod = extra2.modules || textModules(reading2, extra2);
   patternChecks(mod, loc, raw);
@@ -18942,6 +19040,18 @@ var LABELS = {
   soft_404: /* @__PURE__ */ __name(() => ["A missing page answers 200", "Неіснуюча сторінка відповідає 200"], "soft_404"),
   url_variants_inconsistent: /* @__PURE__ */ __name((e) => [e.count === 1 ? "A URL variant ends elsewhere" : `${e.count} URL variants end elsewhere`, e.count === 1 ? "Варіант адреси веде деінде" : `${uk2(e.count, "варіант адреси веде", "варіанти адреси ведуть", "варіантів адреси ведуть")} деінде`], "url_variants_inconsistent"),
   hsts_missing: /* @__PURE__ */ __name(() => ["No HSTS header", "Немає заголовка HSTS"], "hsts_missing"),
+  html_not_compressed: /* @__PURE__ */ __name((e) => [`HTML sent uncompressed · ${kb(e.bytes)} KB`, `HTML без стиснення · ${kb(e.bytes)} КБ`], "html_not_compressed"),
+  html_no_cache_control: /* @__PURE__ */ __name(() => ["No Cache-Control on the HTML", "Немає Cache-Control для HTML"], "html_no_cache_control"),
+  security_headers_missing: /* @__PURE__ */ __name((e) => [en2(e.missing.length, "security header missing", "security headers missing"), e.missing.length === 1 ? "Бракує заголовка безпеки" : `Бракує ${uk2(e.missing.length, "заголовка", "заголовків", "заголовків")} безпеки`], "security_headers_missing"),
+  html_lang_invalid: /* @__PURE__ */ __name((e) => [`html lang ${q(e.lang, 20)} is not a language code`, `html lang ${q(e.lang, 20)} не є кодом мови`], "html_lang_invalid"),
+  link_text_generic: /* @__PURE__ */ __name((e) => [en2(e.count, "link that says only “here” or “more”", "links that say only “here” or “more”"), `${uk2(e.count, "посилання", "посилання", "посилань")} лише з «тут» чи «детальніше»`], "link_text_generic"),
+  image_link_alt_empty: /* @__PURE__ */ __name((e) => [en2(e.count, "image link with no name", "image links with no name"), `${uk2(e.count, "посилання-зображення", "посилання-зображення", "посилань-зображень")} без назви`], "image_link_alt_empty"),
+  image_alt_repeated: /* @__PURE__ */ __name((e) => [e.groups === 1 ? "Same alt on several images" : `Same alt on several images · ${e.groups}`, e.groups === 1 ? "Однаковий alt на кількох зображеннях" : `Однаковий alt на кількох зображеннях · ${e.groups}`], "image_alt_repeated"),
+  internal_nofollow: /* @__PURE__ */ __name((e) => [en2(e.count, "internal link marked nofollow", "internal links marked nofollow"), `${uk2(e.count, "внутрішнє посилання", "внутрішні посилання", "внутрішніх посилань")} з nofollow`], "internal_nofollow"),
+  fragment_link_broken: /* @__PURE__ */ __name((e) => [en2(e.count, "#link to nothing on the page", "#links to nothing on the page"), `${uk2(e.count, "посилання #", "посилання #", "посилань #")} в нікуди`], "fragment_link_broken"),
+  robots_no_sitemap: /* @__PURE__ */ __name(() => ["robots.txt names no sitemap", "robots.txt не називає sitemap"], "robots_no_sitemap"),
+  sitemap_lastmod_invalid: /* @__PURE__ */ __name((e) => [`${en2(e.invalid + e.future, "bad lastmod date", "bad lastmod dates")} in the sitemap`, `${uk2(e.invalid + e.future, "хибна дата", "хибні дати", "хибних дат")} lastmod у sitemap`], "sitemap_lastmod_invalid"),
+  og_image_broken: /* @__PURE__ */ __name(() => ["Preview image does not load", "Зображення для прев’ю не завантажується"], "og_image_broken"),
   author_missing: /* @__PURE__ */ __name(() => ["Article without an author", "Стаття без автора"], "author_missing"),
   about_contact_missing: /* @__PURE__ */ __name((e) => [`No ${e.missing.join(" or ")} link`, `Немає посилання ${e.missing.map((k) => k === "about" ? "«Про нас»" : "«Контакти»").join(" чи ")}`], "about_contact_missing"),
   organization_details_missing: /* @__PURE__ */ __name((e) => e.found ? [`Organization lacks ${e.missing.join(", ")}`, `В Organization бракує ${e.missing.join(", ")}`] : ["No Organization markup", "Немає розмітки Organization"], "organization_details_missing"),
@@ -19165,18 +19275,19 @@ function checklist(reading2, findings) {
     ["robots_search_bots", ["Robots", "Robots"], ["Googlebot and Bingbot may fetch the page", "Googlebot і Bingbot можуть завантажити сторінку"], ["search_engine_blocked", "robots_unreachable"], reading2.robots.status === "not_checked" ? "na" : null],
     ["noindex", ["noindex", "noindex"], ["Not marked noindex", "Не позначено noindex"], ["noindex"], null],
     ["canonical", ["Canonical", "Canonical"], ["One absolute canonical to the page itself", "Один абсолютний canonical на саму сторінку"], ["canonical_missing", "canonical_relative", "canonical_other", "canonical_multiple"], null],
-    ["in_sitemap", ["Sitemap", "Sitemap"], ["Listed in the sitemap", "Є в sitemap"], ["sitemap_missing", "sitemap_not_listed"], !reading2.sitemap || reading2.sitemap.found && reading2.sitemap.listsPage === null ? "na" : null],
+    ["in_sitemap", ["Sitemap", "Sitemap"], ["Listed in the sitemap", "Є в sitemap"], ["sitemap_missing", "sitemap_not_listed", "robots_no_sitemap", "sitemap_lastmod_invalid"], !reading2.sitemap || reading2.sitemap.found && reading2.sitemap.listsPage === null ? "na" : null],
     ["indexed", ["Index", "Індекс"], ["In Google's index", "В індексі Google"], [], "na"],
     ["title_length", ["Title", "Title"], ["Title present, 10–60 characters", "Title є, 10–60 символів"], ["title_missing", "title_too_long", "title_too_short"], null],
     ["title_unique", ["Title ×lang", "Title ×мови"], ["A different title per language version", "Різний title у кожній мовній версії"], ["title_duplicate_locales"], !hl.length ? "none" : !reading2.alternates ? "na" : null],
     ["meta_description", ["Description", "Опис"], ["Description present, 70–160 characters", "Опис є, 70–160 символів"], ["meta_description_missing", "meta_description_short", "meta_description_long"], null],
-    ["social_preview", ["Preview", "Прев’ю"], ["Open Graph and Twitter card tags", "Теги Open Graph і Twitter card"], ["social_tags_missing"], null],
+    ["social_preview", ["Preview", "Прев’ю"], ["Open Graph and Twitter card tags", "Теги Open Graph і Twitter card"], ["social_tags_missing", "og_image_broken"], null],
     ["h1", ["H1", "H1"], ["One h1", "Один h1"], ["h1_missing", "h1_multiple"], null],
     ["heading_order", ["Headings", "Заголовки"], ["No skipped heading levels", "Без пропущених рівнів заголовків"], ["heading_order_skip"], null],
-    ["image_alt", ["Alt", "Alt"], ["Images carry alt", "Зображення мають alt"], ["image_alt_missing"], reading2.facts.images.length ? null : "none"],
-    ["html_lang", ["lang", "lang"], ["html lang declared", "html lang оголошено"], ["html_lang_missing"], null],
+    ["image_alt", ["Alt", "Alt"], ["Images carry alt", "Зображення мають alt"], ["image_alt_missing", "image_link_alt_empty", "image_alt_repeated"], reading2.facts.images.length ? null : "none"],
+    ["html_lang", ["lang", "lang"], ["html lang declared", "html lang оголошено"], ["html_lang_missing", "html_lang_invalid"], null],
     ["url_readable", ["URL", "URL"], ["A readable URL", "Зручна адреса"], ["url_unreadable"], null],
     ["internal_links", ["Links", "Посилання"], ["Internal links present", "Є внутрішні посилання"], ["internal_links_none"], null],
+    ["link_text", ["Link text", "Текст посилань"], ["Links say where they lead, #links have a target, no nofollow inside the site", "Посилання кажуть, куди ведуть, # мають ціль, без nofollow усередині сайту"], ["link_text_generic", "fragment_link_broken", "internal_nofollow"], reading2.facts.links.length || (reading2.facts.fragments || []).length ? null : "none"],
     ["broken_links", ["404", "404"], ["Links answer without errors", "Посилання відповідають без помилок"], ["broken_links"], !reading2.links ? "na" : reading2.links.total === 0 ? "none" : null],
     ["viewport", ["Viewport", "Viewport"], ["A mobile viewport", "Мобільний viewport"], ["viewport_missing"], null],
     ["page_weight", ["Weight", "Вага"], ["HTML size and scripts", "Розмір HTML і скрипти"], ["page_weight_heavy"], null],
@@ -19192,6 +19303,7 @@ function checklist(reading2, findings) {
     ["soft404", ["Soft 404", "Soft 404"], ["A missing page answers 404", "Неіснуюча сторінка відповідає 404"], ["soft_404"], !reading2.site ? "na" : null],
     ["variants", ["Variants", "Варіанти"], ["http, www and slash variants end at the page", "Варіанти http, www і слеш ведуть на сторінку"], ["url_variants_inconsistent"], !reading2.site ? "na" : null],
     ["hsts", ["HSTS", "HSTS"], ["Strict-Transport-Security header", "Заголовок Strict-Transport-Security"], ["hsts_missing"], reading2.fetch.saved ? "na" : null],
+    ["response", ["Headers", "Заголовки HTTP"], ["Compression, Cache-Control and security headers", "Стиснення, Cache-Control і заголовки безпеки"], ["html_not_compressed", "html_no_cache_control", "security_headers_missing"], reading2.fetch.saved ? "na" : null],
     ["trust", ["Trust", "Довіра"], ["Author, About, Contact, organisation, dates, privacy and terms", "Автор, «Про нас», контакти, організація, дати, конфіденційність і умови"], ["author_missing", "about_contact_missing", "organization_details_missing", "article_date_missing", "privacy_terms_missing", "date_mismatch"], null]
   ];
   return cells.map(([id, short, name, codes, fixed]) => {

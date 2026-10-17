@@ -45,7 +45,21 @@ export function parseSitemap(xml) {
   const text = String(xml || "");
   const kind = /<sitemapindex[\s>]/i.test(text) ? "sitemapindex" : /<urlset[\s>]/i.test(text) ? "urlset" : "unknown";
   const locs = [...text.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((m) => decodeXml(m[1])).filter(Boolean);
-  return { kind, locs };
+  const lastmods = [...text.matchAll(/<lastmod>([\s\S]*?)<\/lastmod>/gi)].map((m) => decodeXml(m[1]));
+  return { kind, locs, lastmods };
+}
+
+/** W3C Datetime, the format sitemaps.org gives for <lastmod>: YYYY, YYYY-MM, YYYY-MM-DD, or a date with a time and a zone. */
+export const W3C_DATETIME = /^\d{4}(?:-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01])(?:T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d))?)?)?$/;
+/** A lastmod more than a day after the read is in the future, not a time zone away (this skill's rule). */
+export const LASTMOD_FUTURE_MS = 24 * 60 * 60 * 1000;
+
+/** How many lastmod values are not W3C Datetime, and how many lie in the future, with a few samples. */
+export function lastmodStats(lastmods, now = Date.now()) {
+  const valid = (v) => W3C_DATETIME.test(v);
+  const invalid = lastmods.filter((v) => !valid(v));
+  const future = lastmods.filter((v) => valid(v) && Date.parse(v.length === 4 ? `${v}-01-01` : v.length === 7 ? `${v}-01` : v) > now + LASTMOD_FUTURE_MS);
+  return { total: lastmods.length, invalid: invalid.length, future: future.length, samples: [...invalid, ...future].slice(0, 4).map((v) => v.slice(0, 40)) };
 }
 
 /** The Sitemap: lines of a robots.txt. */
@@ -69,7 +83,7 @@ const sameSite = (a, b) => {
  * /sitemap.xml; a sitemap index is followed into at most SITEMAP_CHILD_CAP children.
  * `pageUrls` are the URLs that count as this page (final, requested, canonical).
  */
-export async function checkSitemap(pageUrl, robotsText, pageUrls) {
+export async function checkSitemap(pageUrl, robotsText, pageUrls, { now = Date.now() } = {}) {
   const origin = new URL(pageUrl).origin;
   const declared = robotsSitemaps(robotsText);
   const offSite = declared.filter((u) => !sameSite(u, pageUrl));
@@ -82,10 +96,10 @@ export async function checkSitemap(pageUrl, robotsText, pageUrls) {
   let listsPage = false;
   let matchedIn = null;
   const matches = (loc) => pageUrls.some((u) => u && samePage(loc, u));
-  const read = async (url) => {
+  const read = async (url, from) => {
     const r = await guardedFetch(url, { accept: "application/xml,text/xml;q=0.9,*/*;q=0.5", maxBytes: SITEMAP_MAX_BYTES, binary: true });
     if (!r.ok || r.status !== 200) {
-      fetched.push({ url, status: r.status ?? null, reason: r.ok ? "http_error" : r.reason, kind: null, count: 0, read: false });
+      fetched.push({ url, from, status: r.status ?? null, reason: r.ok ? "http_error" : r.reason, kind: null, count: 0, read: false });
       return null;
     }
     // A .xml.gz sitemap is a gzip file (sitemaps.org allows it); unpacked here, within the same ceiling.
@@ -93,16 +107,16 @@ export async function checkSitemap(pageUrl, robotsText, pageUrls) {
     try {
       text = r.body[0] === 0x1f && r.body[1] === 0x8b ? gunzipSync(r.body, { maxOutputLength: SITEMAP_MAX_BYTES }).toString("utf8") : r.body.toString("utf8");
     } catch {
-      fetched.push({ url, status: r.status, reason: "unreadable", kind: null, count: 0, read: false });
+      fetched.push({ url, from, status: r.status, reason: "unreadable", kind: null, count: 0, read: false });
       return null;
     }
     const parsed = parseSitemap(text);
-    fetched.push({ url, status: r.status, kind: parsed.kind, count: parsed.locs.length, read: parsed.kind !== "unknown" });
+    fetched.push({ url, from, status: r.status, kind: parsed.kind, count: parsed.locs.length, read: parsed.kind !== "unknown", lastmod: lastmodStats(parsed.lastmods, now) });
     if (parsed.kind !== "unknown") found = true;
     return parsed;
   };
   for (const url of candidates.slice(0, 3)) {
-    const parsed = await read(url);
+    const parsed = await read(url, source);
     if (!parsed) continue;
     if (parsed.kind === "urlset" && parsed.locs.some(matches)) {
       listsPage = true;
@@ -119,7 +133,7 @@ export async function checkSitemap(pageUrl, robotsText, pageUrls) {
     const ranked = children.slice().sort((a, b) => hit(b) - hit(a));
     for (const url of ranked.slice(0, SITEMAP_CHILD_CAP)) {
       childrenRead++;
-      const parsed = await read(url);
+      const parsed = await read(url, "index");
       if (parsed?.locs.some(matches)) {
         listsPage = true;
         matchedIn = url;
@@ -340,9 +354,10 @@ export function improbablePath(pageUrl, seed = Date.now()) {
 /**
  * One request each: the favicon, a path that does not exist (soft 404), up to VARIANT_CAP URL
  * variants, a Markdown alternate (declared, or the page URL plus .md), /.well-known/ai-catalog.json
- * (then /ai-catalog.json if that is missing), and the IndexNow key file when a key is declared.
+ * (then /ai-catalog.json if that is missing), the IndexNow key file when a key is declared, and the
+ * og:image when the page declares one (2.102).
  */
-export async function checkSite(pageUrl, extras, { canonical = null, now = Date.now() } = {}) {
+export async function checkSite(pageUrl, extras, { canonical = null, now = Date.now(), ogImage = null } = {}) {
   const u = new URL(pageUrl);
   const out = {};
   // Favicon: the declared one, else /favicon.ico.
@@ -395,6 +410,19 @@ export async function checkSite(pageUrl, extras, { canonical = null, now = Date.
     const r = await guardedFetch(`${u.origin}/${key}.txt`, { method: "GET", accept: "text/plain", maxBytes: 4096, timeoutMs: LINK_TIMEOUT_MS });
     out.indexnow = { key, url: `${u.origin}/${key}.txt`, status: r.status ?? null, ok: Boolean(r.ok && r.status === 200 && r.text.trim() === key) };
   } else out.indexnow = null;
-  out.requests = (/^data:/i.test(icon) ? 3 : 4) + out.variants.length + (out.aiCatalog && out.aiCatalog.url.endsWith("/ai-catalog.json") && !out.aiCatalog.url.includes(".well-known") ? 1 : 0) + (out.indexnow ? 1 : 0);
+  // og:image: the picture link previews show. A bodiless GET: does it answer with an image?
+  out.ogImage = null;
+  if (ogImage && !/^data:/i.test(ogImage)) {
+    let url = null;
+    try {
+      url = new URL(ogImage, pageUrl).toString();
+    } catch {}
+    if (url && /^https?:/i.test(url)) {
+      const r = await guardedFetch(url, { method: "GET", body: false, accept: "image/*", timeoutMs: LINK_TIMEOUT_MS });
+      const type = r.ok ? r.headers?.contentType || "" : "";
+      out.ogImage = { url, status: r.status ?? null, contentType: type || null, ok: Boolean(r.ok && r.status === 200 && /^image\//i.test(type)), unverified: !r.ok || [401, 403, 429].includes(r.status), reason: r.ok ? null : r.reason };
+    } else out.ogImage = { url: String(ogImage).slice(0, 160), status: null, contentType: null, ok: false, unverified: false, reason: "invalid_url" };
+  }
+  out.requests = (/^data:/i.test(icon) ? 3 : 4) + out.variants.length + (out.aiCatalog && out.aiCatalog.url.endsWith("/ai-catalog.json") && !out.aiCatalog.url.includes(".well-known") ? 1 : 0) + (out.indexnow ? 1 : 0) + (out.ogImage && out.ogImage.reason !== "invalid_url" ? 1 : 0);
   return out;
 }

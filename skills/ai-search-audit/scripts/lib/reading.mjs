@@ -12,6 +12,7 @@ import { declaredLanguagesFromHtml, judgeLanguage } from "../vendor/vectorscope/
 import { isHtmlContentType } from "../vendor/vectorscope/nonPageUrl.mjs";
 import { REFUSAL_CODE } from "../vendor/vectorscope/refusal.mjs";
 import { basename } from "node:path";
+import { gzipSync } from "node:zlib";
 import { guardedFetch } from "./net.mjs";
 import { collectFacts, headingKey } from "./facts.mjs";
 import { checkAlternates, checkImages, checkLinks, checkLlms, checkSite, checkSitemap, robotsSitemaps } from "./collect.mjs";
@@ -109,12 +110,12 @@ export async function readAudit({ url, html, finalUrl, robotsText, network, rend
 
   const canonical = vs.technical?.canonical?.resolved || null;
   const pageUrls = [page.url, urlKey, canonical].filter(Boolean);
-  const sitemap = online ? await checkSitemap(page.url, robotsFetched.text, pageUrls) : null;
+  const sitemap = online ? await checkSitemap(page.url, robotsFetched.text, pageUrls, { now: now.getTime() }) : null;
   const llms = online ? await checkLlms(page.url) : null;
   const alternates = online ? await checkAlternates(page.url, facts.head.hreflang) : null;
   const links = online ? await checkLinks(facts.links) : null;
   const images = online ? await checkImages(facts.images) : null;
-  const site = online ? await checkSite(page.url, facts.extras, { canonical, now: now.getTime() }) : null;
+  const site = online ? await checkSite(page.url, facts.extras, { canonical, now: now.getTime(), ogImage: facts.head.og["og:image"] || null }) : null;
 
   // A single-page app shell: an app root with almost no text, and scripts to fill it. Then the
   // render runs on its own (when a local browser is found), so the JavaScript-only text is measured.
@@ -156,6 +157,15 @@ export async function readAudit({ url, html, finalUrl, robotsText, network, rend
       xRobotsTag: page.headers.xRobotsTag ?? null,
       hsts: page.headers.hsts ?? null,
       contentLanguage: page.headers.contentLanguage ?? null,
+      // 2.102: what the security-header and compression checks read, and the page gzipped here once,
+      // so the compression check has its saving without a second request.
+      csp: page.headers.csp ?? null,
+      xContentTypeOptions: page.headers.xContentTypeOptions ?? null,
+      referrerPolicy: page.headers.referrerPolicy ?? null,
+      xFrameOptions: page.headers.xFrameOptions ?? null,
+      contentEncoding: page.headers.contentEncoding ?? null,
+      cacheControl: page.headers.cacheControl ?? null,
+      gzipBytes: saved ? null : gzipSync(Buffer.from(page.html, "utf8")).length,
     },
     facts,
     vs: { page: vs.page, passages: vs.passages, technical: vs.technical, losses: vs.losses, layout: vs.layout, ...(rendered?.ok ? { render: { ok: true, browser: rendered.browser, wordCount: rendered.wordCount, passages: rendered.passages, charsIndexed: rendered.charsIndexed, headings: rendered.headings } } : {}) },

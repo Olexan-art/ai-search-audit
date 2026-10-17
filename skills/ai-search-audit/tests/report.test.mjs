@@ -46,7 +46,7 @@ test("the Lite layout: verdict, six tiles, the map, biggest problems, the charts
   for (const q of ["Shown well in search?", "AI finds it?", "AI reads all of it?", "AI quotes it right?", "AI gets the brand right?", "Languages in order?"]) assert.ok(out.includes(q), q);
   assert.ok(!out.includes("Rich results &amp; markup"));
   assert.ok(out.includes('id="tile-brand"') && out.includes("no brand.json or reviews.json"), "the brand tile says it was not checked");
-  assert.equal((out.match(/id="cg-/g) || []).length, 33);
+  assert.equal((out.match(/id="cg-/g) || []).length, 35);
   assert.ok(out.includes('href="https://www.getlooploop.com"'));
 });
 

@@ -70,6 +70,20 @@ const CASES = [
   ["hidden_headings", [page({ before: `<nav hidden><h2>Menu</h2><p>Links</p></nav>` })], [page({ body: `<dialog><h2>Sign in</h2><p>Form</p></dialog>` })], { inverse: true }],
   ["ssr_placeholder_text", [page({ body: section("Calculator") + "<p>Calculating your plan…</p>" })], [page({ body: section("Calculator") + "<p>Calculating your plan takes a moment and uses only the numbers you type into the form.</p>" })]],
   ["h1_glued_words", [page({ h1: "<h1><span>BrightDesk</span><span>Plans for every team</span></h1>" })], [page({ h1: "<h1>Get<span>Loop</span>Loop</h1>" })]],
+  // 2.102: the response, link text, anchors, the sitemap's dates, the preview image
+  ["html_not_compressed", [page({ body: many(20, (i) => section(`Part ${i}`)) }), { fetch: { saved: false, gzipBytes: 1000, contentEncoding: null } }], [page({ body: many(20, (i) => section(`Part ${i}`)) }), { fetch: { saved: false, gzipBytes: 1000, contentEncoding: "br" } }]],
+  ["html_no_cache_control", [page(), { fetch: { saved: false } }], [page(), { fetch: { saved: false, cacheControl: "no-cache" } }]],
+  ["security_headers_missing", [page(), { fetch: { saved: false } }], [page(), { fetch: { saved: false, csp: "default-src 'self'; frame-ancestors 'none'", xContentTypeOptions: "nosniff", referrerPolicy: "strict-origin-when-cross-origin" } }]],
+  ["html_lang_invalid", [page({ lang: "english" })], [page({ lang: "en-GB" })]],
+  ["link_text_generic", [page({ body: '<p><a href="/plans">Read more</a></p>' })], [page({ body: '<p><a href="/plans">Plans for small teams</a></p>' })]],
+  ["link_text_generic", [page({ lang: "uk", body: '<p><a href="/plans">Детальніше</a></p>' })], [page({ body: '<p><a href="/docs/link">Link</a></p>' })]],
+  ["image_link_alt_empty", [page({ body: '<p><a href="/plans"><img src="/i.png" alt=""></a></p>' })], [page({ body: '<p><a href="/plans"><img src="/i.png" alt="Plans"></a></p>' })]],
+  ["image_alt_repeated", [page({ body: many(3, (i) => `<img src="/i${i}.png" alt="Logo" width="10" height="10">`) })], [page({ body: many(3, (i) => `<img src="/i${i}.png" alt="Logo ${i}" width="10" height="10">`) })]],
+  ["internal_nofollow", [page({ body: '<p><a href="/plans" rel="nofollow">Plans</a></p>' })], [page({ body: '<p><a href="https://other.example/x" rel="nofollow">Elsewhere</a></p>' })]],
+  ["fragment_link_broken", [page({ body: '<p><a href="#nowhere">Jump down</a></p>' })], [page({ body: '<p><a href="#there">Jump down</a> <a href="#top">Top</a></p><h2 id="there">There</h2>' })]],
+  ["robots_no_sitemap", [page(), { sitemap: sitemapFound(true) }], [page(), { sitemap: { ...sitemapFound(true), declared: ["https://example.org/sitemap.xml"] } }]],
+  ["sitemap_lastmod_invalid", [page(), { sitemap: { ...sitemapFound(true), fetched: [{ ...sitemapFound(true).fetched[0], lastmod: { total: 3, invalid: 1, future: 1, samples: ["yesterday", "2031-01-01"] } }] } }], [page(), { sitemap: { ...sitemapFound(true), fetched: [{ ...sitemapFound(true).fetched[0], lastmod: { total: 3, invalid: 0, future: 0, samples: [] } }] } }]],
+  ["og_image_broken", [page(), { site: { ogImage: { url: "https://example.org/i.png", status: 404, contentType: null, ok: false, unverified: false } } }], [page(), { site: { ogImage: { url: "https://example.org/i.png", status: 403, contentType: null, ok: false, unverified: true } } }]],
 ];
 
 for (const [code, withIt, without, opts = {}] of CASES) {

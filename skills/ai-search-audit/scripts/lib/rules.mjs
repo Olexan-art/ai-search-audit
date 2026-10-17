@@ -77,6 +77,17 @@ export const SOURCES = {
   indexnow: ["IndexNow: documentation (the key file)", "https://www.indexnow.org/documentation"],
   gCwv: ["Google Search Central: Core Web Vitals", "https://developers.google.com/search/docs/appearance/core-web-vitals"],
   gInspect: ["Search Console Help: URL Inspection tool", "https://support.google.com/webmasters/answer/9012289"],
+  // 2.102: the HTTP response, anchors and link text.
+  mdnCsp: ["MDN: CSP frame-ancestors", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors"],
+  mdnNosniff: ["MDN: X-Content-Type-Options", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options"],
+  mdnReferrer: ["MDN: Referrer-Policy", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy"],
+  mdnCompression: ["MDN: compression in HTTP", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Compression"],
+  mdnCache: ["MDN: Cache-Control", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"],
+  htmlFragment: ["HTML Standard: find a potential indicated element", "https://html.spec.whatwg.org/multipage/browsing-the-web.html#find-a-potential-indicated-element"],
+  gNofollow: ["Google Search Central: qualify your outbound links", "https://developers.google.com/search/docs/crawling-indexing/qualify-outbound-links"],
+  wcagH30: ["W3C WCAG technique H30: link text for anchor elements", "https://www.w3.org/WAI/WCAG22/Techniques/html/H30"],
+  wcagF41: ["W3C WCAG failure F41: meta refresh to reload the page", "https://www.w3.org/WAI/WCAG22/Techniques/failures/F41"],
+  gLazy: ["Google Search Central: fix lazy-loaded content", "https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading"],
 };
 
 /** A source key as { name, url }. */
