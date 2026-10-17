@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://example.com/
 
-Example Domain · checked 17 Oct 2026 · skill 2.106
+Example Domain · checked 17 Oct 2026 · skill 2.107
 
 **Nothing hides text from AI** · 24 problems (blocking 0, high 0, medium 6, low 18)
 

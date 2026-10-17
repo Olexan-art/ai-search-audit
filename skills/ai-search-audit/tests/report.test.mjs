@@ -47,7 +47,8 @@ test("the 2.103 layout: headline, cards, the first three, the places, all checks
   assert.ok(!out.includes("Rich results &amp; markup"));
   assert.ok(out.includes('id="tile-brand"') && out.includes("no brand.json or reviews.json"), "the brand tile says it was not checked");
   assert.ok(out.includes('href="https://www.getlooploop.com"'));
-  assert.match(out, /<img class="gll-mark" src="data:image\/webp;base64,/, "the real mark, inline");
+  assert.match(out, /<img class="gll-mark gll-on-light" src="data:image\/webp;base64,/, "the real mark, inline, in the light blue");
+  assert.match(out, /<img class="gll-mark gll-on-dark" src="data:image\/webp;base64,/, "and in the dark blue");
   assert.ok(out.includes("AI search that understands your business") && out.includes("AI пошук, який розуміє ваш бізнес"));
   assert.ok(out.includes("A schema of the document, not a screenshot of the page."));
 });

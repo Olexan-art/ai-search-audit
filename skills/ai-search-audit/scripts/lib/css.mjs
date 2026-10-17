@@ -8,6 +8,7 @@ export const CSS = `
    2.102: light is the default whatever the system prefers; dark comes only from the toggle or
    #theme=dark. Every text and UI pair passes WCAG AA in both themes (tools/contrast.mjs). */
 :root{
+  --brand:#14468f;
   --bg:#f3f6fa;--bg-2:#eaf0f6;--panel:#ffffff;--panel-2:#f6f9fc;--line:#d6dfea;--line-2:#c3d0df;--control:#6b7c91;
   --text:#0b1626;--muted:#46566b;--faint:#56677c;
   --accent:#0b6a85;--accent-ink:#ffffff;--accent-soft:rgba(11,106,133,.09);--glow:0 0 0 1px rgba(11,106,133,.10),0 6px 24px rgba(11,22,38,.06);
@@ -22,6 +23,7 @@ export const CSS = `
   color-scheme:light;
 }
 :root[data-theme="dark"]{
+  --brand:#4d7dff;
   --bg:#060b14;--bg-2:#08101d;--panel:#0a1424;--panel-2:#0d1a2e;--line:#1b2b42;--line-2:#24395a;--control:#6b7f9b;
   --text:#e6eef8;--muted:#a3b3c7;--faint:#8b9cb2;
   --accent:#22d3ee;--accent-ink:#04121a;--accent-soft:rgba(34,211,238,.12);--glow:0 0 0 1px rgba(34,211,238,.18),0 0 32px rgba(34,211,238,.10);
@@ -273,7 +275,11 @@ export const CSS_EXTRA = `
 .top-l{flex:none;gap:10px 14px}
 .brand{display:inline-flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.01em;color:var(--text)}
 .gll-mark{width:56px;height:30px;flex:none;display:block}
-.gll-loop{color:var(--accent)}
+.gll-loop{color:var(--brand)}
+/* The mark in the brand blue that suits the surface: #14468f on light, #4d7dff on dark. */
+.gll-on-dark{display:none!important}
+:root[data-theme="dark"] .gll-on-light{display:none!important}
+:root[data-theme="dark"] .gll-on-dark{display:block!important}
 .links .gll-ico{width:28px;height:15px;flex:none}
 /* The split-signal mark; its signal fault is drawn by LOGO_GLITCH_JS (glitch.mjs), at random moments. */
 .gll-glitch{position:relative;display:inline-grid;place-items:center;flex:none}
