@@ -8,18 +8,20 @@
 //   npm run build            writes dist/
 //   tests/dist.test.mjs      builds the same thing in memory and fails if dist/ differs
 //
-// Not minified, names kept, so the bundle stays readable; the source of truth is scripts/.
+// Minified, names kept, and split: the code both entries share sits in dist/chunks/, so no file is
+// large enough for an agent's file connector to refuse it (one refused a 1.1 MB audit.mjs). The
+// readable source of truth is scripts/.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const SKILL_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const ENTRIES = ["read", "audit"];
 
-const banner = (name) =>
+const banner = () =>
   [
-    `// GENERATED FILE - do not edit. Bundled by esbuild from scripts/${name}.mjs, scripts/lib/ and the`,
+    "// GENERATED FILE - do not edit. Bundled by esbuild from scripts/read.mjs, scripts/audit.mjs, scripts/lib/ and the",
     "// vendored Vectorscope code in scripts/vendor/vectorscope/, with cheerio and its dependencies inlined, so it runs with",
     "// Node 20.18 or later and no npm install. The readable source is scripts/. To rebuild after",
     "// changing it: npm install && npm run build (tests/dist.test.mjs fails if this file differs).",
@@ -56,41 +58,45 @@ const plugins = [
   },
 ];
 
-export function buildOptions(name) {
+export function buildOptions() {
   return {
     absWorkingDir: SKILL_DIR,
-    entryPoints: [join(SKILL_DIR, "scripts", `${name}.mjs`)],
-    outfile: join(SKILL_DIR, "dist", `${name}.mjs`),
+    entryPoints: Object.fromEntries(ENTRIES.map((name) => [name, join(SKILL_DIR, "scripts", `${name}.mjs`)])),
+    outdir: join(SKILL_DIR, "dist"),
+    entryNames: "[name]",
+    chunkNames: "chunks/[name]-[hash]",
+    outExtension: { ".js": ".mjs" },
     bundle: true,
+    splitting: true,
     platform: "node",
     format: "esm",
     target: "node20",
-    minify: false,
+    minify: true,
     keepNames: true,
-    legalComments: "inline",
+    legalComments: "eof",
     charset: "utf8",
     logLevel: "warning",
-    banner: { js: banner(name) },
+    banner: { js: banner() },
     plugins,
     write: false,
   };
 }
 
-/** Builds every entry in memory: [{ name, path, text }]. Throws if esbuild is not installed. */
+/** Builds every file of dist/ in memory: [{ name, path, text }], the entries and their shared chunks. Throws if esbuild is not installed. */
 export async function bundle() {
   const esbuild = await import("esbuild");
-  const out = [];
-  for (const name of ENTRIES) {
-    const result = await esbuild.build(buildOptions(name));
-    const [file] = result.outputFiles.filter((f) => f.path.endsWith(".mjs"));
-    out.push({ name, path: file.path, text: file.text });
-  }
-  return out;
+  const result = await esbuild.build(buildOptions());
+  return result.outputFiles
+    .filter((f) => f.path.endsWith(".mjs"))
+    .map((f) => ({ name: relative(join(SKILL_DIR, "dist"), f.path).replace(/\\/g, "/"), path: f.path, text: f.text }))
+    .sort((x, y) => x.name.localeCompare(y.name));
 }
 
 const isMain = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
 if (isMain) {
-  for (const file of await bundle()) {
+  const files = await bundle();
+  rmSync(join(SKILL_DIR, "dist", "chunks"), { recursive: true, force: true });
+  for (const file of files) {
     mkdirSync(dirname(file.path), { recursive: true });
     writeFileSync(file.path, file.text);
     console.log(`built ${relative(SKILL_DIR, file.path).replace(/\\/g, "/")}  ${(Buffer.byteLength(file.text) / 1024).toFixed(0)} KiB`);
