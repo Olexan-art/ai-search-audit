@@ -12,8 +12,8 @@ export const PROSECUTOR_FIGURES_AS_OF = "2025-11-05";
 export const REFUSAL_COPY = {
   title: { en: "This page was not analysed", uk: "Цю сторінку не проаналізовано" },
   lead: {
-    en: "Vectorscope does not analyse pages written in Russian. This is the publisher's decision, made because of Russia's war against Ukraine. These are the findings it rests on:",
-    uk: "Vectorscope не аналізує сторінки російською мовою. Це рішення автора інструмента через війну Росії проти України. Воно спирається на такі висновки:",
+    en: "Vectorscope does not analyse pages written in Russian, or sites in Russia's domain zone, hosted in Russia or with a Russian-language version. This is the publisher's decision, made because of Russia's war against Ukraine. These are the findings it rests on:",
+    uk: "Vectorscope не аналізує сторінки російською мовою, а також сайти в доменній зоні Росії, розміщені в Росії або з російськомовною версією. Це рішення автора інструмента через війну Росії проти України. Воно спирається на такі висновки:",
   },
   sanctionsLabel: { en: "Sanctions", uk: "Санкції" },
   sanctions: {
