@@ -17,7 +17,7 @@ import { MOTANKA } from "../vendor/vectorscope/sprites.mjs";
 import { CSS, CSS_EXTRA } from "./css.mjs";
 import { FAVICONS } from "./favicons.mjs";
 import { CANNOT, CARD_COPY, LAYER, LITE, MARK, OWNERS, SEV, SEV_COUNT, STATE, UI, ZONE_LABEL, dateLong, fmtEn, fmtUk, headline, nMinor, nProblems, subtitle } from "./copy.mjs";
-import { GLL_MARK } from "./brandmark.mjs";
+import { GLL_MARK } from "../vendor/vectorscope/brandmark.mjs";
 import { SEVERITIES } from "./checks.mjs";
 
 export const TOOL_NAME = "AI Search Audit";
@@ -46,7 +46,8 @@ function safeHref(url) {
 }
 
 const ICONS = {
-  getlooploop: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 7.5a4.5 4.5 0 1 0 0 9c2.4 0 3.4-1.9 4.5-4.5s2.1-4.5 4.5-4.5a4.5 4.5 0 1 1 0 9c-2.4 0-3.4-1.9-4.5-4.5S9.9 7.5 7.5 7.5z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>',
+  // The real mark, not a drawn stand-in.
+  getlooploop: `<img class="gll-ico" src="${GLL_MARK}" alt="" width="28" height="15">`,
   x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
   bluesky: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5.2 3.3C8 5.4 11 9.6 12 11.8c1-2.2 4-6.4 6.8-8.5 2-1.5 5.2-2.6 5.2 1 0 .7-.4 6-.6 6.9-.8 3-3.8 3.7-6.5 3.3 4.7.8 5.9 3.4 3.3 6.1-4.9 5-7-1.3-7.6-2.9l-.6-1.7-.6 1.7c-.6 1.6-2.7 7.9-7.6 2.9-2.6-2.7-1.4-5.3 3.3-6.1-2.7.4-5.7-.3-6.5-3.3C.4 10.3 0 5 0 4.3c0-3.6 3.2-2.5 5.2-1z"/></svg>',
   linkedin: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>',
@@ -480,7 +481,7 @@ const JS = `
 })();
 `;
 
-const brandMark = (cls) => `<span class="brand ${cls}"><img class="gll-mark" src="${GLL_MARK}" alt="" width="56" height="27"><span class="gll-word">GetLoopLoop</span></span>`;
+const brandMark = (cls) => `<span class="brand ${cls}"><span class="gll-glitch" aria-hidden="true"><img class="gll-mark" src="${GLL_MARK}" alt="" width="56" height="30"></span><span class="gll-word">Get<span class="gll-loop">Loop</span>Loop</span></span>`;
 
 function documentStart(title) {
   return [
