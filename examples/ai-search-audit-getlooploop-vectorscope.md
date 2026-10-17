@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://www.getlooploop.com/vectorscope
 
-Semantic Chunking Visualizer for Any URL — Vectorscope · checked 17 Oct 2026 · skill 2.105
+Semantic Chunking Visualizer for Any URL — Vectorscope · checked 17 Oct 2026 · skill 2.106
 
 **Nothing hides text from AI** · 19 problems (blocking 0, high 0, medium 7, low 12)
 

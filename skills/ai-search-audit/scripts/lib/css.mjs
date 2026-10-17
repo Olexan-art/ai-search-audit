@@ -275,12 +275,8 @@ export const CSS_EXTRA = `
 .gll-mark{width:56px;height:30px;flex:none;display:block}
 .gll-loop{color:var(--accent)}
 .links .gll-ico{width:28px;height:15px;flex:none}
-/* The split-signal mark, as the site draws it: stable, a signal fault of about 90 ms, stable. */
+/* The split-signal mark; its signal fault is drawn by LOGO_GLITCH_JS (glitch.mjs), at random moments. */
 .gll-glitch{position:relative;display:inline-grid;place-items:center;flex:none}
-.gll-glitch>img{animation:gll-shift 4.6s steps(2,end) infinite}
-.gll-glitch::after{content:"";position:absolute;left:6%;top:44%;width:88%;height:13%;pointer-events:none;opacity:0;background:linear-gradient(90deg,transparent,rgba(0,242,255,.22),rgba(242,27,223,1) 48%,rgba(0,242,255,.3),transparent);mix-blend-mode:screen;animation:gll-slice 4.6s steps(2,end) infinite}
-@keyframes gll-shift{0%,97%,100%{transform:translate3d(0,0,0);filter:saturate(1)}97.6%{transform:translate3d(-1px,0,0);filter:saturate(1.35) hue-rotate(12deg)}98.3%{transform:translate3d(1px,0,0);filter:saturate(1.5) hue-rotate(-14deg)}99%{transform:translate3d(0,0,0)}}
-@keyframes gll-slice{0%,96.9%,100%{opacity:0;transform:translateX(-125%) skewX(-18deg)}97.4%,98.6%{opacity:.9}99%{opacity:0;transform:translateX(125%) skewX(-18deg)}}
 .brand--top .gll-word{font-size:18px}
 .divider{width:1px;height:22px;background:var(--line-2);flex:none}
 .product{font-size:16px;font-weight:700;color:var(--accent)}

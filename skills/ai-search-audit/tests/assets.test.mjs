@@ -21,3 +21,9 @@ test("the GetLoopLoop mark is the Vectorscope skill's, vendored, and small", asy
   const { GLL_MARK } = await import("../scripts/vendor/vectorscope/brandmark.mjs");
   assert.ok(GLL_MARK.startsWith("data:image/webp;base64,") && GLL_MARK.length < 12000, String(GLL_MARK.length));
 });
+
+test("the logo's glitch ships in the report script, off under reduced motion", async () => {
+  const { LOGO_GLITCH_JS } = await import("../scripts/lib/glitch.mjs");
+  assert.ok(LOGO_GLITCH_JS.includes("startLogoGlitch") && LOGO_GLITCH_JS.includes("prefers-reduced-motion"));
+  assert.ok(LOGO_GLITCH_JS.length < 6000, String(LOGO_GLITCH_JS.length));
+});
