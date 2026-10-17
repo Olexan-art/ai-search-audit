@@ -1,6 +1,6 @@
-// 2.108: the site-level signals that refuse a page before its language is read. One function,
+// 2.110: the site-level signals that refuse a page before its language is read. One function,
 // judgeRussianSite(), applies them in the owner's order: the domain zone (a string check, nothing
-// fetched), then where the site is hosted, then whether the site serves a Russian-language version.
+// fetched), then where the site is hosted, then whether the page declares a Russian-language version of the site.
 // The page-language refusal (language.mjs) comes after all three, in the reading.
 // Every signal is deterministic except hosting, which asks DNS and one RDAP server; when either is
 // unreachable or says nothing, hosting is "not_determined" and nothing is refused on it.
@@ -30,19 +30,16 @@ export function ruDomainZone(host) {
 /** A language tag whose primary subtag is Russian: "ru", "ru-RU", "ru_UA", "RU". */
 export const isRuTag = (value) => /^ru(?:[-_]|$)/i.test(String(value || "").trim());
 
-const siteHost = (host) => String(host || "").toLowerCase().replace(/^www\./, "");
-
 /**
- * Whether the page shows a Russian-language version of its site. Returns the signals found, in
- * document order, each { kind, value }; an empty list means none. Kinds:
+ * Whether the page officially declares a Russian-language version of its site. Only declarations
+ * count, the ones a site makes for search engines and social cards; ordinary links (a language
+ * switcher to /ru, a ru. subdomain, an <a lang="ru">) do not. Returns the signals found, each
+ * { kind, value }; an empty list means none. Kinds:
  *   hreflang          <link rel="alternate" hreflang="ru…">
  *   og_locale         og:locale or og:locale:alternate starting with ru
  *   content_language  a ru tag in the Content-Language header
- *   switcher_path     a same-site link to /ru or /ru/…
- *   switcher_host     a link to the ru. subdomain of this site
- *   link_lang         an <a> with hreflang or lang ru…
  */
-export function ruAudienceSignals({ html, contentLanguage, pageUrl }) {
+export function ruAudienceSignals({ html, contentLanguage }) {
   const found = [];
   const add = (kind, value) => {
     if (!found.some((f) => f.kind === kind && f.value === value)) found.push({ kind, value: String(value).slice(0, 200) });
@@ -60,31 +57,6 @@ export function ruAudienceSignals({ html, contentLanguage, pageUrl }) {
     const prop = String($(el).attr("property") || $(el).attr("name") || "").toLowerCase().trim();
     const content = $(el).attr("content");
     if ((prop === "og:locale" || prop === "og:locale:alternate") && isRuTag(content)) add("og_locale", content.trim());
-  });
-
-  let base = null;
-  try {
-    base = new URL(pageUrl);
-  } catch {}
-  const own = base ? siteHost(base.hostname) : null;
-  $("a").each((_, el) => {
-    const a = $(el);
-    for (const attr of ["hreflang", "lang"]) {
-      const v = a.attr(attr);
-      if (isRuTag(v)) add("link_lang", `${attr}=${v.trim()}`);
-    }
-    const href = a.attr("href");
-    if (!href || !base) return;
-    let target;
-    try {
-      target = new URL(href, base);
-    } catch {
-      return;
-    }
-    if (target.protocol !== "http:" && target.protocol !== "https:") return;
-    const host = target.hostname.toLowerCase();
-    if (siteHost(host) === own && /^\/ru(?:\/|$)/i.test(target.pathname)) add("switcher_path", `${host}${target.pathname}`);
-    else if (host === `ru.${own}`) add("switcher_host", host);
   });
   return found;
 }

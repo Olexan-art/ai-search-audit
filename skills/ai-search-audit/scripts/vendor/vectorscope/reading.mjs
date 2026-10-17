@@ -10,6 +10,7 @@ import { analyseHtml } from "./extract.mjs";
 import { chunkPage, CHUNKS_PER_PAGE } from "./chunk.mjs";
 import { contentRole } from "./lens.mjs";
 import { readTechnical } from "./technical.mjs";
+import { readAccessibility } from "./accessibility.mjs";
 import { fetchRobots, robotsReport } from "./robots.mjs";
 import { shortLineRuns } from "./checks.mjs";
 import { renderPage } from "./render.mjs";
@@ -70,7 +71,7 @@ export async function readPage({ url, html, finalUrl, robots, render = false, on
   const host = new URL(urlKey).hostname;
   const saved = typeof html === "string";
 
-  // 2.108: the domain zone and the hosting country, before the page is fetched at all.
+  // 2.110: the domain zone and the hosting country, before the page is fetched at all.
   const refuse = (judged, pageUrl) => ({
     ...base,
     ok: false,
@@ -166,6 +167,7 @@ export async function readPage({ url, html, finalUrl, robots, render = false, on
   // 2.102: where the text went, stage by stage. Observed on a copy; the passages above are final.
   const losses = measureLosses({ html: fetched.html, chunkerPage, passages, capReached });
   const technical = readTechnical(fetched.html, analysed.url);
+  const accessibility = readAccessibility(fetched.html);
   const layout = { shortLineRuns: shortLineRuns(analysed.bodyText || "", passages) };
 
   let robotsFetched;
@@ -203,6 +205,9 @@ export async function readPage({ url, html, finalUrl, robots, render = false, on
     page,
     passages,
     technical,
+    // The response headers (null when a saved copy was read) and the accessibility structure.
+    headers: fetched.headers ?? null,
+    accessibility,
     robots: robotsReport(robotsFetched, analysed.url),
     hosting,
     layout,

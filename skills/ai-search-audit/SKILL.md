@@ -191,7 +191,7 @@ The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,00
 | `empty` | The page answered, but no readable text was left once navigation and boilerplate were removed. |
 | `refused_ru_domain` | The address is in a Russian domain zone (.ru, .su, .рф, .москва, .moscow), and this tool does not analyse it; the page was not fetched. One line in the chat, the report, nothing more. |
 | `refused_ru_hosting` | The site is hosted in Russia (RDAP gives its server's country as RU), and this tool does not analyse it; the page was not fetched. One line in the chat, the report, nothing more. |
-| `refused_ru_audience` | The site has a Russian-language version (hreflang, og:locale, Content-Language or a language switcher to /ru), and this tool does not analyse it. One line in the chat, the report, nothing more. |
+| `refused_ru_audience` | The site has a Russian-language version (an hreflang alternate, og:locale or Content-Language declares a Russian version), and this tool does not analyse it. One line in the chat, the report, nothing more. |
 | `refused_language_ru` | The page is in Russian, and this tool does not analyse pages in Russian. One line in the chat, the report, nothing more. |
 
 ## Outputs

@@ -22,7 +22,7 @@ export const REFUSAL_COPY = {
   },
 };
 
-// 2.108: four signals refuse, checked in this order; the reading names the one that fired, and
+// 2.110: four signals refuse, checked in this order; the reading names the one that fired, and
 // the report adds its one reason line under the same refusal block.
 export const REFUSED_RU_DOMAIN = "refused_ru_domain";
 export const REFUSED_RU_HOSTING = "refused_ru_hosting";
