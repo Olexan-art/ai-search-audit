@@ -2,7 +2,7 @@ English · [Українська](README.uk.md)
 
 # AI Search Audit Lite
 
-AI Search Audit Lite **2.103**, an Agent Skill from [GetLoopLoop](https://www.getlooploop.com) for claude.ai and the Claude desktop app, Claude Code, Codex, opencode, Hermes Agent and other agents that load `SKILL.md` skills. Versions count in thousandths (2.101, 2.102, …), so the first number moves only on a breaking change.
+AI Search Audit Lite **2.104**, an Agent Skill from [GetLoopLoop](https://www.getlooploop.com) for claude.ai and the Claude desktop app, Claude Code, Codex, opencode, Hermes Agent and other agents that load `SKILL.md` skills. Versions count in thousandths (2.101, 2.102, …), so the first number moves only on a breaking change.
 
 Before Google, Bing or an AI assistant can show or quote a page, a crawler has to be allowed in, the page has to say what it is, and the text has to survive the machine's reading. `ai-search-audit` checks one public page against the standard, published rules for all three, adds three readings only an AI can make (the questions people ask, how the agent's own model describes the brand, and what it believes about the brand's reviews), and draws the result as one report: six status tiles, a map of the page built from its real document with every problem marked where it is, the biggest problems, the bots in robots.txt, the Google and Bing checklist, the language versions, and where the text goes on its way to an AI retriever.
 
@@ -71,6 +71,10 @@ The [skills CLI](https://skills.sh) asks which agents to install it for (add `-g
 **Pasting this repository's link into a chat is not installing it.** Claude rightly will not download and run code from a link someone pasted, so it will at best imitate the steps by hand, and those findings are not the tool's. Upload the zip as above.
 
 Sources: [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude) · [Create custom skills](https://claude.com/docs/skills/how-to) (the zip's structure, the name and description rules) · [Create and edit files with Claude](https://support.claude.com/en/articles/12111783-create-and-edit-files-with-claude) (code execution and network egress) · [Agent Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (network access by surface). Checked on 2026-10-16.
+
+### No internet in the agent's shell
+
+Cloud sandboxes often run the shell offline or keep the skills folder read-only. The skill does not need a skills folder: unpack `ai-search-audit.zip` anywhere the agent can write and point it at that folder (or attach the zip to the chat). With no network, save the page in your browser as "Web page, HTML only" and, if you can, its `robots.txt`, and give both files to the agent: the skill reads the saved copy and marks every check that needs the network as not checked.
 
 ## Use it with your agent
 

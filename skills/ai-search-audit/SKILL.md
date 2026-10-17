@@ -3,7 +3,7 @@ name: ai-search-audit
 description: Audit one public web page for classic search and AI search (SEO and GEO): robots.txt for Googlebot and AI crawlers (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot), noindex and snippet controls, sitemap and llms.txt, title, description, headings, canonical, links, images, structured data and retired rich results, trust signals, hreflang versions and their facts, how an AI retriever reads the page (passages, the 26-passage cap, hidden or JavaScript-only text), writing patterns, the target keyword, the questions people ask, and what the agent's own model believes about the brand and its reviews. An HTML report, plus Markdown and JSON, listing problems, not fixes. Use when the user asks for an SEO or GEO audit, whether a page is ready for AI search, why Google, ChatGPT or Perplexity may not show or quote a page, or names ai-search-audit. Ukrainian too: «SEO-аудит сторінки», «аудит для ШІ-пошуку», «GEO-аудит». Scripts call no model.
 ---
 
-Version 2.103. Versions count in thousandths (2.101, 2.102, 2.103, …): the first number moves only on a breaking change.
+Version 2.104. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, …): the first number moves only on a breaking change.
 
 # AI Search Audit (Lite)
 
@@ -207,6 +207,14 @@ The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,00
 - The brand and review readings are one model's knowledge at its training time; they are not a measurement of any assistant, and they say nothing about what ChatGPT, Gemini or Perplexity answer today.
 - The fetch sends `User-Agent: GetLoopLoop/1.0 SEO Crawler`.
 - The readable source is `scripts/` in the repository, built into `dist/` with esbuild; tests: `npm test` in the skill folder of a repository checkout.
+
+## No network in the shell, or nowhere to install
+
+Some agents run their shell with no internet (cloud sandboxes such as Codex in the cloud or ChatGPT), or cannot write to their skills folder.
+
+- **The skill folder can live anywhere.** If the agent's skills folder is read-only, unpack `ai-search-audit.zip` (or copy this folder) into any directory you can write, such as the working directory, and use that folder as `$SKILL`. Nothing needs installing. If you cannot get the files at all (no network, downloads blocked), ask the user to attach `ai-search-audit.zip` from the repository's Releases, and wait.
+- **No network in the shell:** read.mjs prints `REFUSED unreachable`. Ask the user for a saved copy: the page saved from their browser as "Web page, HTML only" (Ctrl+S, or Cmd+S on a Mac), and, if they can, the site's robots.txt (open `<site>/robots.txt` and save it as text). Then run `node "$SKILL/dist/read.mjs" <url> --html page.html --robots robots.txt --out reading.json` and go on with step 2. Without `--robots`, robots.txt is reported as not checked. Every check that needs the network (the sitemap, llms.txt, the language versions, links, images and the site checks) is then reported as not checked. The report says it read a saved copy.
+- **Only files the user gives you.** Do not make the saved copy yourself with a browsing or fetch tool: those return text or Markdown converted from the page, not its HTML, and the reading would not be the page's. And do not fill in for the scripts: a check made by hand is not this tool's result.
 
 ## If the page cannot be fetched
 

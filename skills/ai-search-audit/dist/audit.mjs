@@ -21240,7 +21240,7 @@ function renderRefusal(reading2) {
 __name(renderRefusal, "renderRefusal");
 
 // scripts/lib/version.mjs
-var SKILL_VERSION = "2.103";
+var SKILL_VERSION = "2.104";
 var READING_SCHEMA = "getlooploop/ai-search-audit-reading@1";
 var EXPORT_SCHEMA = "getlooploop/ai-search-audit@1";
 var PRODUCED_BY = "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)";
