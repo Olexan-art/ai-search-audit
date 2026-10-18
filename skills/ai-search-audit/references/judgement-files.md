@@ -1,12 +1,15 @@
 # The judgement files: schemas and full rules
 
-Read this before writing `questions.json`, `style.json`, `brand.json` and `reviews.json` (steps 2 to 4 of SKILL.md). The `--check` run validates every rule below that a script can check.
+Read this when you write `questions.json`, `style.json`, `brand.json` and `reviews.json` (steps 2 to 4). The `--check` run validates every rule here that a script can check.
 
-## Common to all four
+## All 4 files
 
-Every file carries `agent` and `model` at the top level, as `groups.json` does in the Vectorscope skill: `agent` is the product you are running in ("Claude Code", "claude.ai", "Codex", "opencode", "Hermes"), `model` is your model's name as you know it. Up to 60 characters each. Fill them in honestly; if you do not know one, leave it out and the report says "model not stated". Never guess or invent either. The report prints the model beside every judgement finding.
-
-**Never in Russian.** Questions and answers are in the page's language (or English for the brand and review answers), never Russian. What you write is refused if it holds a letter Russian uses that the page's own language does not: on a Ukrainian page, any of the four letters only Russian writes there; a Bulgarian or Belarusian page keeps the letters its own words use. Quotes are the page's own words and are checked against the passage instead.
+- Write each file with the file-writing tool, never a shell heredoc (heredocs break on apostrophes).
+- `agent`: the product you run in ("Claude Code", "claude.ai", "Codex", "opencode", "Hermes"). `model`: your model's name as you know it. At most 60 characters each.
+- Fill in both honestly. If you do not know one, leave it out; the report says "model not stated". Never guess or invent either.
+- Write questions in the page's language, and brand and review answers in English or the page's language. Never Russian.
+- The script refuses a letter Russian uses and the page's own language does not. On a Ukrainian page, these are the 4 letters only Russian writes there. A Bulgarian or Belarusian page keeps the letters its own words use.
+- Quotes are the page's own words; the script checks them against the passage instead.
 
 ## questions.json
 
@@ -23,16 +26,29 @@ Every file carries `agent` and `model` at the top level, as `groups.json` does i
 }
 ```
 
-Write 8 to 12 questions the way the GetLoopLoop Voicescope does: cross the page's topic with a real circumstance, and vary the circumstance along four axes, naming in `axes` the one to three each question uses (never all four in one question; every axis used at least once across the file):
+Cross the page's topic with a real circumstance (the GetLoopLoop Voicescope method), varied along 4 axes:
 
-- `urgency`: needed right now, on the move, or against a deadline;
-- `device`: who is asking and on what (a phone, nothing installed, hands busy, somebody standing over them);
-- `object`: the thing in front of them (the specific document, page, account, report or person);
-- `obstacle`: what actually hurts (the mistake already made, the thing they cannot find, the thing they are afraid of getting wrong).
+- `urgency`: now, on the move, or against a deadline.
+- `device`: who asks and on what (a phone, hands busy, somebody watching).
+- `object`: the specific document, page, account or person in front of them.
+- `obstacle`: the mistake already made, the thing they cannot find or fear getting wrong.
 
-Rules, in the order they are usually broken: most questions must **not** contain the page's keyword (people describe the problem, not the jargon); write speech, in the first person, in the page's language; no wake words ("Hey Google", "Siri"); no question that is another with words added; include at least one the page probably does not answer.
+Rules, most often broken first:
 
-Then judge each, from the passages only, never from what you know: `passage` is the single passage a retriever should return (`null` when none does); `verdict` is `complete` (that passage alone answers it), `partial` (it helps but leaves part out) or `missing`; `citable` is true only when the quoted words make sense quoted alone; `quote` is the exact words that answer, up to 400 characters, copied **verbatim** from that passage (whitespace, quote marks, dashes and case are folded, nothing else). A `missing` answer has no quote. The script refuses a quote that is not in its passage.
+1. Most questions must not contain the page's keyword.
+2. Write speech, in the first person, in the page's language.
+3. No wake words ("Hey Google", "Siri").
+4. No question that is another with words added.
+5. At least 1 question the page probably does not answer.
+6. 8 to 12 questions. `id`: short, such as `q1`. `question`: at most 200 characters.
+7. `axes`: 1 to 3 per question, never all 4. Every axis used at least once in the file.
+
+Judge each question from the passages only, never from what you know:
+
+- `passage`: the 1 passage a retriever should return, or `null` when none does. Required for `complete` and `partial`.
+- `verdict`: `complete` (that passage alone answers it), `partial` (it helps but leaves part out) or `missing`.
+- `citable`: true only when the quoted words make sense quoted alone. A `missing` answer is never citable.
+- `quote`: the exact words that answer, at most 400 characters, verbatim from that passage. Required for `complete` and `partial`; none for `missing`. The script folds whitespace, quote marks, dashes and case, nothing else, and refuses a quote not in its passage.
 
 ## style.json
 
@@ -43,7 +59,15 @@ Then judge each, from the passages only, never from what you know: `passage` is 
     { "passage": 5, "verdict": "generic", "evidence": "unlock its full potential", "why": "names no integration" } ] }
 ```
 
-The swap test, one verdict for **every** passage in `vs.passages`: would this passage fit a competitor's page with only the brand name changed? `generic` if yes, `specific` if it holds something only this page could say (a number, a name, a limit, a procedure, a first-hand detail). `evidence` is the words that decided it, verbatim from that passage (at most 200 characters); `why` is optional, one short line in the user's language. Judge the passage, not the page, and not who wrote it: this is not an AI detector, and the report says so. The script checks every passage is judged once and every quote is verbatim. At the bottom of the report, *How generated the text sounds* shows your verdicts beside the Pattern score and the marker words; where they disagree it shows both and averages nothing.
+The swap test: would the passage fit a competitor's page with only the brand name changed?
+
+- 1 verdict for every passage in `vs.passages`, each once.
+- `generic`: yes. `specific`: it holds something only this page could say (a number, a name, a limit, a procedure, a first-hand detail).
+- `evidence`: the words that decided it, verbatim from that passage, at most 200 characters.
+- `why`: optional, 1 short line in the user's language.
+- Judge the passage, not the page, and not who wrote it. This is not an AI detector.
+
+The report shows your verdicts beside the Pattern score and the marker words, and averages nothing.
 
 ## brand.json
 
@@ -55,7 +79,7 @@ The swap test, one verdict for **every** passage in `vs.passages`: would this pa
   "basis": "own_knowledge",
   "answers": [
     { "question": "what_is", "knows": true, "answer": "BrightDesk is a help desk for small support teams. …" },
-    { "question": "pricing", "knows": false, "answer": "" },
+    { "question": "pricing", "knows": true, "answer": "I am not sure of the exact prices. I believe plans start at about $15 per agent per month." },
     { "question": "integrations", "knows": true, "answer": "…" },
     { "question": "weaknesses", "knows": false, "answer": "" },
     { "question": "alternatives", "knows": true, "answer": "…" }
@@ -63,7 +87,7 @@ The swap test, one verdict for **every** passage in `vs.passages`: would this pa
 }
 ```
 
-`brand` is the brand the page belongs to (the site's own name). The five questions, the GetLoopLoop Brandscope's, fixed (ask them of yourself in this wording):
+`brand`: the site's own name, at most 80 characters. Answer each of the 5 fixed GetLoopLoop Brandscope questions once. Ask them of yourself in this wording:
 
 1. `what_is`: What is <brand>? Answer in two sentences.
 2. `pricing`: How much does <brand> cost? Name the plans and prices you know of. If you are not sure, say so.
@@ -71,9 +95,27 @@ The swap test, one verdict for **every** passage in `vs.passages`: would this pa
 4. `weaknesses`: What are the main weaknesses or complaints about <brand> compared with its alternatives?
 5. `alternatives`: What are the main alternatives to <brand>, and when would somebody pick one of them instead?
 
-**Honesty rules.** `basis` must be `"own_knowledge"`: by writing it you state that the answers come from what you already knew, with no browsing, no search, no fetch and no reading of the page. Do not look anything up for this step, even if a tool is available. "I don't know" is a correct answer and the most useful one when it is true: write `"knows": false`. Do not soften a guess into a fact, and do not copy the page into an answer. Up to 1,500 characters per answer.
+**Answers.** `answer`: at most 1,500 characters; required when `knows` is true.
 
-The script compares your answers with the page by fixed rules (from Brandscope): a **contradiction** is a price the page states differently, or a number of the same thing ("3 agents", "26 passages") the page states differently; a **fact the page lacks** is a sentence of the `what_is`, `pricing` or `integrations` answer whose numbers and names are not on the page; **brand unknown** is five answers that do not know it. Complaints are never checked against the brand's own page, and alternatives are other brands.
+- You know and are sure: `"knows": true`.
+- You know something but are not sure (for example a price range): `"knows": true`, and write in the answer that you are not sure ("I am not sure of the exact prices.").
+- You do not know: `"knows": false` and `"answer": ""`.
+
+**How the script reads `knows`.** If the first 400 characters of an answer disclaim knowledge of the brand, the script counts it as `"knows": false`, whatever you set. Phrases that do this: "I don't have information" (or details, data, knowledge), "I have no information", "I'm not familiar", "I'm not aware", "I don't know of", "I don't know about", "I don't know any", "I could not find", "unable to find", "may not exist", "no publicly available information", "does not appear to be a well-known". "I am not sure" and "I don't know the exact price" match none of them.
+
+**Honesty rules.**
+
+- `basis` must be `"own_knowledge"`.
+- Answer from what you already knew. Use no browsing, search, fetch or other tool for this step, even if one is available. Do not answer from the page.
+- "I don't know" is a correct answer and the most useful one when it is true: write `"knows": false`.
+- Do not present a guess as a fact. Do not copy the page into an answer.
+
+**What the script compares** (fixed Brandscope rules):
+
+- Contradiction: a price, or a number of the same thing ("3 agents", "26 passages"), that the page states differently.
+- Fact the page lacks: a sentence of `what_is`, `pricing` or `integrations` whose numbers and names are not on the page.
+- Brand unknown: no answer of the 5 knows the brand.
+- Complaints are never checked against the brand's own page. Alternatives are other brands.
 
 ## reviews.json
 
@@ -91,6 +133,12 @@ The script compares your answers with the page by fixed rules (from Brandscope):
 }
 ```
 
-**Start from `reviews.template.json`**, which `read.mjs` writes beside the reading (beside `site.json` for a site): it lists every platform this run asks about, each once, with its name and its scale, and `"knows"` left empty. Keep exactly those platforms, none added or removed; set `"knows"` on each to true, with a `rating` on that platform's scale (out of 5; TrustRadius out of 10; Product Hunt a whole count of upvotes), or to false. `reviews` (a whole count) is optional, and the `name` and `scale` fields may stay or go. The same honesty rules as brand.json: own knowledge only, never browse, `"knows": false` when you do not know. Answer every platform the same way, from what you know of the brand on it.
+Start from `reviews.template.json`. `read.mjs` writes it beside the reading (beside `site.json` for a site). It lists every platform of this run once, with `name` and `scale`, and `"knows"` empty.
 
-The script flags a rating that cannot be right, and every rating you stated that has no source on the page (no mention of the platform, no link to it, no rating markup). The report says which ratings these are and why.
+- Keep exactly those platforms. Add none, remove none.
+- Set `"knows"` to `true` with a `rating`, or to `false`.
+- `rating`: out of 5; TrustRadius out of 10; Product Hunt a whole count of upvotes.
+- `reviews` (a whole count) is optional. `name` and `scale` may stay or go.
+- The honesty rules of brand.json apply. Judge each platform separately, from your own knowledge of the brand on that platform.
+
+The script flags a rating that cannot be right, and every stated rating with no source on the page (no mention of the platform, no link to it, no rating markup). The report says which ratings and why.

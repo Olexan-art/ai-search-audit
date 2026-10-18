@@ -1,8 +1,10 @@
 # The checks: codes, rules and thresholds
 
-Read this when you need what a finding code means, which tile it belongs to, its severity, or the threshold behind it: for example when the user asks about one finding, or to explain what was or was not checked.
+Read this when you need what a finding code means, its tile, its severity or its threshold, for example when the user asks about 1 finding or what was not checked.
 
-Each finding has a code, a severity (blocking, high, medium or low), the status tile it belongs to, who it concerns (developer, content, SEO), its layer (measured: a script counted it; derived: a fixed formula over measured values; judgement: your model, with `agent` and `model`), where it is, the evidence, and its rule sources (in the export). Findings that are not tied to one spot on the page (most of the brand, review and question findings, and several site checks) are counted on the map as "+N not tied to one spot".
+## Findings
+
+Each finding has: a code; a severity (`blocking`, `high`, `medium`, `low`); a tile; an owner (developer, content, SEO); a layer (measured: a script counted it; derived: a fixed formula over measured values; judgement: your model, with `agent` and `model`); the place; the evidence; and its rule sources (in the export). The map counts findings not tied to 1 spot (most brand, review and question findings, several site checks) as "+N not tied to one spot".
 
 | Tile | Codes |
 |---|---|
@@ -13,18 +15,41 @@ Each finding has a code, a severity (blocking, high, medium or low), the status 
 | AI gets the brand right? | `brand_contradiction`, `review_rating_unbacked`, `review_control_hallucination` (high); `brand_fact_absent`, `brand_unknown`, `reviews_without_markup` (medium) |
 | Languages in order? | `hreflang_no_return` (high); `hreflang_invalid_code`, `hreflang_no_self`, `hreflang_alternate_broken`, `title_duplicate_locales`, `locale_facts_differ` (medium); `description_duplicate_locales`, `hreflang_lang_mismatch`, `hreflang_no_x_default`, `llms_txt_one_language` (low) |
 
-**Passages.** The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,000-character windows, a 26-passage cap); `repeated_claim` and the keyword's "one section" use the page's h2 sections as their groups, so they need no embeddings. The Google and Bing checklist has 35 cells; Core Web Vitals and "in Google's index" are always *not measured* (they need field data and Search Console).
+## How the checks work
 
-**Writing patterns** are the GetLoopLoop PatternScope's deterministic detectors, run over the kept text: stock phrases from a list written per language, repeated sentence shapes, runs of sentences that open the same way, and evaluative claims with nothing checkable in the sentence, each with its position (passage and word) and a density per 1,000 words. English, Ukrainian and Spanish are analysed; other languages are reported as not analysed. They are signals about worn writing, not an AI detector. The same score, with the marker words (vocabulary models overuse, counted beside the score and never inside it) and your swap test, is the report's last block, *How generated the text sounds*, shared with the Vectorscope skill.
+**Passages.** The passage checks are the Vectorscope skill's, unchanged: h2 sections, 2,000-character windows, a cap of 26 passages. `repeated_claim` and the keyword's "one section" group by the page's h2 sections, so they need no embeddings.
 
-**The keyword** is `--keyword` when given, else the page's h1 with the site's name, a trailing year, a sales tail, a clause after a comma or colon and stop words at the edges trimmed (at most five words); the report says which. The promise-without-a-figure rule reads English only, and says so.
+**Google and Bing checklist.** 35 cells. Core Web Vitals and "in Google's index" are always *not measured*: they need field data and Search Console.
 
-**Locale facts** compare the numbers in each h2 section across the language versions read, aligned by section order and only when both versions have the same number of sections; a version whose sections do not line up is listed as not compared. Numbers written as words are not read, and a number may differ on purpose (a local price).
+**Writing patterns.** The GetLoopLoop PatternScope's deterministic detectors over the kept text: stock phrases (a list per language), repeated sentence shapes, runs of sentences that open the same way, and evaluative claims with nothing checkable. Each has a position (passage and word) and a density per 1,000 words. Only English, Ukrainian and Spanish are analysed. They are signals of worn writing, not an AI detector. The report's last block, *How generated the text sounds*, shows the score, the marker words (vocabulary models overuse, counted beside the score, never inside it) and your swap test.
 
-**Structured data:** JSON-LD is parsed (microdata and RDFa types are listed). Required properties, as Google's pages list them, are checked for FAQPage, Product, SoftwareApplication (and WebApplication, MobileApplication), BreadcrumbList, Event, JobPosting, LocalBusiness, VideoObject, QAPage, WebSite, ProductGroup, Offer, AggregateOffer, Review and AggregateRating; recommended ones for those and Article (NewsArticle, BlogPosting), Organization and Person. Every FAQPage question must appear in the visible text. Rich results Google retired are informational (no Google rich result any more, not an error), each dated by its entry on https://developers.google.com/search/updates: FAQ (7 May 2026), How-to (14 September 2023), course info, estimated salary and vehicle listing (documentation removed 9 September 2025), ClaimReview (phased out 12 June 2025), special announcement (31 July 2025), practice problem (6 January 2026) and the sitelinks search box (29 November 2024).
+**The keyword.** `--keyword` when given; else the h1 without the site's name, a trailing year, a sales tail, a clause after a comma or colon, and edge stop words, at most 5 words. The report names the source. The promise-without-a-figure rule reads English only, and says so.
 
-**llms.txt:** the report notes that Google documents no use of it, quoting Google's AI features page: "You don't need to create new machine readable files, AI text files, or markup to appear in these features."
+**Locale facts.** The script compares the numbers in each h2 section across language versions, aligned by order, only when both have the same number of sections; otherwise the version is listed as not compared. Numbers written as words are not read. A number may differ on purpose (a local price).
 
-**AI crawlers:** robots.txt is matched by RFC 9309 (the Vectorscope skill's parser): GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Googlebot, Bingbot and CCBot. A 4xx robots.txt means no rules; a 5xx or no answer means everything is assumed disallowed.
+**Structured data.** The script parses JSON-LD and lists microdata and RDFa types.
 
-**This skill's own thresholds** (each a named constant with its reason, in `scripts/lib/`): title 10 to 60 characters; description 70 to 160; a redirect chain is 2 or more hops; a heavy page is HTML over 500 KB or more than 30 scripts; a hard-to-read URL is over 115 characters, more than 2 query parameters or a session id; hidden headings are high from 200 hidden characters; an image is oversized over 200 KB and wants a srcset over 100 KB or from 800 px declared width; above the fold is the hero and at most its first two images, the first being the LCP candidate; `data-nosnippet` blocks snippets when it covers half the visible text; an app shell is under 150 words with an app root (`#root`, `#__next`, `#app`, …) holding under 200 characters; stock phrases are medium from 2.0 per 1,000 words; the keyword's off-phrase floor is half the passage text and "one section" is a third of the sections or fewer, from three sections.
+- Required properties (per Google's pages): FAQPage, Product, SoftwareApplication (and WebApplication, MobileApplication), BreadcrumbList, Event, JobPosting, LocalBusiness, VideoObject, QAPage, WebSite, ProductGroup, Offer, AggregateOffer, Review and AggregateRating.
+- Recommended properties: the types above, and Article (NewsArticle, BlogPosting), Organization and Person.
+- Every FAQPage question must appear in the visible text.
+- Rich results Google retired are informational, dated by their entry on https://developers.google.com/search/updates: FAQ (7 May 2026), How-to (14 September 2023), course info, estimated salary and vehicle listing (documentation removed 9 September 2025), ClaimReview (phased out 12 June 2025), special announcement (31 July 2025), practice problem (6 January 2026) and the sitelinks search box (29 November 2024).
+
+**llms.txt.** The report says that Google documents no use of it, and quotes Google's AI features page: "You don't need to create new machine readable files, AI text files, or markup to appear in these features."
+
+**AI crawlers.** The script matches robots.txt by RFC 9309 (the Vectorscope skill's parser) for GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Googlebot, Bingbot and CCBot. A 4xx robots.txt means no rules. A 5xx or no answer means everything is assumed disallowed.
+
+## This skill's own thresholds
+
+Each is a named constant with its reason, in `scripts/lib/`.
+
+- Title: 10 to 60 characters. Meta description: 70 to 160.
+- Redirect chain: 2 or more hops.
+- Heavy page: HTML over 500 KB, or more than 30 scripts.
+- Hard-to-read URL: over 115 characters, more than 2 query parameters, or a session id.
+- Hidden headings: high from 200 hidden characters.
+- Image: oversized over 200 KB; wants a srcset over 100 KB or from 800 px declared width.
+- Above the fold: the hero and at most its first 2 images; the first is the LCP candidate.
+- `data-nosnippet` blocks snippets when it covers half the visible text.
+- App shell: under 150 words, with an app root (`#root`, `#__next`, `#app`, …) under 200 characters.
+- Stock phrases: medium from 2.0 per 1,000 words.
+- Keyword: off-phrase floor is half the passage text; "one section" is a third of the sections or fewer, from 3 sections.
