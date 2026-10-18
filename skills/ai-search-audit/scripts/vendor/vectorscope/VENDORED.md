@@ -5,7 +5,7 @@ in this skill are the Vectorscope skill's own code, copied here unchanged so thi
 stands on its own.
 
 - Source: https://github.com/Olexan-art/getlooploop-skills, `skills/vectorscope/scripts/lib/`
-- Commit: `ed90ec4`
+- Commit: `666c7d4`
 - Vectorscope version: 2.111.0
 - Licence: MIT, the same holder; the source repository's licence is in [LICENSE](LICENSE).
 
