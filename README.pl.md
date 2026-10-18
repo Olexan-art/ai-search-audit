@@ -161,6 +161,31 @@ Tam, gdzie żadna opublikowana reguła nie podaje liczby: title od 10 do 60 znak
 - **Niczego ponad limit.** Sprawdzanych jest 30 linków i 20 obrazów, czytanych 10 wersji językowych, otwieranych 5 sitemap podrzędnych; 12 sekund na żądanie (8 dla linku, obrazu lub testu witryny), 3 000 000 znaków HTML. Każdy limit jest wymieniony w raporcie, żaden nie działa po cichu.
 - **Jak to naprawić.** Lite wymienia problemy; nie wyjaśnia ich i nie proponuje poprawek.
 
+## Jak zlecać agentowi
+
+Krótkie zlecenie z jasnym warunkiem zatrzymania i formatem odpowiedzi trzyma agenta przy procedurze. Skopiuj je i wpisz swoją stronę:
+
+```markdown
+## Task
+Run the skill `ai-search-audit` on 1 page. Write its report.
+
+## Inputs
+- Page: https://example.com/page
+- Working folder: ./audit
+- Keyword (optional): your target phrase
+
+## Rules
+1. Read SKILL.md first. Follow it exactly.
+2. Write every file into the working folder.
+
+## Stop condition
+Stop when report.html exists. Show it.
+
+## Reply format
+- The report link or path.
+- The verdict line and the 3 biggest problems.
+```
+
 ## Praca nad skillem
 
 `scripts/` to kod źródłowy; `dist/` jest z niego budowany za pomocą [esbuild](https://esbuild.github.io/) (tylko zależność deweloperska) i trzymany w repozytorium, więc skill działa bez instalacji.

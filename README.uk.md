@@ -161,6 +161,31 @@ node dist/audit.mjs reading.json --questions questions.json --style style.json -
 - **Усього, що за лімітом.** Перевіряється 30 посилань і 20 зображень, читається 10 мовних версій, відкривається 5 дочірніх sitemap; 12 секунд на запит (8 для посилання, зображення чи перевірки сайту), 3 000 000 символів HTML. Кожен ліміт звіт називає, жоден не застосовано мовчки.
 - **Як це виправити.** Lite перелічує проблеми, але не пояснює їх і не пропонує виправлень.
 
+## Як доручати агентові
+
+Коротке доручення з чіткою умовою зупинки та форматом відповіді тримає агента в межах процедури. Скопіюйте його й підставте свою сторінку:
+
+```markdown
+## Task
+Run the skill `ai-search-audit` on 1 page. Write its report.
+
+## Inputs
+- Page: https://example.com/page
+- Working folder: ./audit
+- Keyword (optional): your target phrase
+
+## Rules
+1. Read SKILL.md first. Follow it exactly.
+2. Write every file into the working folder.
+
+## Stop condition
+Stop when report.html exists. Show it.
+
+## Reply format
+- The report link or path.
+- The verdict line and the 3 biggest problems.
+```
+
 ## Робота над навичкою
 
 `scripts/` — це вихідний код; `dist/` збирається з нього за допомогою [esbuild](https://esbuild.github.io/) (лише залежність для розробки) і лежить у репозиторії, тож навичка працює без встановлення.

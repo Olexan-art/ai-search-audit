@@ -161,6 +161,31 @@ Where no published rule gives a number: a title of 10 to 60 characters; a descri
 - **Everything past a cap.** 30 links and 20 images are checked, 10 language versions read, 5 child sitemaps opened; 12 seconds per request (8 for a link, an image or a site check), 3,000,000 characters of HTML. Every cap is named in the report, never applied silently.
 - **How to fix it.** Lite lists problems; it does not explain them or propose fixes.
 
+## Asking your agent
+
+A short request with a clear stop condition and a reply format keeps the agent on the procedure. Copy it and put in your page:
+
+```markdown
+## Task
+Run the skill `ai-search-audit` on 1 page. Write its report.
+
+## Inputs
+- Page: https://example.com/page
+- Working folder: ./audit
+- Keyword (optional): your target phrase
+
+## Rules
+1. Read SKILL.md first. Follow it exactly.
+2. Write every file into the working folder.
+
+## Stop condition
+Stop when report.html exists. Show it.
+
+## Reply format
+- The report link or path.
+- The verdict line and the 3 biggest problems.
+```
+
 ## Working on the skill
 
 `scripts/` is the source; `dist/` is built from it with [esbuild](https://esbuild.github.io/) (a development dependency only) and committed, so the skill runs without an install.
