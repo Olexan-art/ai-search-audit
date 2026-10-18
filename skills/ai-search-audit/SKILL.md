@@ -3,7 +3,7 @@ name: ai-search-audit
 description: Audits 1 public web page for search and AI search (SEO and GEO): robots.txt for Googlebot and AI crawlers (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot), noindex, snippets, title, headings, canonical, structured data, hreflang, how an AI retriever reads the page, and what the agent's model knows about the brand. Output: an HTML report. Use for an SEO or GEO audit of 1 page, AI search readiness, or why Google, ChatGPT or Perplexity do not show or quote a page, or when the user names ai-search-audit. For at most 50 pages, history and fix directions, use ai-search-audit-full. For passages only, use vectorscope.
 ---
 
-Version 2.109. The first number changes only on a breaking change.
+Version 2.110. The first number changes only on a breaking change.
 
 # AI Search Audit (Lite)
 

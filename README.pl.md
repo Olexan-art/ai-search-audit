@@ -2,7 +2,7 @@
 
 # AI Search Audit Lite
 
-AI Search Audit Lite **2.109** to skill (Agent Skill) od [GetLoopLoop](https://www.getlooploop.com) dla claude.ai i aplikacji Claude na komputer, Claude Code, Codex, opencode, Hermes Agent i innych agentów, które wczytują skille w formacie `SKILL.md`. Wersje liczymy w tysięcznych (2.101, 2.102, …), więc pierwsza cyfra zmienia się tylko przy zmianie niezgodnej wstecz.
+AI Search Audit Lite **2.110** to skill (Agent Skill) od [GetLoopLoop](https://www.getlooploop.com) dla claude.ai i aplikacji Claude na komputer, Claude Code, Codex, opencode, Hermes Agent i innych agentów, które wczytują skille w formacie `SKILL.md`. Wersje liczymy w tysięcznych (2.101, 2.102, …), więc pierwsza cyfra zmienia się tylko przy zmianie niezgodnej wstecz.
 
 Zanim Google, Bing albo asystent AI pokaże lub zacytuje stronę, robot musi zostać wpuszczony, strona musi powiedzieć, czym jest, a tekst musi przetrwać maszynowe czytanie. `ai-search-audit` sprawdza jedną publiczną stronę według standardowych, opublikowanych reguł dla wszystkich trzech etapów, dodaje trzy odczyty, które może zrobić tylko AI (pytania, które zadają ludzie, jak własny model agenta opisuje markę i co sądzi o jej opiniach), i przedstawia wynik w jednym raporcie: sześć kafelków stanu, mapa strony zbudowana z jej prawdziwego dokumentu, na której każdy problem zaznaczono w jego miejscu, największe problemy, boty w robots.txt, lista kontrolna Google i Bing, wersje językowe, droga tekstu do retrievera AI, a na samym dole: na ile tekst brzmi jak wygenerowany. Raport można czytać po angielsku, ukraińsku lub polsku.
 
