@@ -1,8 +1,8 @@
 {
   "schema": "getlooploop/ai-search-audit@1",
-  "skillVersion": "2.107",
+  "skillVersion": "2.109",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T12:47:00.297Z",
+  "createdAt": "2026-10-18T09:29:27.570Z",
   "edition": "lite",
   "page": {
     "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching",
@@ -1394,6 +1394,522 @@
             25
           ]
         }
+      }
+    ]
+  },
+  "generatedText": {
+    "versions": {
+      "detectors": "det-1",
+      "score": "score-1",
+      "markers": "markers-1"
+    },
+    "analysed": true,
+    "reason": null,
+    "language": "en",
+    "patternScore": {
+      "value": 0,
+      "band": "low",
+      "points": 6,
+      "perThousand": 1.14,
+      "words": 5255
+    },
+    "markerWords": {
+      "hits": 1,
+      "perThousand": 0.2,
+      "band": "rare",
+      "terms": [
+        {
+          "term": "ecosystem",
+          "count": 1,
+          "passages": [
+            11
+          ]
+        }
+      ]
+    },
+    "families": [
+      {
+        "family": "repetition",
+        "findings": 2,
+        "points": 6,
+        "chips": [
+          {
+            "text": "This is called heuristic caching.",
+            "count": 1,
+            "passages": [
+              5
+            ]
+          },
+          {
+            "text": "This is called request collapse.",
+            "count": 1,
+            "passages": [
+              18
+            ]
+          }
+        ],
+        "more": 0
+      }
+    ],
+    "shortPassages": [
+      0,
+      24,
+      25
+    ],
+    "judgement": {
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "generic": {
+        "passages": 5,
+        "of": 26,
+        "chars": 1913,
+        "totalChars": 34619,
+        "share": 0.055258672983043995
+      }
+    },
+    "disagreements": [
+      {
+        "passage": 1,
+        "kind": "script_missed"
+      },
+      {
+        "passage": 23,
+        "kind": "script_missed"
+      }
+    ],
+    "passages": [
+      {
+        "index": 0,
+        "words": 24,
+        "chars": 153,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "The HTTP cache stores a response associated with a request and reuses the stored response for subsequent requests.",
+        "why": "Title plus a one-line definition any caching page would open with.",
+        "disagree": null
+      },
+      {
+        "index": 1,
+        "words": 133,
+        "chars": 761,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Proper operation of the cache is critical to the health of the system.",
+        "why": "General benefits of caching (speed, less server load) with no header, number or example.",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 2,
+        "words": 318,
+        "chars": 1997,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Cache-Control: no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate",
+        "why": "Private vs shared caches with exact directives, including the kitchen-sink header.",
+        "disagree": null
+      },
+      {
+        "index": 3,
+        "words": 319,
+        "chars": 1998,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "some browsers only allow certificates issued with an SCT (signed certificate timestamp), this method requires the application of an enterprise policy",
+        "why": "Concrete account of TLS bridge proxies, CT and managed caches.",
+        "disagree": null
+      },
+      {
+        "index": 4,
+        "words": 166,
+        "chars": 1064,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "some CDNs provide their own headers that are effective only for that CDN (for example, Surrogate-Control)",
+        "why": "Names Varnish VCL, Surrogate-Control and CDN-Cache-Control.",
+        "disagree": null
+      },
+      {
+        "index": 5,
+        "words": 167,
+        "chars": 979,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "the specification recommends about 10% (in this case 0.1 year) of the time after storing",
+        "why": "Heuristic caching with a worked example and the 10% rule.",
+        "disagree": null
+      },
+      {
+        "index": 6,
+        "words": 289,
+        "chars": 1671,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "fresh for the remaining 518400 seconds, the difference between the response's max-age and Age",
+        "why": "Worked max-age/Age arithmetic a reader can check.",
+        "disagree": null
+      },
+      {
+        "index": 7,
+        "words": 114,
+        "chars": 665,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "If both Expires and Cache-Control: max-age are available, max-age is defined to be preferred.",
+        "why": "Exact precedence rule between two headers.",
+        "disagree": null
+      },
+      {
+        "index": 8,
+        "words": 304,
+        "chars": 1966,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Vary: Accept-Language",
+        "why": "Shows how Vary changes the cache key, with tables and the User-Agent caveat.",
+        "disagree": null
+      },
+      {
+        "index": 9,
+        "words": 337,
+        "chars": 1998,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "The server will respond with 304 Not Modified if the content has not changed since the specified time.",
+        "why": "If-Modified-Since request/response exchange with exact timestamps.",
+        "disagree": null
+      },
+      {
+        "index": 10,
+        "words": 331,
+        "chars": 1996,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "if both If-Modified-Since and If-None-Match are present, then If-None-Match takes precedence for the validator",
+        "why": "ETag/If-None-Match exchange, RFC9110 note and precedence rule.",
+        "disagree": null
+      },
+      {
+        "index": 11,
+        "words": 325,
+        "chars": 1999,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 1,
+          "perThousand": 3.1
+        },
+        "verdict": "specific",
+        "evidence": "The no-cache directive (or equivalent, such as max-age=0, must-revalidate) does not guarantee revalidation for history navigations",
+        "why": "Forced revalidation with no-cache and the bfcache exception.",
+        "disagree": null
+      },
+      {
+        "index": 12,
+        "words": 92,
+        "chars": 529,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "there's no reason to ever use that max-age=0 and must-revalidate combination — you should instead just use no-cache",
+        "why": "Explains a historical workaround and gives a definite recommendation.",
+        "disagree": null
+      },
+      {
+        "index": 13,
+        "words": 307,
+        "chars": 1989,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "returning no-store will not prevent the old response from being reused",
+        "why": "Distinguishes no-cache, no-store and private by exact behaviour.",
+        "disagree": null
+      },
+      {
+        "index": 14,
+        "words": 139,
+        "chars": 886,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Cache-Control: no-cache, private",
+        "why": "Concrete replacement for kitchen-sink headers and what no-store costs (bfcache).",
+        "disagree": null
+      },
+      {
+        "index": 15,
+        "words": 329,
+        "chars": 1998,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "fetch(\"/\", { cache: \"no-cache\" });",
+        "why": "Actual reload request headers and the matching Fetch cache mode.",
+        "disagree": null
+      },
+      {
+        "index": 16,
+        "words": 167,
+        "chars": 1084,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Cache-Control: max-age=31536000, immutable",
+        "why": "Force-reload fetch mode, the immutable directive and Chrome's behaviour.",
+        "disagree": null
+      },
+      {
+        "index": 17,
+        "words": 214,
+        "chars": 1271,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "The Clear-Site-Data: cache header and directive value can be used to clear browser caches — but has no effect on intermediate caches.",
+        "why": "Names a header and the exact limit of what it clears.",
+        "disagree": null
+      },
+      {
+        "index": 18,
+        "words": 116,
+        "chars": 655,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Request collapse occurs when requests are arriving at the same time, so even if max-age=0 or no-cache is given in the response, it will be reused.",
+        "why": "Defines request collapse and a checkable directive interaction.",
+        "disagree": null
+      },
+      {
+        "index": 19,
+        "words": 321,
+        "chars": 1978,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "# version in filename bundle.v123.js # version in query bundle.js?v=123",
+        "why": "Default Cache-Control pattern and concrete cache-busting URLs.",
+        "disagree": null
+      },
+      {
+        "index": 20,
+        "words": 332,
+        "chars": 1992,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "41 cache-control public, max-age=31536000",
+        "why": "QPACK static table entries and what public does with Authorization.",
+        "disagree": null
+      },
+      {
+        "index": 21,
+        "words": 309,
+        "chars": 1993,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Cache-Control: public, max-age=31536000, immutable",
+        "why": "Full response headers for a cache-busted bundle.",
+        "disagree": null
+      },
+      {
+        "index": 22,
+        "words": 306,
+        "chars": 1998,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "The same can be used for favicon.ico, manifest.json, .well-known, and API endpoints whose URLs cannot be changed using cache busting.",
+        "why": "Concrete header set for main resources, personalized and not.",
+        "disagree": null
+      },
+      {
+        "index": 23,
+        "words": 123,
+        "chars": 731,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "For more information, see the documentation for your CDN, and consult the service worker documentation.",
+        "why": "General advice to purge via a CDN or service worker; no header, value or procedure.",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 24,
+        "words": 16,
+        "chars": 118,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "RFC 9111: Hypertext Transfer Protocol (HTTP/1.1): Caching",
+        "why": "A See also link list; any caching page could carry the same references.",
+        "disagree": null
+      },
+      {
+        "index": 25,
+        "words": 27,
+        "chars": 150,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Learn how to contribute",
+        "why": "Site footer boilerplate with nothing about the subject.",
+        "disagree": null
       }
     ]
   },

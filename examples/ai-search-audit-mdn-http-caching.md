@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
 
-HTTP caching - HTTP \| MDN · checked 17 Oct 2026 · skill 2.107
+HTTP caching - HTTP \| MDN · checked 18 Oct 2026 · skill 2.109
 
 **Nothing hides text from AI** · 10 problems (blocking 0, high 0, medium 3, low 7)
 
@@ -166,6 +166,53 @@ One language version: the page declares no hreflang.
 - reviews.json not given: that judgement was not made
 - 470 links not checked (cap 30)
 - 5 sections drawn as one zone on the map
+
+## How generated the text sounds `derived` `judgement`
+
+Stock phrasing, marker words and generic passages. Not an authorship detector: who wrote the text cannot be shown from the text.
+
+- **Pattern score** `derived`: 0/100, low (6 points over 5,255 words = 1.14 per 1,000; PatternScope det-1/score-1, language en).
+- **Marker words** `derived`: 0.2 per 1,000 words, rare (1 occurrences; not part of the score; thresholds not yet calibrated).
+- **Generic passages** `judgement`: 5 of 26, 6% of passage characters (the agent's swap test).
+- **Too short for a score** `measured`: 3 of 26 passages under 60 words (#0, #24, #25).
+
+The script and the agent disagree on #1 and #23: #1 low score, generic text; #23 low score, generic text. Shown, not averaged.
+
+### Where the score comes from `derived`
+
+- Repeated sentence shape: 2 findings, 6 points — “This is called heuristic caching.”, “This is called request collapse.”
+
+Marker words (not in the score): ecosystem.
+
+| # | Heading | Score | Markers /1k | Agent | Evidence |
+|---|---|---|---|---|---|
+| #0 | HTTP caching - HTTP \| MDN | — (24 words) | 0 | generic | “The HTTP cache stores a response associated with a request and reuses the stored response for subsequent requests.” — Title plus a one-line definition any caching page would open with. |
+| #1 | — | 0 low | 0 | generic ≠ script | “Proper operation of the cache is critical to the health of the system.” — General benefits of caching (speed, less server load) with no header, number or example. |
+| #2 | Types of caches | 0 low | 0 | specific | “Cache-Control: no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate” — Private vs shared caches with exact directives, including the kitchen-sink header. |
+| #3 | Types of caches | 0 low | 0 | specific | “some browsers only allow certificates issued with an SCT (signed certificate timestamp), this method requires the application of an enterprise policy” — Concrete account of TLS bridge proxies, CT and managed caches. |
+| #4 | Types of caches | 0 low | 0 | specific | “some CDNs provide their own headers that are effective only for that CDN (for example, Surrogate-Control)” — Names Varnish VCL, Surrogate-Control and CDN-Cache-Control. |
+| #5 | Heuristic caching | 0 low | 0 | specific | “the specification recommends about 10% (in this case 0.1 year) of the time after storing” — Heuristic caching with a worked example and the 10% rule. |
+| #6 | Fresh and stale based on age | 0 low | 0 | specific | “fresh for the remaining 518400 seconds, the difference between the response's max-age and Age” — Worked max-age/Age arithmetic a reader can check. |
+| #7 | Expires or max-age | 0 low | 0 | specific | “If both Expires and Cache-Control: max-age are available, max-age is defined to be preferred.” — Exact precedence rule between two headers. |
+| #8 | Vary | 0 low | 0 | specific | “Vary: Accept-Language” — Shows how Vary changes the cache key, with tables and the User-Agent caveat. |
+| #9 | Validation | 0 low | 0 | specific | “The server will respond with 304 Not Modified if the content has not changed since the specified time.” — If-Modified-Since request/response exchange with exact timestamps. |
+| #10 | Validation | 0 low | 0 | specific | “if both If-Modified-Since and If-None-Match are present, then If-None-Match takes precedence for the validator” — ETag/If-None-Match exchange, RFC9110 note and precedence rule. |
+| #11 | Validation | 0 low | 3 | specific | “The no-cache directive (or equivalent, such as max-age=0, must-revalidate) does not guarantee revalidation for history navigations” — Forced revalidation with no-cache and the bfcache exception. |
+| #12 | Validation | 0 low | 0 | specific | “there's no reason to ever use that max-age=0 and must-revalidate combination — you should instead just use no-cache” — Explains a historical workaround and gives a definite recommendation. |
+| #13 | Don't cache | 0 low | 0 | specific | “returning no-store will not prevent the old response from being reused” — Distinguishes no-cache, no-store and private by exact behaviour. |
+| #14 | Don't cache | 0 low | 0 | specific | “Cache-Control: no-cache, private” — Concrete replacement for kitchen-sink headers and what no-store costs (bfcache). |
+| #15 | Reload and force reload | 0 low | 0 | specific | “fetch("/", { cache: "no-cache" });” — Actual reload request headers and the matching Fetch cache mode. |
+| #16 | Reload and force reload | 0 low | 0 | specific | “Cache-Control: max-age=31536000, immutable” — Force-reload fetch mode, the immutable directive and Chrome's behaviour. |
+| #17 | Deleting stored responses | 0 low | 0 | specific | “The Clear-Site-Data: cache header and directive value can be used to clear browser caches — but has no effect on intermediate caches.” — Names a header and the exact limit of what it clears. |
+| #18 | Request collapse | 0 low | 0 | specific | “Request collapse occurs when requests are arriving at the same time, so even if max-age=0 or no-cache is given in the response, it will be reused.” — Defines request collapse and a checkable directive interaction. |
+| #19 | Common caching patterns | 0 low | 0 | specific | “# version in filename bundle.v123.js # version in query bundle.js?v=123” — Default Cache-Control pattern and concrete cache-busting URLs. |
+| #20 | Common caching patterns | 0 low | 0 | specific | “41 cache-control public, max-age=31536000” — QPACK static table entries and what public does with Authorization. |
+| #21 | Common caching patterns | 0 low | 0 | specific | “Cache-Control: public, max-age=31536000, immutable” — Full response headers for a cache-busted bundle. |
+| #22 | Common caching patterns | 0 low | 0 | specific | “The same can be used for favicon.ico, manifest.json, .well-known, and API endpoints whose URLs cannot be changed using cache busting.” — Concrete header set for main resources, personalized and not. |
+| #23 | Common caching patterns | 0 low | 0 | generic ≠ script | “For more information, see the documentation for your CDN, and consult the service worker documentation.” — General advice to purge via a CDN or service worker; no header, value or procedure. |
+| #24 | See also | — (16 words) | 0 | generic | “RFC 9111: Hypertext Transfer Protocol (HTTP/1.1): Caching” — A See also link list; any caching page could carry the same references. |
+| #25 | Help improve MDN | — (27 words) | 0 | generic | “Learn how to contribute” — Site footer boilerplate with nothing about the subject. |
+
 
 ## What this check cannot see
 

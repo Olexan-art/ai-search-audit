@@ -1,8 +1,8 @@
 {
   "schema": "getlooploop/ai-search-audit@1",
-  "skillVersion": "2.107",
+  "skillVersion": "2.109",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T12:46:53.380Z",
+  "createdAt": "2026-10-17T12:59:42.540Z",
   "edition": "lite",
   "page": {
     "url": "https://www.getlooploop.com/es/vectorscope",
@@ -1932,6 +1932,349 @@
     "promiseChecked": false,
     "findings": []
   },
+  "generatedText": {
+    "versions": {
+      "detectors": "det-1",
+      "score": "score-1",
+      "markers": "markers-1"
+    },
+    "analysed": true,
+    "reason": null,
+    "language": "es",
+    "patternScore": {
+      "value": 0,
+      "band": "low",
+      "points": 0,
+      "perThousand": 0,
+      "words": 2489
+    },
+    "markerWords": {
+      "hits": 0,
+      "perThousand": 0,
+      "band": "rare",
+      "terms": []
+    },
+    "families": [],
+    "shortPassages": [
+      0,
+      2,
+      3,
+      4,
+      8,
+      17
+    ],
+    "judgement": {
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "generic": {
+        "passages": 5,
+        "of": 18,
+        "chars": 2271,
+        "totalChars": 15455,
+        "share": 0.14694273697832416
+      }
+    },
+    "disagreements": [
+      {
+        "passage": 11,
+        "kind": "script_missed"
+      },
+      {
+        "passage": 13,
+        "kind": "script_missed"
+      }
+    ],
+    "passages": [
+      {
+        "index": 0,
+        "words": 47,
+        "chars": 283,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "mira qué sobrevive el viaje al espacio vectorial",
+        "why": "A tagline and a paste-a-URL promise any chunking viewer could open with; no number, limit or method.",
+        "disagree": null
+      },
+      {
+        "index": 1,
+        "words": 157,
+        "chars": 957,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "corte en h2, luego ventanas de 2000 caracteres máx. 26 fragmentos / página",
+        "why": "States this tool's exact split rule and its 26-passage cap.",
+        "disagree": null
+      },
+      {
+        "index": 2,
+        "words": 51,
+        "chars": 286,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Es una vista previa de lo que ve la máquina, no una garantía de lo que hará con ella un asistente.",
+        "why": "A preview-not-a-guarantee explainer that any chunking visualiser could carry.",
+        "disagree": null
+      },
+      {
+        "index": 3,
+        "words": 26,
+        "chars": 144,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Esta lectura toma como máximo 26 pasajes de una página.",
+        "why": "Names the 26-passage cap and the fix for a passage past it.",
+        "disagree": null
+      },
+      {
+        "index": 4,
+        "words": 40,
+        "chars": 244,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Esto no demuestra que ningún asistente haya indexado la página.",
+        "why": "A standard disclaimer that fits any retrieval preview tool.",
+        "disagree": null
+      },
+      {
+        "index": 5,
+        "words": 339,
+        "chars": 1997,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Vectorscope aplica el mismo límite que el producto y nombra los fragmentos que se quedaron fuera.",
+        "why": "Ties the cap to the product's own pipeline and ranks extraction failure causes.",
+        "disagree": null
+      },
+      {
+        "index": 6,
+        "words": 109,
+        "chars": 635,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "cambia el titular, vuelve a pasar la página, haz la misma pregunta.",
+        "why": "A concrete procedure for testing a rewritten heading with the tool.",
+        "disagree": null
+      },
+      {
+        "index": 7,
+        "words": 341,
+        "chars": 1992,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "una ventana de 2000 caracteres con 200 de solapamiento, que termina en un final de frase si hay uno lo bastante cerca",
+        "why": "Exact window size, overlap and sentence-end rule; h3 stays inside its h2.",
+        "disagree": null
+      },
+      {
+        "index": 8,
+        "words": 58,
+        "chars": 334,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Un grupo que cruza tres secciones h2 dice que los titulares partieron una idea",
+        "why": "Explains how to read this tool's clusters against its own h2 cuts.",
+        "disagree": null
+      },
+      {
+        "index": 9,
+        "words": 203,
+        "chars": 1138,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "una directiva noindex se informa, no se ignora.",
+        "why": "Lists exactly what this tool reports and what it cannot see, including noindex handling.",
+        "disagree": null
+      },
+      {
+        "index": 10,
+        "words": 160,
+        "chars": 962,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "puedes apuntar a cualquier URL en unos veinte segundos",
+        "why": "Timing, a four-step test procedure and the production chunker parameters.",
+        "disagree": null
+      },
+      {
+        "index": 11,
+        "words": 162,
+        "chars": 976,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Vectorscope es para cualquiera cuya página se lea por pasajes",
+        "why": "An audience list that would fit any chunking tool with the name swapped.",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 12,
+        "words": 256,
+        "chars": 1524,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "En esta página el paso basado en el significado es el agrupamiento de pasajes ya cortados, no el corte en sí.",
+        "why": "Definitions anchored to how this tool actually works.",
+        "disagree": null
+      },
+      {
+        "index": 13,
+        "words": 81,
+        "chars": 482,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Respuestas más largas a las preguntas que esta página solo puede resumir.",
+        "why": "A link list with one-line teasers; nothing only this page could say.",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 14,
+        "words": 342,
+        "chars": 1996,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Vectorscope corta en cada h2 —un h3 no abre un pasaje nuevo— y divide una sección larga en ventanas de 2000 caracteres con 200 de solapamiento.",
+        "why": "FAQ answers carry the tool's exact cut rules and retention behaviour.",
+        "disagree": null
+      },
+      {
+        "index": 15,
+        "words": 71,
+        "chars": 373,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "El límite existe porque cada lectura gasta una llamada de embeddings",
+        "why": "Gives the reason for the rate limit and how it resets.",
+        "disagree": null
+      },
+      {
+        "index": 16,
+        "words": 142,
+        "chars": 838,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "primero sin nombrar plataformas y luego nombrando las doce",
+        "why": "Names the sibling tools and what each one concretely does.",
+        "disagree": null
+      },
+      {
+        "index": 17,
+        "words": 54,
+        "chars": 294,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "eso necesita el corpus del sitio entero, medido en el tiempo.",
+        "why": "States this tool's boundary against the product's site-wide, over-time corpus.",
+        "disagree": null
+      }
+    ]
+  },
   "writingPatterns": {
     "language": "es",
     "wordCount": 2489,
@@ -3063,7 +3406,8 @@
         "path": "div > ul.mt-5.flex > li > a.group.inline-flex",
         "text": "Discord",
         "status": 200,
-        "verdict": "ok"
+        "verdict": "ok",
+        "finalUrl": "https://discord.com/invite/Z6cRuhprMa"
       },
       {
         "url": "https://www.getlooploop.com/questions",

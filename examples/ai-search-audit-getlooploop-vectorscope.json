@@ -1,8 +1,8 @@
 {
   "schema": "getlooploop/ai-search-audit@1",
-  "skillVersion": "2.107",
+  "skillVersion": "2.109",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T12:46:35.717Z",
+  "createdAt": "2026-10-17T12:59:27.061Z",
   "edition": "lite",
   "page": {
     "url": "https://www.getlooploop.com/vectorscope",
@@ -1980,6 +1980,355 @@
     "promiseChecked": true,
     "findings": []
   },
+  "generatedText": {
+    "versions": {
+      "detectors": "det-1",
+      "score": "score-1",
+      "markers": "markers-1"
+    },
+    "analysed": true,
+    "reason": null,
+    "language": "en",
+    "patternScore": {
+      "value": 1,
+      "band": "low",
+      "points": 6,
+      "perThousand": 2.51,
+      "words": 2393
+    },
+    "markerWords": {
+      "hits": 0,
+      "perThousand": 0,
+      "band": "rare",
+      "terms": []
+    },
+    "families": [
+      {
+        "family": "repetition",
+        "findings": 2,
+        "points": 6,
+        "chips": [
+          {
+            "text": "\" contributes the question itself.",
+            "count": 1,
+            "passages": [
+              7
+            ]
+          },
+          {
+            "text": "Not an AI detector.",
+            "count": 1,
+            "passages": [
+              15
+            ]
+          }
+        ],
+        "more": 0
+      }
+    ],
+    "shortPassages": [
+      0,
+      2,
+      3,
+      4,
+      14,
+      16
+    ],
+    "judgement": {
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "generic": {
+        "passages": 4,
+        "of": 17,
+        "chars": 1832,
+        "totalChars": 14259,
+        "share": 0.12848025808261448
+      }
+    },
+    "disagreements": [
+      {
+        "passage": 10,
+        "kind": "script_missed"
+      },
+      {
+        "passage": 12,
+        "kind": "script_missed"
+      }
+    ],
+    "passages": [
+      {
+        "index": 0,
+        "words": 45,
+        "chars": 286,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "what falls past the 26-passage cap",
+        "why": "names the tool's own cap",
+        "disagree": null
+      },
+      {
+        "index": 1,
+        "words": 149,
+        "chars": 852,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "cut at h2, then 2,000-char windows",
+        "why": "the tool's exact cut, as interface copy",
+        "disagree": null
+      },
+      {
+        "index": 2,
+        "words": 46,
+        "chars": 259,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "The reading shows which passages of your page a retriever can receive",
+        "why": "any chunking visualiser could say this",
+        "disagree": null
+      },
+      {
+        "index": 3,
+        "words": 29,
+        "chars": 139,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "This reading takes at most 26 passages from a page.",
+        "why": "a number a reader can check",
+        "disagree": null
+      },
+      {
+        "index": 4,
+        "words": 41,
+        "chars": 246,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "This does not establish that any assistant has indexed the page.",
+        "why": "a disclaimer any such tool could carry",
+        "disagree": null
+      },
+      {
+        "index": 5,
+        "words": 355,
+        "chars": 1995,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Vectorscope applies the same cap the product applies and names the passages that fell outside it.",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 6,
+        "words": 84,
+        "chars": 455,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "change the heading, run the page again, ask the same question",
+        "why": "a concrete test procedure",
+        "disagree": null
+      },
+      {
+        "index": 7,
+        "words": 343,
+        "chars": 1994,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "a window of 2,000 characters with 200 characters of overlap",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 8,
+        "words": 204,
+        "chars": 1126,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "a noindex directive is reported rather than ignored",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 9,
+        "words": 154,
+        "chars": 863,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "point at any URL in about twenty seconds",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 10,
+        "words": 154,
+        "chars": 890,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Vectorscope is for anyone whose page has to be read in passages",
+        "why": "an audience list a competitor's page could carry",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 11,
+        "words": 241,
+        "chars": 1400,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "On this page the meaning-based step is the grouping of passages that are already cut, not the cut itself.",
+        "why": "definitions tied to this tool",
+        "disagree": null
+      },
+      {
+        "index": 12,
+        "words": 71,
+        "chars": 437,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Longer answers to the questions this page can only summarise.",
+        "why": "a link list with no fact of its own",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 13,
+        "words": 355,
+        "chars": 1992,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "the fetched page itself is not retained after the reading is produced",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 14,
+        "words": 57,
+        "chars": 300,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "with a rate limit rather than a paywall",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 15,
+        "words": 125,
+        "chars": 746,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "first without naming a platform, then naming all twelve",
+        "why": null,
+        "disagree": null
+      },
+      {
+        "index": 16,
+        "words": 53,
+        "chars": 279,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "those need a corpus of the whole site, measured over time",
+        "why": null,
+        "disagree": null
+      }
+    ]
+  },
   "writingPatterns": {
     "language": "en",
     "wordCount": 2393,
@@ -3140,7 +3489,8 @@
         "path": "div > ul.mt-5.flex > li > a.group.inline-flex",
         "text": "Discord",
         "status": 200,
-        "verdict": "ok"
+        "verdict": "ok",
+        "finalUrl": "https://discord.com/invite/Z6cRuhprMa"
       },
       {
         "url": "https://www.getlooploop.com/questions",

@@ -129,7 +129,7 @@ test("the headline names the block: noindex, and robots.txt", async () => {
   const { headline, subtitle } = await import("../scripts/lib/copy.mjs");
   const ni = headline([{ code: "noindex", severity: "blocking", area: "find" }, { code: "h1_missing", severity: "medium", area: "classic" }]);
   assert.equal(ni.blocked, true);
-  assert.deepEqual(ni.t, ["The page asks search not to index it. 2 notes.", "Сторінка просить пошук не індексувати її. Є 2 зауваження."]);
+  assert.deepEqual(ni.t, ["The page asks search not to index it. 2 notes.", "Сторінка просить пошук не індексувати її. Є 2 зауваження.", "Strona prosi wyszukiwarki, by jej nie indeksowały. 2 uwagi."]);
   assert.ok(subtitle([{ code: "h1_missing", severity: "medium", area: "classic" }], true)[0].startsWith("Start with the block"));
   const r = await readingOf(html, {}, { robotsText: "User-agent: *\nDisallow: /\n" });
   const bm = buildModel(r);
@@ -138,7 +138,7 @@ test("the headline names the block: noindex, and robots.txt", async () => {
   assert.match(out, /<h1 id="headline"><span class="l-en">robots\.txt blocks search robots\. \d+ notes\.<\/span><span class="l-uk" lang="uk">robots\.txt блокує пошукових роботів\. Є \d+ /);
   assert.match(out, /class="lite-verdict is-blocked"|lite-verdict is-blocked/);
   assert.match(out, /<li class="card block" id="card-find">[\s\S]*?Robots are blocked[\s\S]*?Blocked: /);
-  assert.deepEqual(headline([]).t, ["The page is reachable. No notes.", "Сторінка доступна. Зауважень немає."]);
+  assert.deepEqual(headline([]).t, ["The page is reachable. No notes.", "Сторінка доступна. Зауважень немає.", "Strona jest dostępna. Brak uwag."]);
   assert.equal(headline([{ code: "x", severity: "low" }]).t[1], "Сторінка доступна. Є 1 зауваження.");
   assert.equal(headline(Array.from({ length: 5 }, () => ({ code: "x", severity: "low" }))).t[1], "Сторінка доступна. Є 5 зауважень.");
 });

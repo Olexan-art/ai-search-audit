@@ -5,8 +5,8 @@ in this skill are the Vectorscope skill's own code, copied here unchanged so thi
 stands on its own.
 
 - Source: https://github.com/Olexan-art/getlooploop-skills, `skills/vectorscope/scripts/lib/`
-- Commit: `a2cfdd1`
-- Vectorscope version: 2.110.0
+- Commit: `ed90ec4`
+- Vectorscope version: 2.111.0
 - Licence: MIT, the same holder; the source repository's licence is in [LICENSE](LICENSE).
 
 The files are byte-for-byte copies. Do not edit them here: change them in getlooploop-skills,
@@ -18,7 +18,7 @@ npm run build && npm test
 ```
 
 The set is every module that `scripts/` and `tests/` import from this folder, and what those
-import in turn (24 files):
+import in turn (28 files):
 
 - `accessibility.mjs`
 - `analysis.mjs`
@@ -27,6 +27,7 @@ import in turn (24 files):
 - `chunk.mjs`
 - `extract.mjs`
 - `fetchPage.mjs`
+- `generatedText.mjs`
 - `guards.mjs`
 - `html.mjs`
 - `i18n.mjs`
@@ -34,12 +35,15 @@ import in turn (24 files):
 - `language.mjs`
 - `lens.mjs`
 - `losses.mjs`
+- `markers.mjs`
 - `metrics.mjs`
 - `nonPageUrl.mjs`
+- `patterns.mjs`
 - `reading.mjs`
 - `refusal.mjs`
 - `render.mjs`
 - `robots.mjs`
+- `russian.mjs`
 - `russianSite.mjs`
 - `sprites.mjs`
 - `technical.mjs`

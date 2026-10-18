@@ -1,8 +1,8 @@
 # AI Search Audit Lite: https://www.getlooploop.com/uk/vectorscope
 
-Семантичне розбиття сторінки — Vectorscope · checked 17 Oct 2026 · skill 2.107
+Семантичне розбиття сторінки — Vectorscope · checked 17 Oct 2026 · skill 2.109
 
-**Nothing hides text from AI** · 21 problems (blocking 0, high 0, medium 9, low 12)
+**Nothing hides text from AI** · 21 problems (blocking 0, high 0, medium 8, low 13)
 
 Lite lists problems, not fixes: labels, severities and places. The checks are deterministic (measured or derived); the questions, the brand and the reviews are the agent's judgement, marked as such.
 
@@ -40,13 +40,13 @@ Main phrase: “Семантичне розбиття наочно” (read off 
 | 5 | Medium | No answer: “Потрібна сторінка відкривається лише …” | `question 12 · no passage` | Agent's judgement · Claude Opus 5.5 | `question_missing` |
 | 6 | Medium | Main phrase in 2 of 15 sections | `2 of 15 h2 sections` | Derived | `keyword_one_section` |
 | 7 | Medium | Menu lines inside the text | `passage #1` | Measured | `nav_in_content` |
-| 8 | Medium | 13 sentences of one shape | `passage #7 · word 786, passage #8 · word 916, passage #8 · word 984` | Measured | `repeated_sentence_shape` |
-| 9 | Medium | AI doesn't know the brand | `brand questions 1–5` | Agent's judgement · Claude Opus 5.5 | `brand_unknown` |
-| 10 | Low | Answered in part: “Чи можна перевірити сторінку з телефо…” | `question 4 · passage #1` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
-| 11 | Low | 1 very short section | `h2 “Важливий фрагмент за лімітом?”` | Measured | `thin_section` |
-| 12 | Low | Answered in part: “Завтра запускаємо сторінку: чи асисте…” | `question 1 · passage #5` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
-| 13 | Low | Answered in part: “Наш сайт — застосунок на React. Текст…” | `question 9 · passage #5` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
-| 14 | Low | Answered in part: “До п’ятниці треба перевірити двадцять…” | `question 10 · passage #14` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
+| 8 | Medium | AI doesn't know the brand | `brand questions 1–5` | Agent's judgement · Claude Opus 5.5 | `brand_unknown` |
+| 9 | Low | Answered in part: “Чи можна перевірити сторінку з телефо…” | `question 4 · passage #1` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
+| 10 | Low | 1 very short section | `h2 “Важливий фрагмент за лімітом?”` | Measured | `thin_section` |
+| 11 | Low | Answered in part: “Завтра запускаємо сторінку: чи асисте…” | `question 1 · passage #5` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
+| 12 | Low | Answered in part: “Наш сайт — застосунок на React. Текст…” | `question 9 · passage #5` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
+| 13 | Low | Answered in part: “До п’ятниці треба перевірити двадцять…” | `question 10 · passage #14` | Agent's judgement · Claude Opus 5.5 | `question_partial` |
+| 14 | Low | 4 sentences of one shape | `passage #13 · word 1670, passage #13 · word 1674, passage #13 · word 1752` | Measured | `repeated_sentence_shape` |
 | 15 | Low | FAQ rich result retired | `FAQPage` | Measured | `faq_rich_result_retired` |
 | 16 | Low | How-to: no rich result any more | `HowTo` | Measured | `rich_result_retired` |
 | 17 | Low | 151 KB, 42 scripts | `HTML` | Derived | `page_weight_heavy` |
@@ -60,18 +60,18 @@ Main phrase: “Семантичне розбиття наочно” (read off 
 Top to bottom; the numbers are the problems above. Unseen: the text reaches no passage an AI retriever would read.
 
 1. Site header · navigation
-2. Hero · problems 6, 7, 10
+2. Hero · problems 6, 7, 9
 3. Sidebar · unseen
 4. Що це означає?
-5. Важливий фрагмент за лімітом? · problems 11
+5. Важливий фрагмент за лімітом? · problems 10
 6. Моделі й ліміти пошуку різняться.
-7. Як читати свій результат · problems 3, 12, 13
-8. Що таке семантичне розбиття на фрагменти? · problems 8
-9. Чи готовий мій контент до пошуку з ШІ? · problems 8
-10. Як перевірити RAG-конвеєр за допомогою Vectorscope · problems 8
+7. Як читати свій результат · problems 3, 11, 12
+8. Що таке семантичне розбиття на фрагменти?
+9. Чи готовий мій контент до пошуку з ШІ?
+10. Як перевірити RAG-конвеєр за допомогою Vectorscope
 11. Для кого Vectorscope?
 12. Слова, вжиті на цій сторінці
-13. 4 more sections · problems 1, 3, 8, 14
+13. 4 more sections · problems 1, 3, 13, 14
 14. Footer
 
 **`<head>`**
@@ -182,6 +182,42 @@ x-default: yes
 
 - The promise-without-a-figure rule reads English only
 - 4 sections drawn as one zone on the map
+
+## How generated the text sounds `derived` `judgement`
+
+Stock phrasing, marker words and generic passages. Not an authorship detector: who wrote the text cannot be shown from the text.
+
+- **Pattern score** `derived`: 2/100, low (12 points over 2,022 words = 5.93 per 1,000; PatternScope det-1/score-1, language uk).
+- **Marker words** `derived`: 0 per 1,000 words, rare (0 occurrences; not part of the score; thresholds not yet calibrated).
+- **Generic passages** `judgement`: 4 of 17, 13% of passage characters (the agent's swap test).
+- **Too short for a score** `measured`: 6 of 17 passages under 60 words (#0, #2, #3, #4, #14, #16).
+
+The script and the agent disagree on #10 and #12: #10 low score, generic text; #12 low score, generic text. Shown, not averaged.
+
+### Where the score comes from `derived`
+
+- Repeated sentence shape: 4 findings, 12 points — “Це інструмент візуалізації ембедингів?”, “Так, для однієї сторінки за раз.”, “Не для того, щоб різати сторінку.”, “Це не детектор ШІ.”
+
+| # | Heading | Score | Markers /1k | Agent | Evidence |
+|---|---|---|---|---|---|
+| #0 | Семантичне розбиття сторінки — Vectorscope | — (37 words) | 0 | specific | “що не вміщується в ліміт 26” — Називає власний ліміт інструмента — 26 уривків. |
+| #1 | — | 0 low | 0 | specific | “розріз по h2, далі вікна по 2000 символів до 26 фрагментів / сторінку” — Точні параметри розрізу: h2, вікна по 2000 символів, ліміт 26. |
+| #2 | Що це означає? | — (39 words) | 0 | generic | “Це попередній погляд машини, а не гарантія того, що з ним зробить будь-який асистент.” — Загальне пояснення, яке підійде будь-якому візуалізатору розбиття. |
+| #3 | Важливий фрагмент за лімітом? | — (23 words) | 0 | specific | “Це прочитання бере зі сторінки не більше 26 фрагментів.” — Конкретна межа і конкретна дія для фрагмента за нею. |
+| #4 | Моделі й ліміти пошуку різняться. | — (33 words) | 0 | generic | “Це не доводить, що будь-який асистент проіндексував сторінку.” — Типове застереження, яке конкурент перенесе без змін. |
+| #5 | Як читати свій результат | 0 low | 0 | specific | “Vectorscope застосовує ту саму межу, що й продукт, і називає фрагменти, які за неї вийшли.” — Описує власну поведінку інструмента й причини низького видобутку. |
+| #6 | Як читати свій результат | 0 low | 0 | specific | “змініть заголовок, прогоніть сторінку знову, задайте те саме питання” — Конкретна процедура перевірки переписаного заголовка. |
+| #7 | Що таке семантичне розбиття на фрагменти? | 0 low | 0 | specific | “вікно у 2000 символів із перекриттям у 200, яке закінчується на межі речення” — Точні розміри вікна й перекриття, h3 не ріже фрагмент. |
+| #8 | Чи готовий мій контент до пошуку з ШІ? | 0 low | 0 | specific | “директива noindex повідомляється, а не ігнорується” — Чіткий перелік того, що інструмент бачить і чого не бачить. |
+| #9 | Як перевірити RAG-конвеєр за допомогою Vectorscope | 0 low | 0 | specific | “можна навести на будь-який URL секунд за двадцять” — Час на URL і покрокова перевірка власного чанкера. |
+| #10 | Для кого Vectorscope? | 0 low | 0 | generic ≠ script | “Vectorscope — для всіх, чию сторінку читатимуть фрагментами” — Список аудиторій, який підійде будь-якому подібному інструменту. |
+| #11 | Слова, вжиті на цій сторінці | 0 low | 0 | specific | “На цій сторінці крок за змістом — це групування вже вирізаних фрагментів, а не сам розріз.” — Визначення прив’язані до того, як працює саме цей інструмент. |
+| #12 | Читати далі | 0 low | 0 | generic ≠ script | “Довші відповіді на питання, які ця сторінка може лише підсумувати.” — Звичайний список посилань без власного змісту. |
+| #13 | Питання, які про це ставлять | 8 low | 0 | specific | “Vectorscope ріже по кожному h2 — h3 нового фрагмента не починає” — Відповіді називають власні правила розрізу й зберігання. |
+| #14 | Питання, які про це ставлять | — (32 words) | 0 | specific | “Обмеження існує, бо кожне читання витрачає виклик ембедингів” — Пояснює, звідки береться обмеження частоти саме тут. |
+| #15 | Інші безкоштовні AI SEO інструменти | 0 low | 0 | specific | “спершу не називаючи платформи, потім називаючи всі дванадцять” — Названі власні інструменти з конкретними деталями. |
+| #16 | Чого це показати не може | — (45 words) | 0 | specific | “для цього потрібен корпус усього сайту, зміряний у часі” — Чітка межа однієї сторінки проти корпусу продукту. |
+
 
 ## What this check cannot see
 

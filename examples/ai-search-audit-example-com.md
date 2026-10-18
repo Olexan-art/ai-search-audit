@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://example.com/
 
-Example Domain · checked 17 Oct 2026 · skill 2.107
+Example Domain · checked 18 Oct 2026 · skill 2.109
 
 **Nothing hides text from AI** · 24 problems (blocking 0, high 0, medium 6, low 18)
 
@@ -166,6 +166,21 @@ One language version: the page declares no hreflang.
 
 - Writing patterns: 25 words, under the 60 the density needs; no score
 - Keyword not checked: no --keyword and no h1 to read one from
+
+## How generated the text sounds `derived` `judgement`
+
+Stock phrasing, marker words and generic passages. Not an authorship detector: who wrote the text cannot be shown from the text.
+
+- **Pattern score** `derived`: not computed (insufficient_text). The page has fewer than 60 words of kept text: a density over so few words swings on a comma.
+- **Marker words** `derived`: 0 per 1,000 words, rare (0 occurrences; not part of the score; thresholds not yet calibrated).
+- **Generic passages** `judgement`: 1 of 2, 8% of passage characters (the agent's swap test).
+- **Too short for a score** `measured`: 2 of 2 passages under 60 words (#0, #1).
+
+| # | Heading | Score | Markers /1k | Agent | Evidence |
+|---|---|---|---|---|---|
+| #0 | Example Domain | — (2 words) | 0 | generic | “Example Domain” — a title with nothing a reader could check |
+| #1 | — | — (25 words) | 0 | specific | “This domain is for use in documentation examples without needing permission.” — states what this domain is for and what not to use it for |
+
 
 ## What this check cannot see
 

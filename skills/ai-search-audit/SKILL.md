@@ -1,9 +1,9 @@
 ---
 name: ai-search-audit
-description: Audit one public web page for classic search and AI search (SEO and GEO): robots.txt for Googlebot and AI crawlers (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot), noindex and snippet controls, sitemap and llms.txt, title, description, headings, canonical, links, images, structured data and retired rich results, trust signals, hreflang versions and their facts, how an AI retriever reads the page (passages, the 26-passage cap, hidden or JavaScript-only text), writing patterns, the target keyword, the questions people ask, and what the agent's own model believes about the brand and its reviews. An HTML report, plus Markdown and JSON, listing problems, not fixes. Use when the user asks for an SEO or GEO audit, whether a page is ready for AI search, why Google, ChatGPT or Perplexity may not show or quote a page, or names ai-search-audit. Ukrainian too: «SEO-аудит сторінки», «аудит для ШІ-пошуку», «GEO-аудит». Scripts call no model.
+description: Audit one public web page for classic search and AI search (SEO and GEO): robots.txt for Googlebot and AI crawlers (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot), noindex and snippet controls, sitemap and llms.txt, title, description, headings, canonical, links, images, structured data, trust signals, hreflang versions and their facts, how an AI retriever reads the page (passages, the 26-passage cap, JavaScript-only text), how generated the text sounds, the target keyword, the questions people ask, and what the agent's own model believes about the brand and its reviews. An HTML report, plus Markdown and JSON, listing problems, not fixes. Use when the user asks for an SEO or GEO audit, whether a page is ready for AI search, why Google, ChatGPT or Perplexity may not show or quote a page, or names ai-search-audit. Ukrainian and Polish too: «SEO-аудит сторінки», «аудит для ШІ-пошуку», «audyt SEO strony», «audyt pod wyszukiwanie AI». Scripts call no model.
 ---
 
-Version 2.108. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105, 2.106, 2.107, 2.108, …): the first number moves only on a breaking change.
+Version 2.109. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105, 2.106, 2.107, 2.108, 2.109, …): the first number moves only on a breaking change.
 
 # AI Search Audit (Lite)
 
@@ -25,12 +25,12 @@ Version 2.108. Versions count in thousandths (2.101, 2.102, 2.103, 2.104, 2.105,
 
 1. *script* `node "$SKILL/dist/read.mjs" <url> --out reading.json` (add `--render` to compare with a JavaScript render in a local Chrome or Chromium; an empty app shell is rendered without it).
    It prints what it read: the final URL and redirects, the page's size, passages, robots.txt, sitemap, llms.txt, the language versions, the links and images checked, the site checks, and every cap it hit. If it prints `REFUSED <code>` (exit code 2), skip to step 6: the report says why. Do not retry with another URL unless asked.
-2. *judgement* **questions.json.** Read the `text` of every passage in `reading.json` (`vs.passages`), in full. Write 8 to 12 questions a person would say out loud to an assistant about the page's topic, and judge each against the passages (schema and rules below).
+2. *judgement* **questions.json** and **style.json.** Read the `text` of every passage in `reading.json` (`vs.passages`), in full. Write 8 to 12 questions a person would say out loud to an assistant about the page's topic, and judge each against the passages. From the same reading, mark every passage specific or generic (the swap test). Schemas and rules below.
 3. *judgement* **brand.json.** Name the brand the page belongs to (the site's own name). Answer the five buyer questions below **from your own knowledge only**: no browsing, no search, no other tool, and not from the page you just read. Where you do not know, say so with `"knows": false`.
 4. *judgement* **reviews.json.** For the same brand, state from your own knowledge only the rating you believe it has on each of the 12 platforms below and on the control platform, or `"knows": false`.
-5. *script* `node "$SKILL/dist/audit.mjs" reading.json --questions questions.json --brand brand.json --reviews reviews.json --check`
-   It validates the three files against the reading and writes nothing. If it prints `REFUSED <file>: <reason>`, fix that file as the message says and run it again. A `warning` line is advice about the file, not a refusal.
-6. *script* `node "$SKILL/dist/audit.mjs" reading.json --questions questions.json --brand brand.json --reviews reviews.json --html report.html --md report.md --json export.json` (add `--keyword "phrase"` when the user gave a target keyword; otherwise the keyword is read off the h1).
+5. *script* `node "$SKILL/dist/audit.mjs" reading.json --questions questions.json --style style.json --brand brand.json --reviews reviews.json --check`
+   It validates the four files against the reading and writes nothing. If it prints `REFUSED <file>: <reason>`, fix that file as the message says and run it again. A `warning` line is advice about the file, not a refusal.
+6. *script* `node "$SKILL/dist/audit.mjs" reading.json --questions questions.json --style style.json --brand brand.json --reviews reviews.json --html report.html --md report.md --json export.json` (add `--keyword "phrase"` when the user gave a target keyword; otherwise the keyword is read off the h1).
    It runs every check and prints the problems, numbered as on the report's map, with where each one is; judgement findings are marked `(judgement)`.
 7. **Show the report** (required; see *Show the report*). A chat summary goes with it, never instead of it.
 
@@ -120,6 +120,17 @@ Every one of these 13 codes, once: `g2` (G2), `capterra` (Capterra), `getapp` (G
 
 Vetteral is the **control**: a review platform that does not exist. Answer it as you answer the others; do not treat it differently because you suspect a test. A rating given for it is reported as a hallucination, and it says your other ratings prove nothing. The script then flags every rating you stated that has no source on the page (no mention of the platform, no link to it, no rating markup).
 
+### style.json
+
+```json
+{ "agent": "Claude Code", "model": "…",
+  "passages": [
+    { "passage": 3, "verdict": "specific", "evidence": "Free for up to 5 clients.", "why": "a limit a reader can check" },
+    { "passage": 5, "verdict": "generic", "evidence": "unlock its full potential", "why": "names no integration" } ] }
+```
+
+The swap test, one verdict for **every** passage in `vs.passages`: would this passage fit a competitor's page with only the brand name changed? `generic` if yes, `specific` if it holds something only this page could say (a number, a name, a limit, a procedure, a first-hand detail). `evidence` is the words that decided it, verbatim from that passage (at most 200 characters); `why` is optional, one short line in the user's language. Judge the passage, not the page, and not who wrote it: this is not an AI detector, and the report says so. The script checks every passage is judged once and every quote is verbatim. At the bottom of the report, *How generated the text sounds* shows your verdicts beside the Pattern score (the writing patterns below, the same number) and the marker words; where they disagree it shows both and averages nothing.
+
 ## Errors only
 
 This report lists problems: a short label, a severity and the place, for each one. It has no descriptions, no "what the rule says" and no fix directions; those belong to the full version, available from GetLoopLoop (https://www.getlooploop.com). **If the user wants fixes, they can ask.** When they do, you may answer from your own knowledge, and say that the advice is yours, not the report's. Do not volunteer a fix list with the summary.
@@ -134,7 +145,7 @@ This step is required. The HTML report is the result; a run that ends with only 
 - **Claude Code:** if the session has a tool for publishing HTML pages or artifacts, publish `report.html` with it, and only that file, and give the link. Otherwise open `report.html` in the user's default browser: `start "" "<absolute path>"` on Windows, `open "<absolute path>"` on macOS, `xdg-open "<absolute path>"` on Linux. Then give its absolute path. Do not open, publish or print the JSON or the Markdown.
 - **Codex, opencode, Hermes Agent or any other agent:** give `report.html`'s absolute path and offer to open it in the default browser with the command above (or the agent's own preview or browser tool, if it has one). Preview only the HTML. Name the other two files only if the user asks for the data.
 
-The report is one self-contained file and makes no network requests, so it opens offline. It opens in English and in the light theme; `#lang=uk` opens it in Ukrainian and `#theme=dark` in the dark theme (for example `report.html#lang=uk&theme=dark`).
+The report is one self-contained file and makes no network requests, so it opens offline. It opens in English and in the light theme; `#lang=uk` opens it in Ukrainian, `#lang=pl` in Polish and `#theme=dark` in the dark theme (for example `report.html#lang=pl&theme=dark`). When the user writes in Ukrainian or Polish, give the link with that `#lang`.
 
 ## The chat summary
 
@@ -145,7 +156,8 @@ Short, alongside the report and never instead of it:
 - The biggest problems (the report's numbers 1 to 5), each with where it is.
 - What was not checked: every cap the audit printed (links past 30, images past 20, alternates past 10, child sitemaps past 5, sections merged on the map, a render that could not run).
 - Say once that the checks are deterministic and rest on a published rule or a threshold this skill names, and that the questions, the brand and the reviews are your own judgement as one model (name it), not what ChatGPT, Gemini or Perplexity say; the web Brandscope and Reviewscope ask three assistants.
-- Do not claim that any assistant has indexed the page, ranks it or will cite it, and do not add a score.
+- How generated the text sounds, in one line: the Pattern score and its band, the marker words per 1,000 words, and how many passages you judged generic (derived, derived, your judgement). Never say the page was written by AI, or was not: the text cannot show it.
+- Do not claim that any assistant has indexed the page, ranks it or will cite it, and do not add a score of your own.
 
 ## The checks
 
@@ -162,7 +174,7 @@ Each finding has a code, a severity (blocking, high, medium or low), the status 
 
 The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,000-character windows, a 26-passage cap); `repeated_claim` and the keyword's "one section" use the page's h2 sections as their groups, so they need no embeddings. The Google and Bing checklist has 35 cells; Core Web Vitals and "in Google's index" are always *not measured* (they need field data and Search Console).
 
-**Writing patterns** are the GetLoopLoop PatternScope's deterministic detectors, run over the kept text: stock phrases from a list written per language, repeated sentence shapes, runs of sentences that open the same way, and evaluative claims with nothing checkable in the sentence, each with its position (passage and word) and a density per 1,000 words. English, Ukrainian and Spanish are analysed; other languages are reported as not analysed. They are signals about worn writing, not an AI detector.
+**Writing patterns** are the GetLoopLoop PatternScope's deterministic detectors, run over the kept text: stock phrases from a list written per language, repeated sentence shapes, runs of sentences that open the same way, and evaluative claims with nothing checkable in the sentence, each with its position (passage and word) and a density per 1,000 words. English, Ukrainian and Spanish are analysed; other languages are reported as not analysed. They are signals about worn writing, not an AI detector. The same score, with the marker words (vocabulary models overuse, counted beside the score and never inside it) and your swap test, is the report's last block, *How generated the text sounds*, shared with the Vectorscope skill.
 
 **The keyword** is `--keyword` when given, else the page's h1 with the site's name, a trailing year, a sales tail, a clause after a comma or colon and stop words at the edges trimmed (at most five words); the report says which. The promise-without-a-figure rule reads English only, and says so.
 
@@ -196,9 +208,9 @@ The passage checks are the Vectorscope skill's, run unchanged (h2 sections, 2,00
 
 ## Outputs
 
-- `report.html`: one self-contained page (inline CSS and one small script, favicons as data URIs, a content security policy that blocks every network request, every piece of page text escaped), light by default with a dark theme on the toggle, English and Ukrainian, safe down to 375 px. Summary first: a headline built from the findings, the severity counts, three cards (robots can find it, the text, the brand and questions), the three findings to review first, and the places in the document with the selected one beside them; every technical detail is in one closed section, *All checks and technical details*. Judgement findings carry an "Agent's judgement · <model>" badge, and a note says that brand, reviews and questions are one model's view.
+- `report.html`: one self-contained page (inline CSS and one small script, favicons as data URIs, a content security policy that blocks every network request, every piece of page text escaped), light by default with a dark theme on the toggle, English, Ukrainian and Polish, safe down to 375 px. Summary first: a headline built from the findings, the severity counts, three cards (robots can find it, the text, the brand and questions), the three findings to review first, and the places in the document with the selected one beside them; every technical detail is in one closed section, *All checks and technical details*. Judgement findings carry an "Agent's judgement · <model>" badge, and a note says that brand, reviews and questions are one model's view.
 - `report.md`: the same audit in Markdown, in English: the status, the biggest problems, every problem with its code, place and layer, the page map as a list, the checklist, the bots, the language versions, where the text goes, and what was not checked.
-- `export.json`: `getlooploop/ai-search-audit@1`. Every finding with `code`, `severity`, `area`, `owner`, `layer`, `judgement` (`agent`, `model`, or `null`), `label` (en, uk), `where`, `map` (zones and strip rows), `passages`, `evidence` and `rules` (each `{ name, url }`), plus the tiles, the checklist, the page map, robots, sitemap, llms.txt, languages, alternates, links, structured data, `keyword`, `writingPatterns`, `localeFacts`, `judgement` (the three files as validated), the reading's waterfall, `notChecked` (every cap) and `notMeasured`.
+- `export.json`: `getlooploop/ai-search-audit@1`. Every finding with `code`, `severity`, `area`, `owner`, `layer`, `judgement` (`agent`, `model`, or `null`), `label` (en, uk), `where`, `map` (zones and strip rows), `passages`, `evidence` and `rules` (each `{ name, url }`), plus the tiles, the checklist, the page map, robots, sitemap, llms.txt, languages, alternates, links, structured data, `keyword`, `writingPatterns`, `generatedText` (the last block: Pattern score, marker words, swap test, per passage), `localeFacts`, `judgement` (the files as validated), the reading's waterfall, `notChecked` (every cap) and `notMeasured`.
 - `reading.json` (`getlooploop/ai-search-audit-reading@1`): everything read in step 1, so step 6 can be rerun offline.
 
 ## Limits

@@ -37,9 +37,9 @@ export const CSS = `
   --est:#b69cfb;--est-soft:rgba(182,156,251,.13);--sel-soft:rgba(34,211,238,.08);
   color-scheme:dark;
 }
-.l-uk{display:none}
-:root[data-lang="uk"] .l-en{display:none}
-:root[data-lang="uk"] .l-uk{display:inline}
+.l-uk,.l-pl{display:none}
+:root[data-lang="uk"] .l-en,:root[data-lang="pl"] .l-en{display:none}
+:root[data-lang="uk"] .l-uk,:root[data-lang="pl"] .l-pl{display:inline}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow-wrap:anywhere}
@@ -257,9 +257,9 @@ export const CSS_EXTRA = `
 .refusal .src-link{white-space:nowrap;margin-left:4px;font-size:13px}
 .refusal .sanctions{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);max-width:860px}
 .refusal .why{margin:-6px 0 14px;font-weight:600;color:var(--text)}
-.lb-uk{display:none}
-:root[data-lang="uk"] .lb-en{display:none}
-:root[data-lang="uk"] .lb-uk{display:block}
+.lb-uk,.lb-pl{display:none}
+:root[data-lang="uk"] .lb-en,:root[data-lang="pl"] .lb-en{display:none}
+:root[data-lang="uk"] .lb-uk,:root[data-lang="pl"] .lb-pl{display:block}
 @media (max-width:480px){.refusal{padding:14px 14px}.refusal ul{padding-left:16px}}
 /* the judgement badge and the one-model note */
 .lyr{display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:12px;line-height:1.5;letter-spacing:.01em;border-radius:999px;padding:0 7px;border:1px solid var(--c);color:var(--c);background:var(--cs);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}

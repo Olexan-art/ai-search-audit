@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://www.getlooploop.com/es/vectorscope
 
-Fragmentado semántico de tu página — Vectorscope · checked 17 Oct 2026 · skill 2.107
+Fragmentado semántico de tu página — Vectorscope · checked 17 Oct 2026 · skill 2.109
 
 **Nothing hides text from AI** · 18 problems (blocking 0, high 0, medium 7, low 11)
 
@@ -179,6 +179,39 @@ x-default: yes
 
 - The promise-without-a-figure rule reads English only
 - 4 sections drawn as one zone on the map
+
+## How generated the text sounds `derived` `judgement`
+
+Stock phrasing, marker words and generic passages. Not an authorship detector: who wrote the text cannot be shown from the text.
+
+- **Pattern score** `derived`: 0/100, low (0 points over 2,489 words = 0 per 1,000; PatternScope det-1/score-1, language es).
+- **Marker words** `derived`: 0 per 1,000 words, rare (0 occurrences; not part of the score; thresholds not yet calibrated).
+- **Generic passages** `judgement`: 5 of 18, 15% of passage characters (the agent's swap test).
+- **Too short for a score** `measured`: 6 of 18 passages under 60 words (#0, #2, #3, #4, #8, #17).
+
+The script and the agent disagree on #11 and #13: #11 low score, generic text; #13 low score, generic text. Shown, not averaged.
+
+| # | Heading | Score | Markers /1k | Agent | Evidence |
+|---|---|---|---|---|---|
+| #0 | Fragmentado semántico de tu página — Vectorscope | — (47 words) | 0 | generic | “mira qué sobrevive el viaje al espacio vectorial” — A tagline and a paste-a-URL promise any chunking viewer could open with; no number, limit or method. |
+| #1 | — | 0 low | 0 | specific | “corte en h2, luego ventanas de 2000 caracteres máx. 26 fragmentos / página” — States this tool's exact split rule and its 26-passage cap. |
+| #2 | ¿Qué significa esto? | — (51 words) | 0 | generic | “Es una vista previa de lo que ve la máquina, no una garantía de lo que hará con ella un asistente.” — A preview-not-a-guarantee explainer that any chunking visualiser could carry. |
+| #3 | ¿Un pasaje importante fuera del límite? | — (26 words) | 0 | specific | “Esta lectura toma como máximo 26 pasajes de una página.” — Names the 26-passage cap and the fix for a passage past it. |
+| #4 | Los modelos y los límites varían. | — (40 words) | 0 | generic | “Esto no demuestra que ningún asistente haya indexado la página.” — A standard disclaimer that fits any retrieval preview tool. |
+| #5 | Cómo leer tu resultado | 0 low | 0 | specific | “Vectorscope aplica el mismo límite que el producto y nombra los fragmentos que se quedaron fuera.” — Ties the cap to the product's own pipeline and ranks extraction failure causes. |
+| #6 | Cómo leer tu resultado | 0 low | 0 | specific | “cambia el titular, vuelve a pasar la página, haz la misma pregunta.” — A concrete procedure for testing a rewritten heading with the tool. |
+| #7 | ¿Qué es el fragmentado semántico? | 0 low | 0 | specific | “una ventana de 2000 caracteres con 200 de solapamiento, que termina en un final de frase si hay uno lo bastante cerca” — Exact window size, overlap and sentence-end rule; h3 stays inside its h2. |
+| #8 | ¿Qué es el fragmentado semántico? | — (58 words) | 0 | specific | “Un grupo que cruza tres secciones h2 dice que los titulares partieron una idea” — Explains how to read this tool's clusters against its own h2 cuts. |
+| #9 | ¿Está mi contenido listo para la búsqueda con IA? | 0 low | 0 | specific | “una directiva noindex se informa, no se ignora.” — Lists exactly what this tool reports and what it cannot see, including noindex handling. |
+| #10 | Usar Vectorscope para probar un pipeline RAG | 0 low | 0 | specific | “puedes apuntar a cualquier URL en unos veinte segundos” — Timing, a four-step test procedure and the production chunker parameters. |
+| #11 | ¿Para quién es Vectorscope? | 0 low | 0 | generic ≠ script | “Vectorscope es para cualquiera cuya página se lea por pasajes” — An audience list that would fit any chunking tool with the name swapped. |
+| #12 | Palabras usadas en esta página | 0 low | 0 | specific | “En esta página el paso basado en el significado es el agrupamiento de pasajes ya cortados, no el corte en sí.” — Definitions anchored to how this tool actually works. |
+| #13 | Seguir leyendo | 0 low | 0 | generic ≠ script | “Respuestas más largas a las preguntas que esta página solo puede resumir.” — A link list with one-line teasers; nothing only this page could say. |
+| #14 | Preguntas que la gente hace sobre esto | 0 low | 0 | specific | “Vectorscope corta en cada h2 —un h3 no abre un pasaje nuevo— y divide una sección larga en ventanas de 2000 caracteres con 200 de solapamiento.” — FAQ answers carry the tool's exact cut rules and retention behaviour. |
+| #15 | Preguntas que la gente hace sobre esto | 0 low | 0 | specific | “El límite existe porque cada lectura gasta una llamada de embeddings” — Gives the reason for the rate limit and how it resets. |
+| #16 | Otras herramientas SEO con IA gratis | 0 low | 0 | specific | “primero sin nombrar plataformas y luego nombrando las doce” — Names the sibling tools and what each one concretely does. |
+| #17 | Lo que esto no puede enseñarte | — (54 words) | 0 | specific | “eso necesita el corpus del sitio entero, medido en el tiempo.” — States this tool's boundary against the product's site-wide, over-time corpus. |
+
 
 ## What this check cannot see
 

@@ -3,6 +3,7 @@
 // (one with descriptions and fix directions) can be rendered from this data alone.
 
 import { CANNOT, LAYER, MARK, SEV, UI, dateOf, verdict, ZONE_LABEL } from "./copy.mjs";
+import { generatedExport, generatedMarkdown } from "../vendor/vectorscope/generatedText.mjs";
 import { CODES, SEVERITIES } from "./checks.mjs";
 import { EXPORT_SCHEMA, PRODUCED_BY, SKILL_VERSION } from "./version.mjs";
 import { FULL_VERSION_URL, refusalLead, TOOL_NAME } from "./report.mjs";
@@ -72,6 +73,7 @@ export function renderMarkdown(model) {
     o.push("", "## Not checked", "");
     for (const c of model.caps) o.push(`- ${c.t[0]}`);
   }
+  if (model.generated) o.push("", ...generatedMarkdown(model.generated));
   o.push("", "## What this check cannot see", "");
   for (const c of CANNOT) o.push(`- ${c.t[0]}: ${c.links.map(([en, , href]) => `[${en}](${href})`).join(" · ")}`);
   o.push("", `Full report with explanations: ${FULL_VERSION_URL}`, "");
@@ -114,6 +116,8 @@ export function buildExport(model) {
     layers: { measured: "what a script counted on the page; any agent gets the same value", derived: "computed from measured values by a fixed formula", judgement: "the agent's model read or answered it; another model may judge differently" },
     judgement: { ...model.judgement, questions: model.extra?.questions || null, brand: model.extra?.brand || null, reviews: model.extra?.reviews || null },
     keyword: model.modules.keyword,
+    // How generated the text sounds: the Pattern score, marker words and swap test, as the report's last block shows them.
+    generatedText: model.generated ? generatedExport(model.generated) : null,
     writingPatterns: model.modules.patterns.analysed ? { language: model.modules.patterns.language, wordCount: model.modules.patterns.wordCount, score: model.modules.patterns.score, detectors: model.modules.patterns.version, findings: model.modules.patterns.findings.map((x) => ({ family: x.family, detector: x.detector, severity: x.severity, evidence: x.evidence, passage: x.passage, word: x.word, heading: x.heading, occurrences: x.occurrences })), note: "signals about worn writing, not an AI detector" } : { analysed: false, reason: model.modules.patterns.reason },
     localeFacts: model.modules.locales ? { method: "h2 sections aligned by order when both versions have the same count; numbers compared as sets", compared: model.modules.locales.compared, differ: model.modules.locales.differ, limits: ["versions whose sections do not line up are not compared", "numbers written as words are not read", "a number may differ on purpose (a local price or phone number)"] } : null,
     checklist: model.checklist.map((c) => ({ id: c.id, name: { en: c.name[0], uk: c.name[1] }, state: c.state, codes: c.codes })),

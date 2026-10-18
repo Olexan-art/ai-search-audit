@@ -1,6 +1,6 @@
 # AI Search Audit Lite: https://www.getlooploop.com/vectorscope
 
-Semantic Chunking Visualizer for Any URL — Vectorscope · checked 17 Oct 2026 · skill 2.107
+Semantic Chunking Visualizer for Any URL — Vectorscope · checked 17 Oct 2026 · skill 2.109
 
 **Nothing hides text from AI** · 19 problems (blocking 0, high 0, medium 7, low 12)
 
@@ -179,6 +179,42 @@ x-default: yes
 ## Not checked
 
 - 4 sections drawn as one zone on the map
+
+## How generated the text sounds `derived` `judgement`
+
+Stock phrasing, marker words and generic passages. Not an authorship detector: who wrote the text cannot be shown from the text.
+
+- **Pattern score** `derived`: 1/100, low (6 points over 2,393 words = 2.51 per 1,000; PatternScope det-1/score-1, language en).
+- **Marker words** `derived`: 0 per 1,000 words, rare (0 occurrences; not part of the score; thresholds not yet calibrated).
+- **Generic passages** `judgement`: 4 of 17, 13% of passage characters (the agent's swap test).
+- **Too short for a score** `measured`: 6 of 17 passages under 60 words (#0, #2, #3, #4, #14, #16).
+
+The script and the agent disagree on #10 and #12: #10 low score, generic text; #12 low score, generic text. Shown, not averaged.
+
+### Where the score comes from `derived`
+
+- Repeated sentence shape: 2 findings, 6 points — “" contributes the question itself.”, “Not an AI detector.”
+
+| # | Heading | Score | Markers /1k | Agent | Evidence |
+|---|---|---|---|---|---|
+| #0 | Semantic Chunking Visualizer for Any URL — Vectorscope | — (45 words) | 0 | specific | “what falls past the 26-passage cap” — names the tool's own cap |
+| #1 | — | 0 low | 0 | specific | “cut at h2, then 2,000-char windows” — the tool's exact cut, as interface copy |
+| #2 | What does this mean? | — (46 words) | 0 | generic | “The reading shows which passages of your page a retriever can receive” — any chunking visualiser could say this |
+| #3 | Important passage outside the cap? | — (29 words) | 0 | specific | “This reading takes at most 26 passages from a page.” — a number a reader can check |
+| #4 | Models and retrieval caps vary. | — (41 words) | 0 | generic | “This does not establish that any assistant has indexed the page.” — a disclaimer any such tool could carry |
+| #5 | How to read your result | 0 low | 0 | specific | “Vectorscope applies the same cap the product applies and names the passages that fell outside it.” |
+| #6 | How to read your result | 0 low | 0 | specific | “change the heading, run the page again, ask the same question” — a concrete test procedure |
+| #7 | What is semantic chunking? | 0 low | 0 | specific | “a window of 2,000 characters with 200 characters of overlap” |
+| #8 | Is my content ready for AI search? | 0 low | 0 | specific | “a noindex directive is reported rather than ignored” |
+| #9 | Using Vectorscope to test a RAG pipeline | 0 low | 0 | specific | “point at any URL in about twenty seconds” |
+| #10 | Who is Vectorscope for? | 0 low | 0 | generic ≠ script | “Vectorscope is for anyone whose page has to be read in passages” — an audience list a competitor's page could carry |
+| #11 | Words used on this page | 0 low | 0 | specific | “On this page the meaning-based step is the grouping of passages that are already cut, not the cut itself.” — definitions tied to this tool |
+| #12 | Keep reading | 0 low | 0 | generic ≠ script | “Longer answers to the questions this page can only summarise.” — a link list with no fact of its own |
+| #13 | Questions people ask about this | 0 low | 0 | specific | “the fetched page itself is not retained after the reading is produced” |
+| #14 | Questions people ask about this | — (57 words) | 0 | specific | “with a rate limit rather than a paywall” |
+| #15 | Other free AI search tools | 0 low | 0 | specific | “first without naming a platform, then naming all twelve” |
+| #16 | What this cannot show you | — (53 words) | 0 | specific | “those need a corpus of the whole site, measured over time” |
+
 
 ## What this check cannot see
 

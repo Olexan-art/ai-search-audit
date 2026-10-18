@@ -1,0 +1,8 @@
+{
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "passages": [
+    { "passage": 0, "verdict": "generic", "evidence": "Example Domain", "why": "a title with nothing a reader could check" },
+    { "passage": 1, "verdict": "specific", "evidence": "This domain is for use in documentation examples without needing permission.", "why": "states what this domain is for and what not to use it for" }
+  ]
+}

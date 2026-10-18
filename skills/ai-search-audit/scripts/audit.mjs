@@ -3,7 +3,7 @@
 // validated and compared with the page, and the report. No network, no model: the scripts only
 // count, compare and draw; the judgement in questions.json, brand.json and reviews.json was
 // written by the agent running the skill, and the report marks it as such.
-//   node scripts/audit.mjs reading.json [--questions questions.json] [--brand brand.json] [--reviews reviews.json]
+//   node scripts/audit.mjs reading.json [--questions questions.json] [--brand brand.json] [--reviews reviews.json] [--style style.json]
 //        [--keyword "phrase"] [--html report.html] [--md report.md] [--json export.json] [--check]
 // --check validates the judgement files against the reading and writes nothing.
 // A refused reading (ok:false) still gets its report: the URL and the reason, nothing else.
@@ -17,15 +17,16 @@ import { validateQuestions } from "./lib/questions.mjs";
 import { validateBrand } from "./lib/brand.mjs";
 import { validateReviews } from "./lib/reviews.mjs";
 import { textModules } from "./lib/checks.mjs";
+import { computeGenerated, validateStyle } from "./vendor/vectorscope/generatedText.mjs";
 
 const USAGE = [
-  "Usage: node scripts/audit.mjs reading.json [--questions questions.json] [--brand brand.json] [--reviews reviews.json]",
+  "Usage: node scripts/audit.mjs reading.json [--questions questions.json] [--brand brand.json] [--reviews reviews.json] [--style style.json]",
   '       [--keyword "phrase"] [--html report.html] [--md report.md] [--json export.json] [--check]',
 ].join("\n");
 
 function parseArgs(argv) {
-  const out = { reading: null, html: null, md: null, json: null, questions: null, brand: null, reviews: null, keyword: null, check: false };
-  const takes = { "--html": "html", "--md": "md", "--json": "json", "--questions": "questions", "--brand": "brand", "--reviews": "reviews", "--keyword": "keyword" };
+  const out = { reading: null, html: null, md: null, json: null, questions: null, brand: null, reviews: null, style: null, keyword: null, check: false };
+  const takes = { "--html": "html", "--md": "md", "--json": "json", "--questions": "questions", "--brand": "brand", "--reviews": "reviews", "--style": "style", "--keyword": "keyword" };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (takes[arg]) {
@@ -90,6 +91,7 @@ const judged = [
   ["questions", args.questions, (x) => validateQuestions(x, reading.vs.passages, { keyword: modules.keyword.keyword })],
   ["brand", args.brand, validateBrand],
   ["reviews", args.reviews, validateReviews],
+  ["style", args.style, (x) => validateStyle(x, reading.vs.passages)],
 ];
 for (const [key, file, validate] of judged) {
   if (!file) continue;
@@ -106,6 +108,8 @@ for (const [key, file, validate] of judged) {
 if (args.check) process.exit(0);
 
 const model = buildModel(reading, extra);
+// How generated the text sounds: the writing patterns' own text (the kept sections), each passage, the swap test.
+model.generated = computeGenerated({ sections: reading.facts.sections || null, passages: reading.vs.passages, style: extra.style ?? null });
 if (args.html) writeFileSync(args.html, renderReport(model));
 if (args.md) writeFileSync(args.md, renderMarkdown(model));
 if (args.json) writeFileSync(args.json, JSON.stringify(buildExport(model), null, 2));
@@ -117,6 +121,8 @@ console.log(`tiles     ${model.tiles.map((t) => `${t.id} ${t.state}`).join(" · 
 if (model.keyword) console.log(`keyword   “${model.keyword.keyword}” (${model.keyword.source === "given" ? "--keyword" : "from the h1"})`);
 const p = model.modules.patterns;
 console.log(`patterns  ${p.analysed ? `${p.language} · ${p.wordCount} words · ${p.findings.length} signals` : `not analysed (${p.reason})`}`);
+const gx = model.generated;
+console.log(`generated ${gx.page?.score ? `pattern score ${gx.page.score.value}/100 ${gx.page.score.band}` : `pattern score not computed (${gx.reason})`}${gx.page ? ` · markers ${gx.page.markers.perThousand}/1k` : ""} · ${gx.judged ? `${gx.generic.passages} of ${gx.generic.of} passages generic` : "swap test not given (--style)"}`);
 if (model.modules.locales) console.log(`locales   ${model.modules.locales.compared.map((x) => `${x.hreflang} ${x.aligned ? `${x.differ} differ` : "not aligned"}`).join(" · ")}`);
 for (const f of model.findings) console.log(`  ${String(f.pin).padStart(2)} [${f.severity}] ${f.code}${f.layer === "judgement" ? " (judgement)" : ""}${f.where ? `  @ ${f.where.slice(0, 90)}` : ""}`);
 const cl = model.checklist;

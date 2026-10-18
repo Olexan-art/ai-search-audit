@@ -1,8 +1,8 @@
 {
   "schema": "getlooploop/ai-search-audit@1",
-  "skillVersion": "2.107",
+  "skillVersion": "2.109",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T12:46:59.738Z",
+  "createdAt": "2026-10-18T09:29:33.865Z",
   "edition": "lite",
   "page": {
     "url": "https://example.com/",
@@ -2010,6 +2010,70 @@
     "source": "h1",
     "skipped": "no_h1",
     "findings": []
+  },
+  "generatedText": {
+    "versions": {
+      "detectors": "det-1",
+      "score": "score-1",
+      "markers": "markers-1"
+    },
+    "analysed": true,
+    "reason": "insufficient_text",
+    "language": "en",
+    "patternScore": null,
+    "markerWords": {
+      "hits": 0,
+      "perThousand": 0,
+      "band": "rare",
+      "terms": []
+    },
+    "families": [],
+    "shortPassages": [
+      0,
+      1
+    ],
+    "judgement": {
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "generic": {
+        "passages": 1,
+        "of": 2,
+        "chars": 14,
+        "totalChars": 170,
+        "share": 0.08235294117647059
+      }
+    },
+    "disagreements": [],
+    "passages": [
+      {
+        "index": 0,
+        "words": 2,
+        "chars": 14,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Example Domain",
+        "why": "a title with nothing a reader could check",
+        "disagree": null
+      },
+      {
+        "index": 1,
+        "words": 25,
+        "chars": 156,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "This domain is for use in documentation examples without needing permission.",
+        "why": "states what this domain is for and what not to use it for",
+        "disagree": null
+      }
+    ]
   },
   "writingPatterns": {
     "language": "en",

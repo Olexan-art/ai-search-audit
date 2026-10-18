@@ -1,0 +1,24 @@
+{
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "passages": [
+    { "passage": 0, "verdict": "generic", "evidence": "mira qué sobrevive el viaje al espacio vectorial", "why": "A tagline and a paste-a-URL promise any chunking viewer could open with; no number, limit or method." },
+    { "passage": 1, "verdict": "specific", "evidence": "corte en h2, luego ventanas de 2000 caracteres máx. 26 fragmentos / página", "why": "States this tool's exact split rule and its 26-passage cap." },
+    { "passage": 2, "verdict": "generic", "evidence": "Es una vista previa de lo que ve la máquina, no una garantía de lo que hará con ella un asistente.", "why": "A preview-not-a-guarantee explainer that any chunking visualiser could carry." },
+    { "passage": 3, "verdict": "specific", "evidence": "Esta lectura toma como máximo 26 pasajes de una página.", "why": "Names the 26-passage cap and the fix for a passage past it." },
+    { "passage": 4, "verdict": "generic", "evidence": "Esto no demuestra que ningún asistente haya indexado la página.", "why": "A standard disclaimer that fits any retrieval preview tool." },
+    { "passage": 5, "verdict": "specific", "evidence": "Vectorscope aplica el mismo límite que el producto y nombra los fragmentos que se quedaron fuera.", "why": "Ties the cap to the product's own pipeline and ranks extraction failure causes." },
+    { "passage": 6, "verdict": "specific", "evidence": "cambia el titular, vuelve a pasar la página, haz la misma pregunta.", "why": "A concrete procedure for testing a rewritten heading with the tool." },
+    { "passage": 7, "verdict": "specific", "evidence": "una ventana de 2000 caracteres con 200 de solapamiento, que termina en un final de frase si hay uno lo bastante cerca", "why": "Exact window size, overlap and sentence-end rule; h3 stays inside its h2." },
+    { "passage": 8, "verdict": "specific", "evidence": "Un grupo que cruza tres secciones h2 dice que los titulares partieron una idea", "why": "Explains how to read this tool's clusters against its own h2 cuts." },
+    { "passage": 9, "verdict": "specific", "evidence": "una directiva noindex se informa, no se ignora.", "why": "Lists exactly what this tool reports and what it cannot see, including noindex handling." },
+    { "passage": 10, "verdict": "specific", "evidence": "puedes apuntar a cualquier URL en unos veinte segundos", "why": "Timing, a four-step test procedure and the production chunker parameters." },
+    { "passage": 11, "verdict": "generic", "evidence": "Vectorscope es para cualquiera cuya página se lea por pasajes", "why": "An audience list that would fit any chunking tool with the name swapped." },
+    { "passage": 12, "verdict": "specific", "evidence": "En esta página el paso basado en el significado es el agrupamiento de pasajes ya cortados, no el corte en sí.", "why": "Definitions anchored to how this tool actually works." },
+    { "passage": 13, "verdict": "generic", "evidence": "Respuestas más largas a las preguntas que esta página solo puede resumir.", "why": "A link list with one-line teasers; nothing only this page could say." },
+    { "passage": 14, "verdict": "specific", "evidence": "Vectorscope corta en cada h2 —un h3 no abre un pasaje nuevo— y divide una sección larga en ventanas de 2000 caracteres con 200 de solapamiento.", "why": "FAQ answers carry the tool's exact cut rules and retention behaviour." },
+    { "passage": 15, "verdict": "specific", "evidence": "El límite existe porque cada lectura gasta una llamada de embeddings", "why": "Gives the reason for the rate limit and how it resets." },
+    { "passage": 16, "verdict": "specific", "evidence": "primero sin nombrar plataformas y luego nombrando las doce", "why": "Names the sibling tools and what each one concretely does." },
+    { "passage": 17, "verdict": "specific", "evidence": "eso necesita el corpus del sitio entero, medido en el tiempo.", "why": "States this tool's boundary against the product's site-wide, over-time corpus." }
+  ]
+}

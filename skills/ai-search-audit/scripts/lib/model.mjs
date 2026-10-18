@@ -4,7 +4,7 @@
 
 import { auditFindings, textModules, SEVERITIES, SEVERITY_RANK } from "./checks.mjs";
 import { headingKey } from "./facts.mjs";
-import { AREAS, label, fmtEn, fmtUk, ukForm } from "./copy.mjs";
+import { AREAS, label, fmtEn, fmtPl, fmtUk, plForm, ukForm } from "./copy.mjs";
 import { samePage } from "../vendor/vectorscope/technical.mjs";
 import { pathOf as robotsPathOf } from "../vendor/vectorscope/robots.mjs";
 
@@ -16,6 +16,7 @@ export const UNSEEN_SHARE = 0.05;
 export const SEEN_SHARE = 0.9;
 
 const uk = (n, a, b, c) => `${fmtUk(n)} ${ukForm(n, a, b, c)}`;
+const pl = (n, a, b, c) => `${fmtPl(n)} ${plForm(n, a, b, c)}`;
 const hasRow = (f, side, row) => f.strip && f.strip.side === side && f.strip.rows.includes(row);
 const worst = (items) => items.reduce((w, f) => (SEVERITY_RANK[f.severity] > SEVERITY_RANK[w] ? f.severity : w), "low");
 
@@ -61,41 +62,41 @@ function checklist(reading, findings) {
   const hl = reading.facts.head.hreflang;
   const types = new Set(reading.facts.structured.jsonLd.flatMap((b) => b.types).concat(reading.facts.structured.microdata));
   const cells = [
-    ["http_status", ["Status", "Статус"], ["HTTP status and redirects", "HTTP-статус і переадресації"], ["redirect_chain"], reading.fetch.saved ? "na" : null],
-    ["https", ["HTTPS", "HTTPS"], ["Served over HTTPS", "Віддається через HTTPS"], ["not_https"], null],
-    ["robots_search_bots", ["Robots", "Robots"], ["Googlebot and Bingbot may fetch the page", "Googlebot і Bingbot можуть завантажити сторінку"], ["search_engine_blocked", "robots_unreachable"], reading.robots.status === "not_checked" ? "na" : null],
-    ["noindex", ["noindex", "noindex"], ["Not marked noindex", "Не позначено noindex"], ["noindex"], null],
-    ["canonical", ["Canonical", "Canonical"], ["One absolute canonical to the page itself", "Один абсолютний canonical на саму сторінку"], ["canonical_missing", "canonical_relative", "canonical_other", "canonical_multiple"], null],
-    ["in_sitemap", ["Sitemap", "Sitemap"], ["Listed in the sitemap", "Є в sitemap"], ["sitemap_missing", "sitemap_not_listed", "robots_no_sitemap", "sitemap_lastmod_invalid"], !reading.sitemap || (reading.sitemap.found && reading.sitemap.listsPage === null) ? "na" : null],
-    ["indexed", ["Index", "Індекс"], ["In Google's index", "В індексі Google"], [], "na"],
-    ["title_length", ["Title", "Title"], ["Title present, 10–60 characters", "Title є, 10–60 символів"], ["title_missing", "title_too_long", "title_too_short"], null],
-    ["title_unique", ["Title ×lang", "Title ×мови"], ["A different title per language version", "Різний title у кожній мовній версії"], ["title_duplicate_locales"], !hl.length ? "none" : !reading.alternates ? "na" : null],
-    ["meta_description", ["Description", "Опис"], ["Description present, 70–160 characters", "Опис є, 70–160 символів"], ["meta_description_missing", "meta_description_short", "meta_description_long"], null],
-    ["social_preview", ["Preview", "Прев’ю"], ["Open Graph and Twitter card tags", "Теги Open Graph і Twitter card"], ["social_tags_missing", "og_image_broken"], null],
-    ["h1", ["H1", "H1"], ["One h1", "Один h1"], ["h1_missing", "h1_multiple"], null],
-    ["heading_order", ["Headings", "Заголовки"], ["No skipped heading levels", "Без пропущених рівнів заголовків"], ["heading_order_skip"], null],
-    ["image_alt", ["Alt", "Alt"], ["Images carry alt", "Зображення мають alt"], ["image_alt_missing", "image_link_alt_empty", "image_alt_repeated"], reading.facts.images.length ? null : "none"],
-    ["html_lang", ["lang", "lang"], ["html lang declared", "html lang оголошено"], ["html_lang_missing", "html_lang_invalid"], null],
-    ["url_readable", ["URL", "URL"], ["A readable URL", "Зручна адреса"], ["url_unreadable"], null],
-    ["internal_links", ["Links", "Посилання"], ["Internal links present", "Є внутрішні посилання"], ["internal_links_none"], null],
-    ["link_text", ["Link text", "Текст посилань"], ["Links say where they lead, #links have a target, no nofollow inside the site", "Посилання кажуть, куди ведуть, # мають ціль, без nofollow усередині сайту"], ["link_text_generic", "fragment_link_broken", "internal_nofollow"], reading.facts.links.length || (reading.facts.fragments || []).length ? null : "none"],
-    ["broken_links", ["404", "404"], ["Links answer without errors", "Посилання відповідають без помилок"], ["broken_links"], !reading.links ? "na" : reading.links.total === 0 ? "none" : null],
-    ["viewport", ["Viewport", "Viewport"], ["A mobile viewport", "Мобільний viewport"], ["viewport_missing"], null],
-    ["page_weight", ["Weight", "Вага"], ["HTML size and scripts", "Розмір HTML і скрипти"], ["page_weight_heavy"], null],
-    ["core_web_vitals", ["CWV", "CWV"], ["Core Web Vitals from real users", "Core Web Vitals від реальних користувачів"], [], "na"],
-    ["hreflang_pairs", ["hreflang", "hreflang"], ["hreflang versions link back", "Мовні версії hreflang посилаються взаємно"], ["hreflang_no_return", "hreflang_invalid_code", "hreflang_no_self", "hreflang_alternate_broken"], !hl.length ? "none" : !reading.alternates ? "na" : null],
-    ["rich_faqpage", ["FAQ", "FAQ"], ["FAQPage markup", "Розмітка FAQPage"], ["faq_schema_not_visible", "faq_rich_result_retired"], types.has("FAQPage") ? null : "none"],
-    ["rich_breadcrumb", ["Breadcrumb", "Ланцюжок"], ["BreadcrumbList markup", "Розмітка BreadcrumbList"], [], types.has("BreadcrumbList") ? null : "none"],
-    ["images", ["Images", "Зображення"], ["Image sizes, formats, lazy loading, srcset", "Розміри, формати, lazy і srcset зображень"], ["image_dimensions_missing", "image_lcp_lazy", "image_not_lazy", "image_legacy_format", "image_oversized", "image_no_srcset"], reading.facts.images.length ? null : "none"],
-    ["snippet", ["Snippet", "Сніпет"], ["Eligible for a snippet (no nosnippet, max-snippet:0)", "Може мати сніпет (без nosnippet, max-snippet:0)"], ["snippet_blocked"], null],
-    ["favicon", ["Favicon", "Favicon"], ["A favicon that loads", "Favicon завантажується"], ["favicon_missing"], !reading.site ? "na" : null],
-    ["site_name", ["Site name", "Назва сайту"], ["WebSite name markup on the home page", "Назва сайту в розмітці WebSite на головній"], ["site_name_missing"], isHome(reading) ? null : "none"],
-    ["mixed", ["Mixed", "Змішаний"], ["No http:// resources on https", "Без ресурсів http:// на https"], ["mixed_content"], null],
-    ["soft404", ["Soft 404", "Soft 404"], ["A missing page answers 404", "Неіснуюча сторінка відповідає 404"], ["soft_404"], !reading.site ? "na" : null],
-    ["variants", ["Variants", "Варіанти"], ["http, www and slash variants end at the page", "Варіанти http, www і слеш ведуть на сторінку"], ["url_variants_inconsistent"], !reading.site ? "na" : null],
-    ["hsts", ["HSTS", "HSTS"], ["Strict-Transport-Security header", "Заголовок Strict-Transport-Security"], ["hsts_missing"], reading.fetch.saved ? "na" : null],
-    ["response", ["Headers", "Заголовки HTTP"], ["Compression, Cache-Control and security headers", "Стиснення, Cache-Control і заголовки безпеки"], ["html_not_compressed", "html_no_cache_control", "security_headers_missing"], reading.fetch.saved ? "na" : null],
-    ["trust", ["Trust", "Довіра"], ["Author, About, Contact, organisation, dates, privacy and terms", "Автор, «Про нас», контакти, організація, дати, конфіденційність і умови"], ["author_missing", "about_contact_missing", "organization_details_missing", "article_date_missing", "privacy_terms_missing", "date_mismatch"], null],
+    ["http_status", ["Status", "Статус", "Status"], ["HTTP status and redirects", "HTTP-статус і переадресації", "Status HTTP i przekierowania"], ["redirect_chain"], reading.fetch.saved ? "na" : null],
+    ["https", ["HTTPS", "HTTPS", "HTTPS"], ["Served over HTTPS", "Віддається через HTTPS", "Serwowana przez HTTPS"], ["not_https"], null],
+    ["robots_search_bots", ["Robots", "Robots", "Robots"], ["Googlebot and Bingbot may fetch the page", "Googlebot і Bingbot можуть завантажити сторінку", "Googlebot i Bingbot mogą pobrać stronę"], ["search_engine_blocked", "robots_unreachable"], reading.robots.status === "not_checked" ? "na" : null],
+    ["noindex", ["noindex", "noindex", "noindex"], ["Not marked noindex", "Не позначено noindex", "Bez oznaczenia noindex"], ["noindex"], null],
+    ["canonical", ["Canonical", "Canonical", "Canonical"], ["One absolute canonical to the page itself", "Один абсолютний canonical на саму сторінку", "Jeden bezwzględny canonical wskazujący na samą stronę"], ["canonical_missing", "canonical_relative", "canonical_other", "canonical_multiple"], null],
+    ["in_sitemap", ["Sitemap", "Sitemap", "Sitemap"], ["Listed in the sitemap", "Є в sitemap", "Jest w sitemap"], ["sitemap_missing", "sitemap_not_listed", "robots_no_sitemap", "sitemap_lastmod_invalid"], !reading.sitemap || (reading.sitemap.found && reading.sitemap.listsPage === null) ? "na" : null],
+    ["indexed", ["Index", "Індекс", "Indeks"], ["In Google's index", "В індексі Google", "W indeksie Google"], [], "na"],
+    ["title_length", ["Title", "Title", "Title"], ["Title present, 10–60 characters", "Title є, 10–60 символів", "Title jest, 10–60 znaków"], ["title_missing", "title_too_long", "title_too_short"], null],
+    ["title_unique", ["Title ×lang", "Title ×мови", "Title ×języki"], ["A different title per language version", "Різний title у кожній мовній версії", "Inny title w każdej wersji językowej"], ["title_duplicate_locales"], !hl.length ? "none" : !reading.alternates ? "na" : null],
+    ["meta_description", ["Description", "Опис", "Opis"], ["Description present, 70–160 characters", "Опис є, 70–160 символів", "Opis jest, 70–160 znaków"], ["meta_description_missing", "meta_description_short", "meta_description_long"], null],
+    ["social_preview", ["Preview", "Прев’ю", "Podgląd"], ["Open Graph and Twitter card tags", "Теги Open Graph і Twitter card", "Tagi Open Graph i Twitter card"], ["social_tags_missing", "og_image_broken"], null],
+    ["h1", ["H1", "H1", "H1"], ["One h1", "Один h1", "Jeden h1"], ["h1_missing", "h1_multiple"], null],
+    ["heading_order", ["Headings", "Заголовки", "Nagłówki"], ["No skipped heading levels", "Без пропущених рівнів заголовків", "Bez pominiętych poziomów nagłówków"], ["heading_order_skip"], null],
+    ["image_alt", ["Alt", "Alt", "Alt"], ["Images carry alt", "Зображення мають alt", "Obrazy mają alt"], ["image_alt_missing", "image_link_alt_empty", "image_alt_repeated"], reading.facts.images.length ? null : "none"],
+    ["html_lang", ["lang", "lang", "lang"], ["html lang declared", "html lang оголошено", "html lang zadeklarowany"], ["html_lang_missing", "html_lang_invalid"], null],
+    ["url_readable", ["URL", "URL", "URL"], ["A readable URL", "Зручна адреса", "Czytelny adres URL"], ["url_unreadable"], null],
+    ["internal_links", ["Links", "Посилання", "Linki"], ["Internal links present", "Є внутрішні посилання", "Są linki wewnętrzne"], ["internal_links_none"], null],
+    ["link_text", ["Link text", "Текст посилань", "Tekst linków"], ["Links say where they lead, #links have a target, no nofollow inside the site", "Посилання кажуть, куди ведуть, # мають ціль, без nofollow усередині сайту", "Linki mówią, dokąd prowadzą, linki # mają cel, bez nofollow wewnątrz serwisu"], ["link_text_generic", "fragment_link_broken", "internal_nofollow"], reading.facts.links.length || (reading.facts.fragments || []).length ? null : "none"],
+    ["broken_links", ["404", "404", "404"], ["Links answer without errors", "Посилання відповідають без помилок", "Linki odpowiadają bez błędów"], ["broken_links"], !reading.links ? "na" : reading.links.total === 0 ? "none" : null],
+    ["viewport", ["Viewport", "Viewport", "Viewport"], ["A mobile viewport", "Мобільний viewport", "Mobilny viewport"], ["viewport_missing"], null],
+    ["page_weight", ["Weight", "Вага", "Waga"], ["HTML size and scripts", "Розмір HTML і скрипти", "Rozmiar HTML i skrypty"], ["page_weight_heavy"], null],
+    ["core_web_vitals", ["CWV", "CWV", "CWV"], ["Core Web Vitals from real users", "Core Web Vitals від реальних користувачів", "Core Web Vitals od prawdziwych użytkowników"], [], "na"],
+    ["hreflang_pairs", ["hreflang", "hreflang", "hreflang"], ["hreflang versions link back", "Мовні версії hreflang посилаються взаємно", "Wersje hreflang linkują do siebie nawzajem"], ["hreflang_no_return", "hreflang_invalid_code", "hreflang_no_self", "hreflang_alternate_broken"], !hl.length ? "none" : !reading.alternates ? "na" : null],
+    ["rich_faqpage", ["FAQ", "FAQ", "FAQ"], ["FAQPage markup", "Розмітка FAQPage", "Znaczniki FAQPage"], ["faq_schema_not_visible", "faq_rich_result_retired"], types.has("FAQPage") ? null : "none"],
+    ["rich_breadcrumb", ["Breadcrumb", "Ланцюжок", "Okruszki"], ["BreadcrumbList markup", "Розмітка BreadcrumbList", "Znaczniki BreadcrumbList"], [], types.has("BreadcrumbList") ? null : "none"],
+    ["images", ["Images", "Зображення", "Obrazy"], ["Image sizes, formats, lazy loading, srcset", "Розміри, формати, lazy і srcset зображень", "Rozmiary, formaty, lazy loading i srcset obrazów"], ["image_dimensions_missing", "image_lcp_lazy", "image_not_lazy", "image_legacy_format", "image_oversized", "image_no_srcset"], reading.facts.images.length ? null : "none"],
+    ["snippet", ["Snippet", "Сніпет", "Snippet"], ["Eligible for a snippet (no nosnippet, max-snippet:0)", "Може мати сніпет (без nosnippet, max-snippet:0)", "Może mieć snippet (bez nosnippet, max-snippet:0)"], ["snippet_blocked"], null],
+    ["favicon", ["Favicon", "Favicon", "Favicon"], ["A favicon that loads", "Favicon завантажується", "Favicon się wczytuje"], ["favicon_missing"], !reading.site ? "na" : null],
+    ["site_name", ["Site name", "Назва сайту", "Nazwa serwisu"], ["WebSite name markup on the home page", "Назва сайту в розмітці WebSite на головній", "Nazwa serwisu w znacznikach WebSite na stronie głównej"], ["site_name_missing"], isHome(reading) ? null : "none"],
+    ["mixed", ["Mixed", "Змішаний", "Mieszane"], ["No http:// resources on https", "Без ресурсів http:// на https", "Bez zasobów http:// na https"], ["mixed_content"], null],
+    ["soft404", ["Soft 404", "Soft 404", "Soft 404"], ["A missing page answers 404", "Неіснуюча сторінка відповідає 404", "Nieistniejąca strona odpowiada 404"], ["soft_404"], !reading.site ? "na" : null],
+    ["variants", ["Variants", "Варіанти", "Warianty"], ["http, www and slash variants end at the page", "Варіанти http, www і слеш ведуть на сторінку", "Warianty http, www i z ukośnikiem prowadzą do strony"], ["url_variants_inconsistent"], !reading.site ? "na" : null],
+    ["hsts", ["HSTS", "HSTS", "HSTS"], ["Strict-Transport-Security header", "Заголовок Strict-Transport-Security", "Nagłówek Strict-Transport-Security"], ["hsts_missing"], reading.fetch.saved ? "na" : null],
+    ["response", ["Headers", "Заголовки HTTP", "Nagłówki HTTP"], ["Compression, Cache-Control and security headers", "Стиснення, Cache-Control і заголовки безпеки", "Kompresja, Cache-Control i nagłówki bezpieczeństwa"], ["html_not_compressed", "html_no_cache_control", "security_headers_missing"], reading.fetch.saved ? "na" : null],
+    ["trust", ["Trust", "Довіра", "Zaufanie"], ["Author, About, Contact, organisation, dates, privacy and terms", "Автор, «Про нас», контакти, організація, дати, конфіденційність і умови", "Autor, „O nas”, kontakt, organizacja, daty, prywatność i regulamin"], ["author_missing", "about_contact_missing", "organization_details_missing", "article_date_missing", "privacy_terms_missing", "date_mismatch"], null],
   ];
   return cells.map(([id, short, name, codes, fixed]) => {
     let items = by(codes);
@@ -160,8 +161,8 @@ function strips(reading, findings) {
   const h = reading.facts.head;
   const st = reading.facts.structured;
   const titleDup = findings.find((f) => f.code === "title_duplicate_locales");
-  const chars = (n) => [`${fmtEn(n)} characters`, uk(n, "символ", "символи", "символів")];
-  const none = ["none", "немає"];
+  const chars = (n) => [`${fmtEn(n)} characters`, uk(n, "символ", "символи", "символів"), pl(n, "znak", "znaki", "znaków")];
+  const none = ["none", "немає", "brak"];
   let canonical = none;
   const c = reading.vs.technical?.canonical;
   if (c?.present) {
@@ -170,7 +171,7 @@ function strips(reading, findings) {
       const u = new URL(c.resolved);
       v = c.self ? `${u.pathname}${u.search}` : c.resolved;
     } catch {}
-    canonical = [c.count > 1 ? `×${c.count} · ${v}` : v, c.count > 1 ? `×${c.count} · ${v}` : v];
+    canonical = [c.count > 1 ? `×${c.count} · ${v}` : v, c.count > 1 ? `×${c.count} · ${v}` : v, c.count > 1 ? `×${c.count} · ${v}` : v];
   }
   const robotsMeta = h.robotsMeta.map((m) => m.content).join(" · ");
   const xr = reading.fetch.xRobotsTag ? ` · X-Robots-Tag: ${reading.fetch.xRobotsTag}` : "";
@@ -179,37 +180,37 @@ function strips(reading, findings) {
   const socialHave = ["og:title", "og:description", "og:image"].filter((k) => h.og[k]).length + (h.twitter["twitter:card"] ? 1 : 0);
   const langs = h.hreflang.map((x) => x.hreflang);
   const head = [
-    { id: "title", k: "title", v: !h.title ? none : titleDup ? [`same ×${titleDup.evidence.count} languages`, `однаковий ×${titleDup.evidence.count} мови`] : chars(h.title.length) },
+    { id: "title", k: "title", v: !h.title ? none : titleDup ? [`same ×${titleDup.evidence.count} languages`, `однаковий ×${titleDup.evidence.count} мови`, `ten sam ×${titleDup.evidence.count} języki`] : chars(h.title.length) },
     { id: "description", k: "meta description", v: h.metaDescriptions[0] ? chars(h.metaDescriptions[0].length) : none },
     { id: "canonical", k: "canonical", v: canonical },
-    { id: "robots", k: "meta robots", v: robotsMeta || xr ? [`${robotsMeta || "—"}${xr}`, `${robotsMeta || "—"}${xr}`] : ["not set", "не задано"] },
-    { id: "hreflang", k: "hreflang", v: langs.length ? [langs.length > 5 ? `${langs.slice(0, 5).join(" · ")} +${langs.length - 5}` : langs.join(" · "), langs.length > 5 ? `${langs.slice(0, 5).join(" · ")} +${langs.length - 5}` : langs.join(" · ")] : none },
-    { id: "lang", k: "html lang", v: h.lang ? [h.lang, h.lang] : none },
-    { id: "jsonld", k: "JSON-LD", v: typesText ? [typesText, typesText] : st.jsonLd.length ? [`${st.jsonLd.length} blocks`, `${st.jsonLd.length} блоки`] : none },
-    { id: "social", k: "Open Graph", v: [`${socialHave} of 4 tags`, `${socialHave} з 4 тегів`] },
-    { id: "viewport", k: "viewport", v: h.viewport ? ["set", "задано"] : none },
-    { id: "scripts", k: "scripts", v: [`${h.scripts.total} · ${h.scripts.blocking} blocking`, `${h.scripts.total} · ${h.scripts.blocking} блокують`] },
-    { id: "favicon", k: "favicon", v: !reading.site ? (reading.facts.extras?.icons.length ? ["declared", "оголошено"] : ["not measured", "не виміряно"]) : reading.site.favicon.ok ? ["loads", "завантажується"] : reading.site.favicon.reason === "data_uri" ? ["data: URI", "data: URI"] : [`HTTP ${reading.site.favicon.status ?? "—"}`, `HTTP ${reading.site.favicon.status ?? "—"}`] },
+    { id: "robots", k: "meta robots", v: robotsMeta || xr ? [`${robotsMeta || "—"}${xr}`, `${robotsMeta || "—"}${xr}`, `${robotsMeta || "—"}${xr}`] : ["not set", "не задано", "nie ustawiono"] },
+    { id: "hreflang", k: "hreflang", v: langs.length ? [langs.length > 5 ? `${langs.slice(0, 5).join(" · ")} +${langs.length - 5}` : langs.join(" · "), langs.length > 5 ? `${langs.slice(0, 5).join(" · ")} +${langs.length - 5}` : langs.join(" · "), langs.length > 5 ? `${langs.slice(0, 5).join(" · ")} +${langs.length - 5}` : langs.join(" · ")] : none },
+    { id: "lang", k: "html lang", v: h.lang ? [h.lang, h.lang, h.lang] : none },
+    { id: "jsonld", k: "JSON-LD", v: typesText ? [typesText, typesText, typesText] : st.jsonLd.length ? [`${st.jsonLd.length} blocks`, `${st.jsonLd.length} блоки`, pl(st.jsonLd.length, "blok", "bloki", "bloków")] : none },
+    { id: "social", k: "Open Graph", v: [`${socialHave} of 4 tags`, `${socialHave} з 4 тегів`, `${socialHave} z 4 tagów`] },
+    { id: "viewport", k: "viewport", v: h.viewport ? ["set", "задано", "ustawiono"] : none },
+    { id: "scripts", k: "scripts", v: [`${h.scripts.total} · ${h.scripts.blocking} blocking`, `${h.scripts.total} · ${h.scripts.blocking} блокують`, `${h.scripts.total} · ${h.scripts.blocking} blokujących`] },
+    { id: "favicon", k: "favicon", v: !reading.site ? (reading.facts.extras?.icons.length ? ["declared", "оголошено", "zadeklarowano"] : ["not measured", "не виміряно", "nie zmierzono"]) : reading.site.favicon.ok ? ["loads", "завантажується", "wczytuje się"] : reading.site.favicon.reason === "data_uri" ? ["data: URI", "data: URI", "data: URI"] : Array(3).fill(`HTTP ${reading.site.favicon.status ?? "—"}`) },
   ];
   const r = reading.robots;
   const bots = r.bots || [];
   const groupVal = (kinds) => {
-    if (r.status === "not_checked") return ["not measured", "не виміряно"];
-    if (r.status === "unreachable") return ["no answer", "немає відповіді"];
+    if (r.status === "not_checked") return ["not measured", "не виміряно", "nie zmierzono"];
+    if (r.status === "unreachable") return ["no answer", "немає відповіді", "brak odpowiedzi"];
     const b = bots.filter((x) => kinds.includes(x.kind) && !x.allowed);
-    return b.length ? [`${b.length} blocked`, `${b.length} заборонено`] : ["allowed", "дозволено"];
+    return b.length ? [`${b.length} blocked`, `${b.length} заборонено`, `zablokowane: ${b.length}`] : ["allowed", "дозволено", "dozwolone"];
   };
   const sm = reading.sitemap;
   const ll = reading.llms;
   const site = reading.site;
   const robots = [
     { id: "search", k: "Google · Bing", v: groupVal(["index"]) },
-    { id: "ai_search", k: ["AI search bots", "ШІ-пошуковики"], v: groupVal(["search", "user"]) },
-    { id: "ai_training", k: ["AI training bots", "Боти навчання ШІ"], v: groupVal(["training"]) },
-    { id: "sitemap", k: "sitemap.xml", v: !sm ? ["not measured", "не виміряно"] : !sm.found ? ["not found", "не знайдено"] : sm.listsPage === true ? ["lists the page", "сторінка є"] : sm.listsPage === false ? ["page not listed", "сторінки немає"] : ["not measured", "не виміряно"] },
-    { id: "llms", k: "llms.txt", v: !ll ? ["not measured", "не виміряно"] : ll.present ? [`present · ${ll.links} links`, `є · ${uk(ll.links, "посилання", "посилання", "посилань")}`] : none },
-    { id: "markdown", k: ["Markdown copy", "Markdown-копія"], v: !site ? ["not measured", "не виміряно"] : site.markdown.ok ? [site.markdown.declared ? "declared · loads" : ".md · loads", site.markdown.declared ? "оголошено · є" : ".md · є"] : site.markdown.declared ? [`declared · HTTP ${site.markdown.status ?? "—"}`, `оголошено · HTTP ${site.markdown.status ?? "—"}`] : none },
-    { id: "ai_catalog", k: "ai-catalog.json", v: !site ? ["not measured", "не виміряно"] : !site.aiCatalog?.present ? none : site.aiCatalog.valid ? ["present · JSON", "є · JSON"] : ["present · not JSON", "є · не JSON"] },
+    { id: "ai_search", k: ["AI search bots", "ШІ-пошуковики", "Boty wyszukiwania AI"], v: groupVal(["search", "user"]) },
+    { id: "ai_training", k: ["AI training bots", "Боти навчання ШІ", "Boty trenujące AI"], v: groupVal(["training"]) },
+    { id: "sitemap", k: "sitemap.xml", v: !sm ? ["not measured", "не виміряно", "nie zmierzono"] : !sm.found ? ["not found", "не знайдено", "nie znaleziono"] : sm.listsPage === true ? ["lists the page", "сторінка є", "strona jest"] : sm.listsPage === false ? ["page not listed", "сторінки немає", "strony brak"] : ["not measured", "не виміряно", "nie zmierzono"] },
+    { id: "llms", k: "llms.txt", v: !ll ? ["not measured", "не виміряно", "nie zmierzono"] : ll.present ? [`present · ${ll.links} links`, `є · ${uk(ll.links, "посилання", "посилання", "посилань")}`, `jest · ${pl(ll.links, "link", "linki", "linków")}`] : none },
+    { id: "markdown", k: ["Markdown copy", "Markdown-копія", "Kopia Markdown"], v: !site ? ["not measured", "не виміряно", "nie zmierzono"] : site.markdown.ok ? [site.markdown.declared ? "declared · loads" : ".md · loads", site.markdown.declared ? "оголошено · є" : ".md · є", site.markdown.declared ? "zadeklarowano · wczytuje się" : ".md · wczytuje się"] : site.markdown.declared ? [`declared · HTTP ${site.markdown.status ?? "—"}`, `оголошено · HTTP ${site.markdown.status ?? "—"}`, `zadeklarowano · HTTP ${site.markdown.status ?? "—"}`] : none },
+    { id: "ai_catalog", k: "ai-catalog.json", v: !site ? ["not measured", "не виміряно", "nie zmierzono"] : !site.aiCatalog?.present ? none : site.aiCatalog.valid ? ["present · JSON", "є · JSON", "jest · JSON"] : ["present · not JSON", "є · не JSON", "jest · nie JSON"] },
   ];
   const attach = (side, rows) => rows.map((row) => ({ ...row, pins: findings.filter((f) => hasRow(f, side, row.id)) }));
   return { head: attach("head", head), robots: attach("robots", robots) };
@@ -298,26 +299,26 @@ function judgementSummary(extra) {
 function caps(r, modules = null, extra = {}) {
   const out = [];
   const p = modules?.patterns;
-  if (p && !p.analysed) out.push({ id: "patterns", t: [`Writing patterns not analysed (${p.reason}): lexicons exist for English, Ukrainian and Spanish`, `Шаблони письма не аналізовано (${p.reason}): словники є для англійської, української й іспанської`] });
-  if (p?.analysed && p.score?.band === "insufficient_text") out.push({ id: "patterns_short", t: [`Writing patterns: ${p.wordCount} words, under the 60 the density needs; no score`, `Шаблони письма: ${p.wordCount} слів, менше за 60, потрібних для щільності; без оцінки`] });
-  if (modules?.keyword?.skipped) out.push({ id: "keyword", t: ["Keyword not checked: no --keyword and no h1 to read one from", "Ключову фразу не перевірено: немає --keyword і немає h1"] });
-  if (modules?.keyword && !modules.keyword.skipped && !modules.keyword.promiseChecked) out.push({ id: "promise", t: ["The promise-without-a-figure rule reads English only", "Правило «обіцянка без числа» читає лише англійську"] });
+  if (p && !p.analysed) out.push({ id: "patterns", t: [`Writing patterns not analysed (${p.reason}): lexicons exist for English, Ukrainian and Spanish`, `Шаблони письма не аналізовано (${p.reason}): словники є для англійської, української й іспанської`, `Schematy pisania nie zostały przeanalizowane (${p.reason}): słowniki istnieją dla angielskiego, ukraińskiego i hiszpańskiego`] });
+  if (p?.analysed && p.score?.band === "insufficient_text") out.push({ id: "patterns_short", t: [`Writing patterns: ${p.wordCount} words, under the 60 the density needs; no score`, `Шаблони письма: ${p.wordCount} слів, менше за 60, потрібних для щільності; без оцінки`, `Schematy pisania: ${pl(p.wordCount, "słowo", "słowa", "słów")}, mniej niż 60 potrzebnych do gęstości; bez wyniku`] });
+  if (modules?.keyword?.skipped) out.push({ id: "keyword", t: ["Keyword not checked: no --keyword and no h1 to read one from", "Ключову фразу не перевірено: немає --keyword і немає h1", "Nie sprawdzono frazy kluczowej: brak --keyword i brak h1, z którego można ją odczytać"] });
+  if (modules?.keyword && !modules.keyword.skipped && !modules.keyword.promiseChecked) out.push({ id: "promise", t: ["The promise-without-a-figure rule reads English only", "Правило «обіцянка без числа» читає лише англійську", "Reguła „obietnica bez liczby” czyta tylko tekst angielski"] });
   const unaligned = (modules?.locales?.compared || []).filter((c) => !c.aligned && c.reason !== "no_sections");
-  if (unaligned.length) out.push({ id: "locales", n: unaligned.length, t: [`Facts not compared for ${unaligned.map((c) => `${c.hreflang} (${c.sections[1]} sections vs ${c.sections[0]})`).join(", ")}: the sections do not line up`, `Факти не порівняно для ${unaligned.map((c) => `${c.hreflang} (${c.sections[1]} розділів проти ${c.sections[0]})`).join(", ")}: розділи не збігаються`] });
-  for (const [k, name] of [["questions", "questions.json"], ["brand", "brand.json"], ["reviews", "reviews.json"]]) if (!extra[k]) out.push({ id: `no_${k}`, t: [`${name} not given: that judgement was not made`, `${name} не надано: цього судження не зроблено`] });
-  if (r.links?.unchecked) out.push({ id: "links", n: r.links.unchecked, cap: r.links.cap, t: [`${r.links.unchecked} links not checked (cap ${r.links.cap})`, `${uk(r.links.unchecked, "посилання", "посилання", "посилань")} не перевірено (ліміт ${r.links.cap})`] });
+  if (unaligned.length) out.push({ id: "locales", n: unaligned.length, t: [`Facts not compared for ${unaligned.map((c) => `${c.hreflang} (${c.sections[1]} sections vs ${c.sections[0]})`).join(", ")}: the sections do not line up`, `Факти не порівняно для ${unaligned.map((c) => `${c.hreflang} (${c.sections[1]} розділів проти ${c.sections[0]})`).join(", ")}: розділи не збігаються`, `Nie porównano faktów dla ${unaligned.map((c) => `${c.hreflang} (${c.sections[1]} sekcji wobec ${c.sections[0]})`).join(", ")}: sekcje do siebie nie pasują`] });
+  for (const [k, name] of [["questions", "questions.json"], ["brand", "brand.json"], ["reviews", "reviews.json"]]) if (!extra[k]) out.push({ id: `no_${k}`, t: [`${name} not given: that judgement was not made`, `${name} не надано: цього судження не зроблено`, `Nie podano ${name}: tej oceny nie wykonano`] });
+  if (r.links?.unchecked) out.push({ id: "links", n: r.links.unchecked, cap: r.links.cap, t: [`${r.links.unchecked} links not checked (cap ${r.links.cap})`, `${uk(r.links.unchecked, "посилання", "посилання", "посилань")} не перевірено (ліміт ${r.links.cap})`, `Nie sprawdzono: ${pl(r.links.unchecked, "link", "linki", "linków")} (limit ${r.links.cap})`] });
   const unverified = (r.links?.results || []).filter((x) => x.verdict === "unverified").length;
-  if (unverified) out.push({ id: "links_unverified", n: unverified, t: [`${unverified} links did not answer or refused the check`, `${uk(unverified, "посилання не відповіло", "посилання не відповіли", "посилань не відповіли")} або відмовили в перевірці`] });
-  if (r.alternates?.unchecked.length) out.push({ id: "alternates", n: r.alternates.unchecked.length, cap: r.alternates.cap, t: [`${r.alternates.unchecked.length} language versions not read (cap ${r.alternates.cap})`, `${uk(r.alternates.unchecked.length, "мовну версію", "мовні версії", "мовних версій")} не прочитано (ліміт ${r.alternates.cap})`] });
-  if (r.sitemap?.children.unread && r.sitemap.listsPage !== true) out.push({ id: "sitemap", n: r.sitemap.children.unread, cap: r.sitemap.children.cap, t: [`${r.sitemap.children.unread} child sitemaps not read (cap ${r.sitemap.children.cap})`, `${uk(r.sitemap.children.unread, "дочірній sitemap", "дочірні sitemap", "дочірніх sitemap")} не прочитано (ліміт ${r.sitemap.children.cap})`] });
-  if (r.images?.unchecked) out.push({ id: "images", n: r.images.unchecked, cap: r.images.cap, t: [`${r.images.unchecked} images not sized (cap ${r.images.cap})`, `${uk(r.images.unchecked, "зображення", "зображення", "зображень")} без перевірки розміру (ліміт ${r.images.cap})`] });
+  if (unverified) out.push({ id: "links_unverified", n: unverified, t: [`${unverified} links did not answer or refused the check`, `${uk(unverified, "посилання не відповіло", "посилання не відповіли", "посилань не відповіли")} або відмовили в перевірці`, `Bez odpowiedzi lub z odmową sprawdzenia: ${pl(unverified, "link", "linki", "linków")}`] });
+  if (r.alternates?.unchecked.length) out.push({ id: "alternates", n: r.alternates.unchecked.length, cap: r.alternates.cap, t: [`${r.alternates.unchecked.length} language versions not read (cap ${r.alternates.cap})`, `${uk(r.alternates.unchecked.length, "мовну версію", "мовні версії", "мовних версій")} не прочитано (ліміт ${r.alternates.cap})`, `Nie przeczytano: ${pl(r.alternates.unchecked.length, "wersja językowa", "wersje językowe", "wersji językowych")} (limit ${r.alternates.cap})`] });
+  if (r.sitemap?.children.unread && r.sitemap.listsPage !== true) out.push({ id: "sitemap", n: r.sitemap.children.unread, cap: r.sitemap.children.cap, t: [`${r.sitemap.children.unread} child sitemaps not read (cap ${r.sitemap.children.cap})`, `${uk(r.sitemap.children.unread, "дочірній sitemap", "дочірні sitemap", "дочірніх sitemap")} не прочитано (ліміт ${r.sitemap.children.cap})`, `Nie przeczytano: ${pl(r.sitemap.children.unread, "podrzędna sitemap", "podrzędne sitemapy", "podrzędnych sitemap")} (limit ${r.sitemap.children.cap})`] });
+  if (r.images?.unchecked) out.push({ id: "images", n: r.images.unchecked, cap: r.images.cap, t: [`${r.images.unchecked} images not sized (cap ${r.images.cap})`, `${uk(r.images.unchecked, "зображення", "зображення", "зображень")} без перевірки розміру (ліміт ${r.images.cap})`, `${pl(r.images.unchecked, "obraz", "obrazy", "obrazów")} bez sprawdzenia rozmiaru (limit ${r.images.cap})`] });
   if (r.shell?.detected) {
-    if (r.render?.ok) out.push({ id: "render_auto", t: [`An app shell: rendered in ${r.render.browser} on its own; ${r.render.jsZones.length} sections only with JavaScript`, `Оболонка застосунку: відрендерено в ${r.render.browser} автоматично; ${r.render.jsZones.length} розділів лише з JavaScript`] });
-    else if (r.render) out.push({ id: "render_none", t: [`An app shell, and no render: ${r.render.reason === "no_browser" ? "no Chrome or Chromium found (set CHROME_PATH)" : r.render.reason}; the JavaScript-only text is not measured`, `Оболонка застосунку без рендеру: ${r.render.reason === "no_browser" ? "не знайдено Chrome чи Chromium (задайте CHROME_PATH)" : r.render.reason}; текст лише з JavaScript не виміряно`] });
-    else out.push({ id: "render_none", t: ["An app shell in a saved page: not rendered", "Оболонка застосунку в збереженій сторінці: не відрендерено"] });
+    if (r.render?.ok) out.push({ id: "render_auto", t: [`An app shell: rendered in ${r.render.browser} on its own; ${r.render.jsZones.length} sections only with JavaScript`, `Оболонка застосунку: відрендерено в ${r.render.browser} автоматично; ${r.render.jsZones.length} розділів лише з JavaScript`, `Powłoka aplikacji: wyrenderowano automatycznie w ${r.render.browser}; sekcje tylko z JavaScriptem: ${r.render.jsZones.length}`] });
+    else if (r.render) out.push({ id: "render_none", t: [`An app shell, and no render: ${r.render.reason === "no_browser" ? "no Chrome or Chromium found (set CHROME_PATH)" : r.render.reason}; the JavaScript-only text is not measured`, `Оболонка застосунку без рендеру: ${r.render.reason === "no_browser" ? "не знайдено Chrome чи Chromium (задайте CHROME_PATH)" : r.render.reason}; текст лише з JavaScript не виміряно`, `Powłoka aplikacji bez renderowania: ${r.render.reason === "no_browser" ? "nie znaleziono Chrome ani Chromium (ustaw CHROME_PATH)" : r.render.reason}; tekstu dostępnego tylko z JavaScriptem nie zmierzono`] });
+    else out.push({ id: "render_none", t: ["An app shell in a saved page: not rendered", "Оболонка застосунку в збереженій сторінці: не відрендерено", "Powłoka aplikacji w zapisanej stronie: nie wyrenderowano"] });
   }
   const merged = r.facts.zones.find((z) => z.kind === "more");
-  if (merged) out.push({ id: "zones", n: merged.merged, t: [`${merged.merged} sections drawn as one zone on the map`, `${uk(merged.merged, "розділ", "розділи", "розділів")} на мапі показано однією зоною`] });
-  if (r.fetch.saved) out.push({ id: "saved", t: ["A saved page: robots.txt, sitemap, llms.txt, language versions and links not measured", "Збережена сторінка: robots.txt, sitemap, llms.txt, мовні версії й посилання не виміряно"] });
+  if (merged) out.push({ id: "zones", n: merged.merged, t: [`${merged.merged} sections drawn as one zone on the map`, `${uk(merged.merged, "розділ", "розділи", "розділів")} на мапі показано однією зоною`, `${pl(merged.merged, "sekcja pokazana", "sekcje pokazane", "sekcji pokazanych")} na mapie jako jedna strefa`] });
+  if (r.fetch.saved) out.push({ id: "saved", t: ["A saved page: robots.txt, sitemap, llms.txt, language versions and links not measured", "Збережена сторінка: robots.txt, sitemap, llms.txt, мовні версії й посилання не виміряно", "Zapisana strona: nie zmierzono robots.txt, sitemap, llms.txt, wersji językowych ani linków"] });
   return out;
 }

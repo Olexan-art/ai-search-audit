@@ -1,8 +1,8 @@
 {
   "schema": "getlooploop/ai-search-audit@1",
-  "skillVersion": "2.107",
+  "skillVersion": "2.109",
   "producedBy": "ai-search-audit skill, Lite (local; deterministic checks, and the agent's own judgement where marked; the scripts call no model)",
-  "createdAt": "2026-10-17T12:46:46.198Z",
+  "createdAt": "2026-10-17T12:59:37.535Z",
   "edition": "lite",
   "page": {
     "url": "https://www.getlooploop.com/uk/vectorscope",
@@ -24,8 +24,8 @@
     "total": 21,
     "blocking": 0,
     "high": 0,
-    "medium": 9,
-    "low": 12
+    "medium": 8,
+    "low": 13
   },
   "tiles": [
     {
@@ -417,152 +417,8 @@
       ]
     },
     {
-      "id": "repeated_sentence_shape",
-      "pin": 8,
-      "big": false,
-      "code": "repeated_sentence_shape",
-      "severity": "medium",
-      "area": "quote",
-      "owner": "content",
-      "hidesText": false,
-      "informational": false,
-      "layer": "measured",
-      "judgement": null,
-      "label": {
-        "en": "13 sentences of one shape",
-        "uk": "13 речень однієї форми"
-      },
-      "where": "passage #7 · word 786, passage #8 · word 916, passage #8 · word 984",
-      "map": {
-        "zones": [
-          7,
-          8,
-          9,
-          12
-        ],
-        "strip": null
-      },
-      "passages": [
-        7,
-        8,
-        9,
-        12,
-        13,
-        15
-      ],
-      "evidence": {
-        "count": 13,
-        "words": 2022,
-        "per1k": 6.43,
-        "threshold": null,
-        "language": "uk",
-        "score": {
-          "value": 9,
-          "band": "low",
-          "perThousand": 23.74
-        },
-        "items": [
-          {
-            "text": "Vectorscope цього кроку не робить.",
-            "passage": 7,
-            "word": 786,
-            "heading": "Що таке семантичне розбиття на фрагменти?",
-            "occurrences": 3
-          },
-          {
-            "text": "Які фрагменти мають спільну тему, коли їх згрупувати за змістом, — питання, яке ставить семантичне розбиття, поставлене вашій сторінці.",
-            "passage": 8,
-            "word": 916,
-            "heading": "Чи готовий мій контент до пошуку з ШІ?",
-            "occurrences": 2
-          },
-          {
-            "text": "Цього не бачить ніхто поза тими компаніями.",
-            "passage": 8,
-            "word": 984,
-            "heading": "Чи готовий мій контент до пошуку з ШІ?",
-            "occurrences": 2
-          },
-          {
-            "text": "4 Прогоніть завідомо задовгу сторінку.",
-            "passage": 9,
-            "word": 1107,
-            "heading": "Як перевірити RAG-конвеєр за допомогою Vectorscope",
-            "occurrences": 3
-          },
-          {
-            "text": "Методологія Кожна формула за показниками вище, названа повністю.",
-            "passage": 12,
-            "word": 1550,
-            "heading": "Читати далі",
-            "occurrences": 2
-          },
-          {
-            "text": "Це інструмент візуалізації ембедингів?",
-            "passage": 13,
-            "word": 1670,
-            "heading": "Питання, які про це ставлять",
-            "occurrences": 2
-          },
-          {
-            "text": "Так, для однієї сторінки за раз.",
-            "passage": 13,
-            "word": 1674,
-            "heading": "Питання, які про це ставлять",
-            "occurrences": 2
-          },
-          {
-            "text": "Чим розбиття за заголовками відрізняється від семантичного?",
-            "passage": 13,
-            "word": 1707,
-            "heading": "Питання, які про це ставлять",
-            "occurrences": 2
-          },
-          {
-            "text": "Чи використовує Vectorscope семантичне розбиття?",
-            "passage": 13,
-            "word": 1747,
-            "heading": "Питання, які про це ставлять",
-            "occurrences": 3
-          },
-          {
-            "text": "Не для того, щоб різати сторінку.",
-            "passage": 13,
-            "word": 1752,
-            "heading": "Питання, які про це ставлять",
-            "occurrences": 2
-          },
-          {
-            "text": "Прочитане тримається недовго, щоб ним можна було поділитися посиланням, а сама завантажена сторінка після формування звіту не зберігається.",
-            "passage": 13,
-            "word": 1811,
-            "heading": "Питання, які про це ставлять",
-            "occurrences": 2
-          },
-          {
-            "text": "Це не детектор ШІ.",
-            "passage": 15,
-            "word": 1945,
-            "heading": "Інші безкоштовні AI SEO інструменти",
-            "occurrences": 2
-          }
-        ],
-        "note": "signals about worn writing, not an AI detector"
-      },
-      "rules": [
-        {
-          "name": "Google Search Central: creating helpful, reliable, people-first content",
-          "url": "https://developers.google.com/search/docs/fundamentals/creating-helpful-content"
-        },
-        {
-          "name": "This skill's rule (README, the thresholds)",
-          "url": "https://github.com/Olexan-art/ai-search-audit#this-skills-own-thresholds"
-        }
-      ]
-    },
-    {
       "id": "brand_unknown",
-      "pin": 9,
+      "pin": 8,
       "big": false,
       "code": "brand_unknown",
       "severity": "medium",
@@ -603,7 +459,7 @@
     },
     {
       "id": "question_partial-q4",
-      "pin": 10,
+      "pin": 9,
       "big": false,
       "code": "question_partial",
       "severity": "low",
@@ -654,7 +510,7 @@
     },
     {
       "id": "thin_section",
-      "pin": 11,
+      "pin": 10,
       "big": false,
       "code": "thin_section",
       "severity": "low",
@@ -697,7 +553,7 @@
     },
     {
       "id": "question_partial-q1",
-      "pin": 12,
+      "pin": 11,
       "big": false,
       "code": "question_partial",
       "severity": "low",
@@ -749,7 +605,7 @@
     },
     {
       "id": "question_partial-q9",
-      "pin": 13,
+      "pin": 12,
       "big": false,
       "code": "question_partial",
       "severity": "low",
@@ -801,7 +657,7 @@
     },
     {
       "id": "question_partial-q10",
-      "pin": 14,
+      "pin": 13,
       "big": false,
       "code": "question_partial",
       "severity": "low",
@@ -843,6 +699,87 @@
         {
           "name": "Google Search Central: AI features and your website",
           "url": "https://developers.google.com/search/docs/appearance/ai-features"
+        },
+        {
+          "name": "This skill's rule (README, the thresholds)",
+          "url": "https://github.com/Olexan-art/ai-search-audit#this-skills-own-thresholds"
+        }
+      ]
+    },
+    {
+      "id": "repeated_sentence_shape",
+      "pin": 14,
+      "big": false,
+      "code": "repeated_sentence_shape",
+      "severity": "low",
+      "area": "quote",
+      "owner": "content",
+      "hidesText": false,
+      "informational": false,
+      "layer": "measured",
+      "judgement": null,
+      "label": {
+        "en": "4 sentences of one shape",
+        "uk": "4 речення однієї форми"
+      },
+      "where": "passage #13 · word 1670, passage #13 · word 1674, passage #13 · word 1752",
+      "map": {
+        "zones": [
+          12
+        ],
+        "strip": null
+      },
+      "passages": [
+        13,
+        15
+      ],
+      "evidence": {
+        "count": 4,
+        "words": 2022,
+        "per1k": 1.98,
+        "threshold": null,
+        "language": "uk",
+        "score": {
+          "value": 2,
+          "band": "low",
+          "perThousand": 5.93
+        },
+        "items": [
+          {
+            "text": "Це інструмент візуалізації ембедингів?",
+            "passage": 13,
+            "word": 1670,
+            "heading": "Питання, які про це ставлять",
+            "occurrences": 2
+          },
+          {
+            "text": "Так, для однієї сторінки за раз.",
+            "passage": 13,
+            "word": 1674,
+            "heading": "Питання, які про це ставлять",
+            "occurrences": 2
+          },
+          {
+            "text": "Не для того, щоб різати сторінку.",
+            "passage": 13,
+            "word": 1752,
+            "heading": "Питання, які про це ставлять",
+            "occurrences": 2
+          },
+          {
+            "text": "Це не детектор ШІ.",
+            "passage": 15,
+            "word": 1945,
+            "heading": "Інші безкоштовні AI SEO інструменти",
+            "occurrences": 2
+          }
+        ],
+        "note": "signals about worn writing, not an AI detector"
+      },
+      "rules": [
+        {
+          "name": "Google Search Central: creating helpful, reliable, people-first content",
+          "url": "https://developers.google.com/search/docs/fundamentals/creating-helpful-content"
         },
         {
           "name": "This skill's rule (README, the thresholds)",
@@ -2217,78 +2154,391 @@
       }
     ]
   },
+  "generatedText": {
+    "versions": {
+      "detectors": "det-1",
+      "score": "score-1",
+      "markers": "markers-1"
+    },
+    "analysed": true,
+    "reason": null,
+    "language": "uk",
+    "patternScore": {
+      "value": 2,
+      "band": "low",
+      "points": 12,
+      "perThousand": 5.93,
+      "words": 2022
+    },
+    "markerWords": {
+      "hits": 0,
+      "perThousand": 0,
+      "band": "rare",
+      "terms": []
+    },
+    "families": [
+      {
+        "family": "repetition",
+        "findings": 4,
+        "points": 12,
+        "chips": [
+          {
+            "text": "Це інструмент візуалізації ембедингів?",
+            "count": 1,
+            "passages": [
+              13
+            ]
+          },
+          {
+            "text": "Так, для однієї сторінки за раз.",
+            "count": 1,
+            "passages": [
+              13
+            ]
+          },
+          {
+            "text": "Не для того, щоб різати сторінку.",
+            "count": 1,
+            "passages": [
+              13
+            ]
+          },
+          {
+            "text": "Це не детектор ШІ.",
+            "count": 1,
+            "passages": [
+              15
+            ]
+          }
+        ],
+        "more": 0
+      }
+    ],
+    "shortPassages": [
+      0,
+      2,
+      3,
+      4,
+      14,
+      16
+    ],
+    "judgement": {
+      "agent": "Claude Code",
+      "model": "claude-opus-5-5",
+      "generic": {
+        "passages": 4,
+        "of": 17,
+        "chars": 1862,
+        "totalChars": 14223,
+        "share": 0.13091471560149054
+      }
+    },
+    "disagreements": [
+      {
+        "passage": 10,
+        "kind": "script_missed"
+      },
+      {
+        "passage": 12,
+        "kind": "script_missed"
+      }
+    ],
+    "passages": [
+      {
+        "index": 0,
+        "words": 37,
+        "chars": 269,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "що не вміщується в ліміт 26",
+        "why": "Називає власний ліміт інструмента — 26 уривків.",
+        "disagree": null
+      },
+      {
+        "index": 1,
+        "words": 134,
+        "chars": 934,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "розріз по h2, далі вікна по 2000 символів до 26 фрагментів / сторінку",
+        "why": "Точні параметри розрізу: h2, вікна по 2000 символів, ліміт 26.",
+        "disagree": null
+      },
+      {
+        "index": 2,
+        "words": 39,
+        "chars": 279,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Це попередній погляд машини, а не гарантія того, що з ним зробить будь-який асистент.",
+        "why": "Загальне пояснення, яке підійде будь-якому візуалізатору розбиття.",
+        "disagree": null
+      },
+      {
+        "index": 3,
+        "words": 23,
+        "chars": 149,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Це прочитання бере зі сторінки не більше 26 фрагментів.",
+        "why": "Конкретна межа і конкретна дія для фрагмента за нею.",
+        "disagree": null
+      },
+      {
+        "index": 4,
+        "words": 33,
+        "chars": 249,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Це не доводить, що будь-який асистент проіндексував сторінку.",
+        "why": "Типове застереження, яке конкурент перенесе без змін.",
+        "disagree": null
+      },
+      {
+        "index": 5,
+        "words": 294,
+        "chars": 1998,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Vectorscope застосовує ту саму межу, що й продукт, і називає фрагменти, які за неї вийшли.",
+        "why": "Описує власну поведінку інструмента й причини низького видобутку.",
+        "disagree": null
+      },
+      {
+        "index": 6,
+        "words": 73,
+        "chars": 489,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "змініть заголовок, прогоніть сторінку знову, задайте те саме питання",
+        "why": "Конкретна процедура перевірки переписаного заголовка.",
+        "disagree": null
+      },
+      {
+        "index": 7,
+        "words": 288,
+        "chars": 1960,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "вікно у 2000 символів із перекриттям у 200, яке закінчується на межі речення",
+        "why": "Точні розміри вікна й перекриття, h3 не ріже фрагмент.",
+        "disagree": null
+      },
+      {
+        "index": 8,
+        "words": 173,
+        "chars": 1106,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "директива noindex повідомляється, а не ігнорується",
+        "why": "Чіткий перелік того, що інструмент бачить і чого не бачить.",
+        "disagree": null
+      },
+      {
+        "index": 9,
+        "words": 133,
+        "chars": 841,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "можна навести на будь-який URL секунд за двадцять",
+        "why": "Час на URL і покрокова перевірка власного чанкера.",
+        "disagree": null
+      },
+      {
+        "index": 10,
+        "words": 140,
+        "chars": 939,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Vectorscope — для всіх, чию сторінку читатимуть фрагментами",
+        "why": "Список аудиторій, який підійде будь-якому подібному інструменту.",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 11,
+        "words": 210,
+        "chars": 1376,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "На цій сторінці крок за змістом — це групування вже вирізаних фрагментів, а не сам розріз.",
+        "why": "Визначення прив’язані до того, як працює саме цей інструмент.",
+        "disagree": null
+      },
+      {
+        "index": 12,
+        "words": 60,
+        "chars": 395,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "generic",
+        "evidence": "Довші відповіді на питання, які ця сторінка може лише підсумувати.",
+        "why": "Звичайний список посилань без власного змісту.",
+        "disagree": "script_missed"
+      },
+      {
+        "index": 13,
+        "words": 303,
+        "chars": 1995,
+        "score": {
+          "value": 8,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Vectorscope ріже по кожному h2 — h3 нового фрагмента не починає",
+        "why": "Відповіді називають власні правила розрізу й зберігання.",
+        "disagree": null
+      },
+      {
+        "index": 14,
+        "words": 32,
+        "chars": 205,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "Обмеження існує, бо кожне читання витрачає виклик ембедингів",
+        "why": "Пояснює, звідки береться обмеження частоти саме тут.",
+        "disagree": null
+      },
+      {
+        "index": 15,
+        "words": 102,
+        "chars": 761,
+        "score": {
+          "value": 0,
+          "band": "low"
+        },
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "спершу не називаючи платформи, потім називаючи всі дванадцять",
+        "why": "Названі власні інструменти з конкретними деталями.",
+        "disagree": null
+      },
+      {
+        "index": 16,
+        "words": 45,
+        "chars": 278,
+        "score": null,
+        "markers": {
+          "hits": 0,
+          "perThousand": 0
+        },
+        "verdict": "specific",
+        "evidence": "для цього потрібен корпус усього сайту, зміряний у часі",
+        "why": "Чітка межа однієї сторінки проти корпусу продукту.",
+        "disagree": null
+      }
+    ]
+  },
   "writingPatterns": {
     "language": "uk",
     "wordCount": 2022,
     "score": {
       "scoreModelVersion": "score-1",
       "band": "low",
-      "value": 9,
+      "value": 2,
       "wordCount": 2022,
-      "perThousand": 23.74,
-      "points": 48,
+      "perThousand": 5.93,
+      "points": 12,
       "capped": false,
       "contributions": [
         {
           "family": "repetition",
-          "counted": 13,
+          "counted": 4,
           "suppressed": 0,
-          "points": 48
+          "points": 12
         }
       ]
     },
     "detectors": "det-1",
     "findings": [
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "high",
-        "evidence": "Vectorscope цього кроку не робить.",
-        "passage": 7,
-        "word": 786,
-        "heading": "Що таке семантичне розбиття на фрагменти?",
-        "occurrences": 3
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "medium",
-        "evidence": "Які фрагменти мають спільну тему, коли їх згрупувати за змістом, — питання, яке ставить семантичне розбиття, поставлене вашій сторінці.",
-        "passage": 8,
-        "word": 916,
-        "heading": "Чи готовий мій контент до пошуку з ШІ?",
-        "occurrences": 2
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "medium",
-        "evidence": "Цього не бачить ніхто поза тими компаніями.",
-        "passage": 8,
-        "word": 984,
-        "heading": "Чи готовий мій контент до пошуку з ШІ?",
-        "occurrences": 2
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "high",
-        "evidence": "4 Прогоніть завідомо задовгу сторінку.",
-        "passage": 9,
-        "word": 1107,
-        "heading": "Як перевірити RAG-конвеєр за допомогою Vectorscope",
-        "occurrences": 3
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "medium",
-        "evidence": "Методологія Кожна формула за показниками вище, названа повністю.",
-        "passage": 12,
-        "word": 1550,
-        "heading": "Читати далі",
-        "occurrences": 2
-      },
       {
         "family": "repetition",
         "detector": "sentence_template",
@@ -2313,26 +2563,6 @@
         "family": "repetition",
         "detector": "sentence_template",
         "severity": "medium",
-        "evidence": "Чим розбиття за заголовками відрізняється від семантичного?",
-        "passage": 13,
-        "word": 1707,
-        "heading": "Питання, які про це ставлять",
-        "occurrences": 2
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "high",
-        "evidence": "Чи використовує Vectorscope семантичне розбиття?",
-        "passage": 13,
-        "word": 1747,
-        "heading": "Питання, які про це ставлять",
-        "occurrences": 3
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "medium",
         "evidence": "Не для того, щоб різати сторінку.",
         "passage": 13,
         "word": 1752,
@@ -2343,29 +2573,9 @@
         "family": "repetition",
         "detector": "sentence_template",
         "severity": "medium",
-        "evidence": "Прочитане тримається недовго, щоб ним можна було поділитися посиланням, а сама завантажена сторінка після формування звіту не зберігається.",
-        "passage": 13,
-        "word": 1811,
-        "heading": "Питання, які про це ставлять",
-        "occurrences": 2
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "medium",
         "evidence": "Це не детектор ШІ.",
         "passage": 15,
         "word": 1945,
-        "heading": "Інші безкоштовні AI SEO інструменти",
-        "occurrences": 2
-      },
-      {
-        "family": "repetition",
-        "detector": "sentence_template",
-        "severity": "medium",
-        "evidence": "Усі безкоштовні інструменти\n\nОдна сторінка сама по собі.",
-        "passage": null,
-        "word": 1975,
         "heading": "Інші безкоштовні AI SEO інструменти",
         "occurrences": 2
       }
@@ -2757,7 +2967,7 @@
         "problems": [
           6,
           7,
-          10
+          9
         ]
       },
       {
@@ -2801,7 +3011,7 @@
         "seenShare": 1,
         "merged": 0,
         "problems": [
-          11
+          10
         ]
       },
       {
@@ -2832,8 +3042,8 @@
         "merged": 0,
         "problems": [
           3,
-          12,
-          13
+          11,
+          12
         ]
       },
       {
@@ -2848,9 +3058,7 @@
         "panels": 0,
         "seenShare": 1,
         "merged": 0,
-        "problems": [
-          8
-        ]
+        "problems": []
       },
       {
         "id": 8,
@@ -2864,9 +3072,7 @@
         "panels": 0,
         "seenShare": 1,
         "merged": 0,
-        "problems": [
-          8
-        ]
+        "problems": []
       },
       {
         "id": 9,
@@ -2880,9 +3086,7 @@
         "panels": 0,
         "seenShare": 1,
         "merged": 0,
-        "problems": [
-          8
-        ]
+        "problems": []
       },
       {
         "id": 10,
@@ -2930,7 +3134,7 @@
         "problems": [
           1,
           3,
-          8,
+          13,
           14
         ]
       },
@@ -3492,7 +3696,8 @@
         "path": "div > ul.mt-5.flex > li > a.group.inline-flex",
         "text": "Discord",
         "status": 200,
-        "verdict": "ok"
+        "verdict": "ok",
+        "finalUrl": "https://discord.com/invite/Z6cRuhprMa"
       },
       {
         "url": "https://www.getlooploop.com/questions",

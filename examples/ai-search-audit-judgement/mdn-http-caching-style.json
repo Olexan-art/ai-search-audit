@@ -1,0 +1,32 @@
+{
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "passages": [
+    { "passage": 0, "verdict": "generic", "evidence": "The HTTP cache stores a response associated with a request and reuses the stored response for subsequent requests.", "why": "Title plus a one-line definition any caching page would open with." },
+    { "passage": 1, "verdict": "generic", "evidence": "Proper operation of the cache is critical to the health of the system.", "why": "General benefits of caching (speed, less server load) with no header, number or example." },
+    { "passage": 2, "verdict": "specific", "evidence": "Cache-Control: no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate", "why": "Private vs shared caches with exact directives, including the kitchen-sink header." },
+    { "passage": 3, "verdict": "specific", "evidence": "some browsers only allow certificates issued with an SCT (signed certificate timestamp), this method requires the application of an enterprise policy", "why": "Concrete account of TLS bridge proxies, CT and managed caches." },
+    { "passage": 4, "verdict": "specific", "evidence": "some CDNs provide their own headers that are effective only for that CDN (for example, Surrogate-Control)", "why": "Names Varnish VCL, Surrogate-Control and CDN-Cache-Control." },
+    { "passage": 5, "verdict": "specific", "evidence": "the specification recommends about 10% (in this case 0.1 year) of the time after storing", "why": "Heuristic caching with a worked example and the 10% rule." },
+    { "passage": 6, "verdict": "specific", "evidence": "fresh for the remaining 518400 seconds, the difference between the response's max-age and Age", "why": "Worked max-age/Age arithmetic a reader can check." },
+    { "passage": 7, "verdict": "specific", "evidence": "If both Expires and Cache-Control: max-age are available, max-age is defined to be preferred.", "why": "Exact precedence rule between two headers." },
+    { "passage": 8, "verdict": "specific", "evidence": "Vary: Accept-Language", "why": "Shows how Vary changes the cache key, with tables and the User-Agent caveat." },
+    { "passage": 9, "verdict": "specific", "evidence": "The server will respond with 304 Not Modified if the content has not changed since the specified time.", "why": "If-Modified-Since request/response exchange with exact timestamps." },
+    { "passage": 10, "verdict": "specific", "evidence": "if both If-Modified-Since and If-None-Match are present, then If-None-Match takes precedence for the validator", "why": "ETag/If-None-Match exchange, RFC9110 note and precedence rule." },
+    { "passage": 11, "verdict": "specific", "evidence": "The no-cache directive (or equivalent, such as max-age=0, must-revalidate) does not guarantee revalidation for history navigations", "why": "Forced revalidation with no-cache and the bfcache exception." },
+    { "passage": 12, "verdict": "specific", "evidence": "there's no reason to ever use that max-age=0 and must-revalidate combination — you should instead just use no-cache", "why": "Explains a historical workaround and gives a definite recommendation." },
+    { "passage": 13, "verdict": "specific", "evidence": "returning no-store will not prevent the old response from being reused", "why": "Distinguishes no-cache, no-store and private by exact behaviour." },
+    { "passage": 14, "verdict": "specific", "evidence": "Cache-Control: no-cache, private", "why": "Concrete replacement for kitchen-sink headers and what no-store costs (bfcache)." },
+    { "passage": 15, "verdict": "specific", "evidence": "fetch(\"/\", { cache: \"no-cache\" });", "why": "Actual reload request headers and the matching Fetch cache mode." },
+    { "passage": 16, "verdict": "specific", "evidence": "Cache-Control: max-age=31536000, immutable", "why": "Force-reload fetch mode, the immutable directive and Chrome's behaviour." },
+    { "passage": 17, "verdict": "specific", "evidence": "The Clear-Site-Data: cache header and directive value can be used to clear browser caches — but has no effect on intermediate caches.", "why": "Names a header and the exact limit of what it clears." },
+    { "passage": 18, "verdict": "specific", "evidence": "Request collapse occurs when requests are arriving at the same time, so even if max-age=0 or no-cache is given in the response, it will be reused.", "why": "Defines request collapse and a checkable directive interaction." },
+    { "passage": 19, "verdict": "specific", "evidence": "# version in filename bundle.v123.js # version in query bundle.js?v=123", "why": "Default Cache-Control pattern and concrete cache-busting URLs." },
+    { "passage": 20, "verdict": "specific", "evidence": "41 cache-control public, max-age=31536000", "why": "QPACK static table entries and what public does with Authorization." },
+    { "passage": 21, "verdict": "specific", "evidence": "Cache-Control: public, max-age=31536000, immutable", "why": "Full response headers for a cache-busted bundle." },
+    { "passage": 22, "verdict": "specific", "evidence": "The same can be used for favicon.ico, manifest.json, .well-known, and API endpoints whose URLs cannot be changed using cache busting.", "why": "Concrete header set for main resources, personalized and not." },
+    { "passage": 23, "verdict": "generic", "evidence": "For more information, see the documentation for your CDN, and consult the service worker documentation.", "why": "General advice to purge via a CDN or service worker; no header, value or procedure." },
+    { "passage": 24, "verdict": "generic", "evidence": "RFC 9111: Hypertext Transfer Protocol (HTTP/1.1): Caching", "why": "A See also link list; any caching page could carry the same references." },
+    { "passage": 25, "verdict": "generic", "evidence": "Learn how to contribute", "why": "Site footer boilerplate with nothing about the subject." }
+  ]
+}
