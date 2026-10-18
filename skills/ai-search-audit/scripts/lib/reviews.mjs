@@ -25,22 +25,66 @@ export const REVIEW_PLATFORMS = [
 ];
 
 /**
- * The control: a review platform that does not exist, asked about as though it did. A constant,
- * so every run is the same instrument; the report always says it is invented.
+ * The control: a review platform that does not exist, asked about as though it did. It is drawn
+ * from this pool by the site's host, so every page and every run of one site meets the same
+ * control, and the instructions never name it: a model told which platform is invented could not
+ * be caught inventing a rating for it. The report always says which one it was.
  */
-export const CONTROL = { code: "vetteral", name: "Vetteral", host: null, aliases: [], scale: "five", control: true };
-export const ALL_PLATFORMS = [...REVIEW_PLATFORMS, CONTROL];
+export const CONTROL_POOL = [
+  { code: "vetteral", name: "Vetteral" },
+  { code: "ratefold", name: "Ratefold" },
+  { code: "proofwick", name: "Proofwick" },
+  { code: "quillrate", name: "Quillrate" },
+  { code: "peerhaven", name: "Peerhaven" },
+  { code: "vouchwell", name: "Vouchwell" },
+  { code: "trustorly", name: "Trustorly" },
+  { code: "revunda", name: "Revunda" },
+].map((p) => ({ ...p, host: null, aliases: [], scale: "five", control: true }));
+
+const hashOf = (s) => {
+  let h = 2166136261;
+  for (const c of s) h = Math.imul(h ^ c.codePointAt(0), 16777619);
+  return h >>> 0;
+};
+const hostOf = (url) => {
+  try { return new URL(url).hostname.toLowerCase().replace(/^www\./, ""); } catch { return String(url || ""); }
+};
+
+/** The control platform for a page's site. */
+export const controlFor = (url) => CONTROL_POOL[hashOf(hostOf(url)) % CONTROL_POOL.length];
+/** The control when the site is not known (old files and tests). */
+export const CONTROL = CONTROL_POOL[0];
+/** The platforms a reviews.json for this control answers: the twelve, then the control. */
+export const platformsFor = (control = CONTROL) => [...REVIEW_PLATFORMS, control];
+export const ALL_PLATFORMS = platformsFor(CONTROL);
 export const PLATFORM_CODES = ALL_PLATFORMS.map((p) => p.code);
+
+/**
+ * reviews.template.json for a site: every platform once, the control among them, in an order
+ * shuffled by the host, and "knows" left empty, so the agent fills each one in and a file
+ * copied without thought is refused.
+ */
+export function reviewsTemplate(url) {
+  const host = hostOf(url);
+  const platforms = platformsFor(controlFor(url))
+    .map((p) => ({ p, k: hashOf(`${host}:${p.code}`) }))
+    .sort((a, b) => a.k - b.k)
+    .map(({ p }) => ({ platform: p.code, name: p.name, scale: p.scale === "ten" ? "0-10" : p.scale === "count" ? "upvotes" : "0-5", knows: null }));
+  return { agent: "<your agent>", model: "<your model name>", brand: "", basis: BASIS, platforms };
+}
 export const BASIS = "own_knowledge";
 const MAX = { five: 5, ten: 10 };
 
 /**
  * reviews.json:
  * {"agent": "…", "model": "…", "brand": "Name", "basis": "own_knowledge",
- *  "platforms": [{"platform": "g2", "knows": true, "rating": 4.5, "reviews": 120}, {"platform": "capterra", "knows": false}, …, {"platform": "vetteral", "knows": false}]}
- * Every one of the 13 codes once. Returns { brand, platforms, judgement } or throws.
+ *  "platforms": [{"platform": "g2", "knows": true, "rating": 4.5, "reviews": 120}, {"platform": "capterra", "knows": false}, …]}
+ * Every platform of reviews.template.json once: the twelve and this site's control.
+ * Returns { brand, platforms, control, judgement } or throws.
  */
-export function validateReviews(input) {
+export function validateReviews(input, control = CONTROL) {
+  const ALL = platformsFor(control);
+  const CODES = ALL.map((p) => p.code);
   if (!input || typeof input !== "object" || !Array.isArray(input.platforms)) throw new Error('reviews.json must be {"brand": "…", "basis": "own_knowledge", "platforms": [{"platform": "g2", "knows": false}, …]}.');
   if (input.basis !== BASIS) throw new Error(`reviews.json "basis" must be "${BASIS}": the ratings come from the model's own knowledge, with no browsing or search.`);
   const brand = typeof input.brand === "string" ? input.brand.replace(/\s+/g, " ").trim() : "";
@@ -48,11 +92,11 @@ export function validateReviews(input) {
   const seen = new Set();
   const platforms = input.platforms.map((x, i) => {
     const where = `platforms[${i}]`;
-    if (!x || !PLATFORM_CODES.includes(x.platform)) throw new Error(`${where}.platform must be one of ${PLATFORM_CODES.join(", ")}.`);
+    if (!x || !CODES.includes(x.platform)) throw new Error(`${where}.platform must be one of the platforms in reviews.template.json (${CODES.join(", ")}).`);
     if (seen.has(x.platform)) throw new Error(`platform ${x.platform} appears twice.`);
     seen.add(x.platform);
     if (typeof x.knows !== "boolean") throw new Error(`${where}.knows must be true or false; false is the honest answer when the model does not know.`);
-    const p = ALL_PLATFORMS.find((y) => y.code === x.platform);
+    const p = ALL.find((y) => y.code === x.platform);
     if (!x.knows) return { platform: p.code, knows: false, rating: null, reviews: null };
     const rating = x.rating;
     if (typeof rating !== "number" || !Number.isFinite(rating) || rating < 0) throw new Error(`${where}.rating must be a number when knows is true.`);
@@ -61,10 +105,10 @@ export function validateReviews(input) {
     if (reviews !== null && (!Number.isInteger(reviews) || reviews < 0)) throw new Error(`${where}.reviews must be a whole number or left out.`);
     return { platform: p.code, knows: true, rating, reviews };
   });
-  const missing = PLATFORM_CODES.filter((c) => !seen.has(c));
+  const missing = CODES.filter((c) => !seen.has(c));
   if (missing.length) throw new Error(`reviews.json has no entry for ${missing.join(", ")}; every platform gets one, "knows": false included.`);
-  platforms.sort((a, b) => PLATFORM_CODES.indexOf(a.platform) - PLATFORM_CODES.indexOf(b.platform));
-  return { brand, platforms, judgement: validateIdentity(input) };
+  platforms.sort((a, b) => CODES.indexOf(a.platform) - CODES.indexOf(b.platform));
+  return { brand, platforms, control: { code: control.code, name: control.name }, judgement: validateIdentity(input) };
 }
 
 const fold = (s) => String(s ?? "").toLowerCase().replace(/[’']/g, "").replace(/\s+/g, " ");
@@ -87,10 +131,11 @@ export function reviewFindings(r, page) {
   const hasRatingMarkup = ["AggregateRating", "Review"].some((t) => page.types.has(t)) || /"aggregaterating"|"@type":\s*"review"/i.test(page.jsonText || "");
   if (r) {
     const base = { judgement: r.judgement };
-    const control = r.platforms.find((p) => p.platform === CONTROL.code);
-    if (control?.knows) out.push({ ...base, code: "review_control_hallucination", evidence: { platform: CONTROL.name, invented: true, rating: control.rating, reviews: control.reviews }, where: `control question · “${CONTROL.name}” (invented)` });
+    const C = r.control || CONTROL;
+    const control = r.platforms.find((p) => p.platform === C.code);
+    if (control?.knows) out.push({ ...base, code: "review_control_hallucination", evidence: { platform: C.name, invented: true, rating: control.rating, reviews: control.reviews }, where: `control question · “${C.name}” (invented)` });
     const unbacked = [];
-    for (const x of r.platforms.filter((p) => p.knows && p.platform !== CONTROL.code)) {
+    for (const x of r.platforms.filter((p) => p.knows && p.platform !== C.code)) {
       const p = REVIEW_PLATFORMS.find((y) => y.code === x.platform);
       const linked = page.links.some((u) => {
         try {

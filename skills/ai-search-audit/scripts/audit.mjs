@@ -15,7 +15,7 @@ import { buildExport, buildRefusalExport, renderMarkdown, renderRefusalMarkdown 
 import { READING_SCHEMA } from "./lib/version.mjs";
 import { validateQuestions } from "./lib/questions.mjs";
 import { validateBrand } from "./lib/brand.mjs";
-import { validateReviews } from "./lib/reviews.mjs";
+import { controlFor, validateReviews } from "./lib/reviews.mjs";
 import { textModules } from "./lib/checks.mjs";
 import { computeGenerated, validateStyle } from "./vendor/vectorscope/generatedText.mjs";
 
@@ -90,7 +90,7 @@ const modules = textModules(reading, { keyword: args.keyword });
 const judged = [
   ["questions", args.questions, (x) => validateQuestions(x, reading.vs.passages, { keyword: modules.keyword.keyword })],
   ["brand", args.brand, validateBrand],
-  ["reviews", args.reviews, validateReviews],
+  ["reviews", args.reviews, (x) => validateReviews(x, controlFor(reading.fetch?.finalUrl || reading.requestedInput))],
   ["style", args.style, (x) => validateStyle(x, reading.vs.passages)],
 ];
 for (const [key, file, validate] of judged) {

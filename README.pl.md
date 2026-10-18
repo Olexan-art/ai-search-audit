@@ -140,7 +140,7 @@ For an SEO or AI search audit of a web page, follow skills/ai-search-audit/SKILL
 
 ```
 node dist/read.mjs https://example.com/page --out reading.json
-# agent pisze questions.json, style.json, brand.json i reviews.json (schematy w SKILL.md)
+# agent pisze questions.json, style.json, brand.json i reviews.json (schematy w references/judgement-files.md)
 node dist/audit.mjs reading.json --questions questions.json --style style.json --brand brand.json --reviews reviews.json --check
 node dist/audit.mjs reading.json --questions questions.json --style style.json --brand brand.json --reviews reviews.json --html report.html --md report.md --json export.json
 ```

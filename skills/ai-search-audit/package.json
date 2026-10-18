@@ -13,7 +13,7 @@
     "audit": "node dist/audit.mjs",
     "build": "node tools/build.mjs",
     "zip": "node tools/zip.mjs",
-    "test": "node --test tests/assets.test.mjs tests/checks.test.mjs tests/contrast.test.mjs tests/dist.test.mjs tests/fixtures.test.mjs tests/judgement.test.mjs tests/keyword.test.mjs tests/languages.test.mjs tests/locales.test.mjs tests/map.test.mjs tests/network.test.mjs tests/patterns.test.mjs tests/refusal.test.mjs tests/report.test.mjs tests/robots.test.mjs tests/site.test.mjs tests/skill.test.mjs tests/version.test.mjs tests/russianSite.test.mjs tests/generated.test.mjs",
+    "test": "node --test tests/assets.test.mjs tests/checks.test.mjs tests/contrast.test.mjs tests/dist.test.mjs tests/fixtures.test.mjs tests/judgement.test.mjs tests/keyword.test.mjs tests/languages.test.mjs tests/locales.test.mjs tests/map.test.mjs tests/network.test.mjs tests/patterns.test.mjs tests/refusal.test.mjs tests/report.test.mjs tests/robots.test.mjs tests/site.test.mjs tests/skill.test.mjs tests/version.test.mjs tests/russianSite.test.mjs tests/generated.test.mjs tests/cyrillic.test.mjs tests/control.test.mjs",
     "favicons": "node tools/favicons.mjs"
   },
   "dependencies": {

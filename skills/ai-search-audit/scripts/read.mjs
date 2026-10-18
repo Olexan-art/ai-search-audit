@@ -11,6 +11,8 @@
 // A refusal still writes its reading, with ok:false and the code, and exits with code 2.
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { dirname as dirOf, join as joinPath } from "node:path";
+import { reviewsTemplate } from "./lib/reviews.mjs";
 import { readAudit } from "./lib/reading.mjs";
 import { findBrowser } from "./vendor/vectorscope/render.mjs";
 import { isRefusalCode, refusalReason } from "./vendor/vectorscope/refusal.mjs";
@@ -91,5 +93,7 @@ const reading = await readAudit({
   onHtml: args.saveHtml ? (source) => writeFileSync(args.saveHtml, source) : undefined,
 });
 writeFileSync(args.out, JSON.stringify(reading, null, 2));
+// The reviews.json to fill in: every platform, this site's control among them, unnamed.
+if (reading.ok) writeFileSync(joinPath(dirOf(args.out), "reviews.template.json"), JSON.stringify(reviewsTemplate(reading.fetch.finalUrl), null, 2));
 summarise(reading, args.out);
 process.exit(reading.ok ? 0 : 2);
