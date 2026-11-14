@@ -309,6 +309,7 @@ export const UI = {
     "Utworzono za pomocą umiejętności ai-search-audit (Lite) od GetLoopLoop: skrypty pobrały stronę raz i niczego z niej nie zachowały.",
   ],
   author: ["the author", "автор", "autor"],
+  gllmolfar: ["crawl your whole site", "проскануйте весь сайт", "przeskanuj cały serwis"],
   refusedEyebrow: ["AI search audit · Lite", "Аудит для ШІ-пошуку · Lite", "Audyt wyszukiwania AI · Lite"],
 };
 

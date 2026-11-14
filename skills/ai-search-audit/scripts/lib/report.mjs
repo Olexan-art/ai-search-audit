@@ -11,13 +11,13 @@
 // selects a place, opens a section a link points into, and copies a path. The theme is light
 // unless #theme=dark or the toggle asks for dark: the system preference is not read.
 
-import { esc, FOOTER_LINKS } from "../vendor/vectorscope/html.mjs";
+import { esc, FOOTER_LINKS, gllmolfarHref } from "../vendor/vectorscope/html.mjs";
 import { FINDINGS, REFUSAL_COPY, SANCTIONS_LINKS, isRefusalCode, refusalReason } from "../vendor/vectorscope/refusal.mjs";
 import { MOTANKA } from "../vendor/vectorscope/sprites.mjs";
 import { CSS, CSS_EXTRA } from "./css.mjs";
 import { FAVICONS } from "./favicons.mjs";
 import { CANNOT, CARD_COPY, LAYER, LITE, MARK, OWNERS, SEV, SEV_COUNT, STATE, UI, ZONE_LABEL, dateLong, fmtEn, fmtPl, fmtUk, headline, nMinor, nProblems, subtitle } from "./copy.mjs";
-import { GLL_MARK, GLL_MARK_LIGHT } from "../vendor/vectorscope/brandmark.mjs";
+import { GLL_MARK, GLL_MARK_LIGHT, GLLMOLFAR_ICON } from "../vendor/vectorscope/brandmark.mjs";
 import { GENERATED_CSS, renderGeneratedHtml } from "../vendor/vectorscope/generatedText.mjs";
 import { LOGO_GLITCH_JS } from "./glitch.mjs";
 import { SEVERITIES } from "./checks.mjs";
@@ -54,14 +54,17 @@ function safeHref(url) {
 }
 
 const ICONS = {
+  // The GLLmolfar desktop app's own icon; the label beside it names the app, so alt is empty.
+  gllmolfar: `<img class="gm-ico" src="${GLLMOLFAR_ICON}" alt="" width="16" height="16">`,
   // The real mark, not a drawn stand-in.
   getlooploop: `<img class="gll-ico gll-on-light" src="${GLL_MARK_LIGHT}" alt="" width="28" height="15"><img class="gll-ico gll-on-dark" src="${GLL_MARK}" alt="" width="28" height="15">`,
   x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
   bluesky: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5.2 3.3C8 5.4 11 9.6 12 11.8c1-2.2 4-6.4 6.8-8.5 2-1.5 5.2-2.6 5.2 1 0 .7-.4 6-.6 6.9-.8 3-3.8 3.7-6.5 3.3 4.7.8 5.9 3.4 3.3 6.1-4.9 5-7-1.3-7.6-2.9l-.6-1.7-.6 1.7c-.6 1.6-2.7 7.9-7.6 2.9-2.6-2.7-1.4-5.3 3.3-6.1-2.7.4-5.7-.3-6.5-3.3C.4 10.3 0 5 0 4.3c0-3.6 3.2-2.5 5.2-1z"/></svg>',
   linkedin: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>',
 };
-// The Vectorscope report's four footer links, so the two skills cannot drift apart.
-const LINKS = FOOTER_LINKS.map((l) => [l.id, l.name, l.href, l.key ? UI.author : null]);
+// The Vectorscope report's footer links, so the skills cannot drift apart; GLLmolfar's carries this
+// skill's name as utm_source and its own label.
+const LINKS = FOOTER_LINKS.map((l) => (l.id === "gllmolfar" ? [l.id, l.name, gllmolfarHref("ai-search-audit"), UI.gllmolfar] : [l.id, l.name, l.href, l.key ? UI.author : null]));
 const OWNER_ICON = {
   dev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   content: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
@@ -533,7 +536,7 @@ function documentStart(title) {
 }
 
 function documentEnd(madeKey = "footer") {
-  const links = LINKS.map(([id, name, href, k]) => `<li><a id="foot-${id}" href="${href}" rel="noopener noreferrer" target="_blank">${ICONS[id]}<span>${name}${k ? ` · ${P(k)}` : ""}</span></a></li>`).join("");
+  const links = LINKS.map(([id, name, href, k]) => `<li><a id="foot-${id}" href="${esc(href)}" rel="noopener noreferrer" target="_blank">${ICONS[id]}<span>${name}${k ? ` · ${P(k)}` : ""}</span></a></li>`).join("");
   return [
     `<footer class="foot"><div class="foot-brand">${brandMark("brand--foot")}<span class="divider" aria-hidden="true"></span><span class="tagline">${P(LITE.tagline)}</span></div>`,
     `<ul class="links">${links}</ul>`,

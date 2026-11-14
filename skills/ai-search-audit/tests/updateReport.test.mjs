@@ -28,3 +28,15 @@ test("no newer release: no notice and update is null", async () => {
   assert.ok(!renderReport(model).includes('class="lite-meta update"'));
   assert.equal(buildExport(model).update, null);
 });
+
+test("the footer links to GLLmolfar with its own icon inline, this skill as utm_source, three languages and no number", async () => {
+  const html = renderReport(buildModel(await readingOf(page())));
+  const at = html.indexOf('id="foot-gllmolfar"');
+  assert.ok(at > 0);
+  const a = html.slice(at, html.indexOf("</a>", at));
+  assert.ok(a.includes('href="https://www.getlooploop.com/gllmolfar?utm_source=ai-search-audit&amp;utm_medium=skill-report&amp;utm_campaign=gllmolfar"'));
+  assert.match(a, /<img class="gm-ico" src="data:image\/png;base64,iVBORw0KGgo[^"]+" alt="" width="16" height="16">/);
+  for (const t of ["GLLmolfar", "crawl your whole site", "проскануйте весь сайт", "przeskanuj cały serwis"]) assert.ok(a.includes(t), t);
+  assert.doesNotMatch(a.replace(/<img[^>]*>/, "").replace(/href="[^"]+"/, ""), /\d/, "no page count or price");
+  assert.ok(html.includes('id="foot-linkedin"') && html.includes("the author"));
+});
