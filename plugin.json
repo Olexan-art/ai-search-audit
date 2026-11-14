@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ai-search-audit",
+  "version": "2.110.0",
+  "description": "AI Search Audit Lite: standard search and AI-search checks that rest on published rules (access, robots.txt for search and AI crawlers, the Google and Bing checklist, structured data, language versions, the Vectorscope reading), as a visual report. The scripts call no model.",
+  "author": {
+    "name": "GetLoopLoop",
+    "url": "https://www.getlooploop.com"
+  },
+  "homepage": "https://www.getlooploop.com",
+  "repository": "https://github.com/Olexan-art/ai-search-audit",
+  "license": "MIT",
+  "keywords": [
+    "seo",
+    "ai-search",
+    "geo",
+    "audit",
+    "robots-txt",
+    "agent-skill"
+  ]
+}

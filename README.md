@@ -67,6 +67,23 @@ npx skills add Olexan-art/ai-search-audit --skill ai-search-audit
 
 The [skills CLI](https://skills.sh) asks which agents to install it for (add `-g` for every project, `-a claude-code` to pick one). Then ask your agent for "an AI search audit of <url>".
 
+### As a plugin (Google Antigravity, Claude Code)
+
+The repository is also a plugin: `plugin.json` and `.agents/plugins/marketplace.json` for Antigravity, `gemini-extension.json` for Gemini CLI, `.claude-plugin/` for Claude Code, with the skill in `skills/`.
+
+Google Antigravity:
+
+```
+agy plugin install https://github.com/Olexan-art/ai-search-audit
+```
+
+Claude Code:
+
+```
+/plugin marketplace add Olexan-art/ai-search-audit
+/plugin install ai-search-audit@ai-search-audit
+```
+
 ### claude.ai and the Claude desktop app
 
 1. Download **`ai-search-audit.zip`** from this repository's [Releases](https://github.com/Olexan-art/ai-search-audit/releases). Do not unpack it: the upload takes the zip, with the `ai-search-audit` folder at its top level.
