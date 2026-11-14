@@ -1,7 +1,7 @@
 {
   "name": "ai-search-audit",
   "description": "AI Search Audit Lite: standard search and AI-search checks that rest on published rules (access, robots.txt for search and AI crawlers, the Google and Bing checklist, structured data, language versions, the Vectorscope reading), as a visual report. The scripts call no model.",
-  "version": "2.111.0",
+  "version": "2.112.0",
   "author": {
     "name": "GetLoopLoop"
   }
