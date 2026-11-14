@@ -59,23 +59,7 @@ Lite — це картина проблем: кожна має коротку н
 
 Навичці потрібен Node 20.18 або новіший (цього вимагає cheerio) і **не потрібен `npm install`**: `dist/read.mjs` і `dist/audit.mjs` — це скрипти, зібрані разом з усім потрібним, зокрема з кодом Vectorscope і [cheerio](https://cheerio.js.org/), тож їх запускає звичайний `node`, зокрема в пісочницях, де встановлювати пакети заборонено. Читабельний код лежить у `scripts/`; `dist/` збирається з нього (див. *Робота над навичкою*).
 
-### Однією командою (Claude Code, Codex, opencode та інші агенти)
-
-```
-npx skills add Olexan-art/ai-search-audit --skill ai-search-audit
-```
-
-[Програма skills](https://skills.sh) запитає, для яких агентів встановити навичку (додайте `-g`, щоб вона працювала в усіх проєктах, або `-a claude-code`, щоб вибрати одного агента). Далі попросіть агента: «зроби аудит для ШІ-пошуку сторінки <адреса>».
-
-### Як плагін (Google Antigravity, Claude Code)
-
-Репозиторій — це ще й плагін: `plugin.json` і `.agents/plugins/marketplace.json` для Antigravity, `gemini-extension.json` для Gemini CLI, `.claude-plugin/` для Claude Code, а сама навичка лежить у `skills/`.
-
-Google Antigravity:
-
-```
-agy plugin install https://github.com/Olexan-art/ai-search-audit
-```
+### Як плагін (Claude Code, Google Antigravity), рекомендовано
 
 Claude Code:
 
@@ -83,6 +67,30 @@ Claude Code:
 /plugin marketplace add Olexan-art/ai-search-audit
 /plugin install ai-search-audit@ai-search-audit
 ```
+
+Далі ввімкніть автооновлення: у `/plugin` відкрийте **Marketplaces**, виберіть `ai-search-audit` і натисніть **Enable auto-update**. Доти Claude Code тримає встановлену версію; `/plugin marketplace update ai-search-audit` завантажує новішу вручну.
+
+Google Antigravity:
+
+```
+agy plugin install https://github.com/Olexan-art/ai-search-audit
+```
+
+Щоб оновити, виконайте ту саму команду ще раз.
+
+У репозиторії є `plugin.json` і `.agents/plugins/marketplace.json` для Antigravity, `gemini-extension.json` для Gemini CLI і `.claude-plugin/` для Claude Code, а сама навичка лежить у `skills/`.
+
+### Перевірка оновлень
+
+Скрипт аудиту (`audit.mjs`) щонайбільше раз на добу питає GitHub, чи вийшла новіша версія: один GET `https://raw.githubusercontent.com/Olexan-art/ai-search-audit/main/plugin.json`, відповідь зберігається в `~/.getlooploop-skills/update-check.json`. Більше нічого не надсилається: ні адреси сторінки, ні домену, ні даних аудиту, ні ідентифікатора. Без інтернету чи за будь-якої помилки перевірка мовчить. Про новішу версію скаже один рядок у терміналі й повідомлення у звіті; агент запропонує команду оновлення і виконає її лише з вашої згоди. Вимкнути: `GETLOOPLOOP_NO_UPDATE_CHECK=1` або `--no-update-check`; коли задано `CI`, перевірка теж не виконується.
+
+### Однією командою (Claude Code, Codex, opencode та інші агенти)
+
+```
+npx skills add Olexan-art/ai-search-audit --skill ai-search-audit
+```
+
+[Програма skills](https://skills.sh) запитає, для яких агентів встановити навичку (додайте `-g`, щоб вона працювала в усіх проєктах, або `-a claude-code`, щоб вибрати одного агента). Далі попросіть агента: «зроби аудит для ШІ-пошуку сторінки <адреса>». Пізніше `npx skills update ai-search-audit` оновить її.
 
 ### claude.ai і застосунок Claude для комп’ютера
 

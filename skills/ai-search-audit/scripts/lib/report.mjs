@@ -163,6 +163,8 @@ function heroBlock(model) {
     `<p class="pageid">${url}</p>`,
     `<p class="lite-meta"><span>${P([LITE.checked[0](date[0]), LITE.checked[1](date[1]), LITE.checked[2](date[2])])}</span>${title}</p>`,
     `<h1 id="headline">${P(h.t)}</h1>`,
+    // A newer release of the skill (scripts/lib/update-check.mjs), in the report's three languages.
+    `${model.update ? `<p class="lite-meta update" role="status">${P([model.update.notice.en, model.update.notice.uk, model.update.notice.pl])}</p>` : ""}`,
     `<p class="lede" id="subtitle">${P(subtitle(model.findings, h.blocked))}</p>`,
     `<ul class="sevrow" id="sev-counts" ${attrPair("aria-label", UI.severity[0], UI.severity[1], UI.severity[2])}>${sevs}</ul>`,
     `<p class="cta-row"><a class="btn btn-primary" id="see-first" href="#review-first">${P(LITE.seeFindings)}<span aria-hidden="true"> ↓</span></a></p>`,

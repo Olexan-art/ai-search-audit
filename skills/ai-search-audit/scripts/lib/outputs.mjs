@@ -5,6 +5,7 @@
 import { CANNOT, LAYER, MARK, SEV, UI, dateOf, verdict, ZONE_LABEL } from "./copy.mjs";
 import { generatedExport, generatedMarkdown } from "../vendor/vectorscope/generatedText.mjs";
 import { CODES, SEVERITIES } from "./checks.mjs";
+import { updateExport } from "./update-check.mjs";
 import { rubricOf } from "./rubrics.mjs";
 import { EXPORT_SCHEMA, PRODUCED_BY, SKILL_VERSION } from "./version.mjs";
 import { FULL_VERSION_URL, refusalLead, TOOL_NAME } from "./report.mjs";
@@ -23,6 +24,7 @@ export function renderMarkdown(model) {
   const r = model.reading;
   const o = [];
   o.push(`# ${TOOL_NAME} Lite: ${r.fetch.finalUrl}`, "");
+  if (model.update) o.push(`> **${model.update.notice.en}**`, "");
   o.push(`${r.facts.head.title ? `${cell(r.facts.head.title)} · ` : ""}checked ${dateOf(r.createdAt)[0]} · skill ${SKILL_VERSION}`, "");
   o.push(`**${verdict(model.findings)[0]}** · ${model.findings.length} problems (${SEVERITIES.map((s) => `${SEV[s][0].toLowerCase()} ${model.counts[s]}`).join(", ")})`, "");
   o.push("Lite lists problems, not fixes: labels, severities and places. The checks are deterministic (measured or derived); the questions, the brand and the reviews are the agent's judgement, marked as such.", "");
@@ -87,6 +89,8 @@ export function buildExport(model) {
   return {
     schema: EXPORT_SCHEMA,
     skillVersion: SKILL_VERSION,
+    // A newer release of the skill when the daily check found one: { current, latest, how }; else null.
+    update: updateExport(model.update),
     producedBy: PRODUCED_BY,
     createdAt: r.createdAt,
     edition: "lite",

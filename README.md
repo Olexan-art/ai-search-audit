@@ -59,23 +59,7 @@ Real runs in [`examples/`](examples), each as HTML, Markdown and JSON. The three
 
 The skill needs Node 20.18 or later (what cheerio declares) and **no `npm install`**: `dist/read.mjs` and `dist/audit.mjs` are the scripts bundled with everything they need, the Vectorscope's code and [cheerio](https://cheerio.js.org/) included, so plain `node` runs them, including in sandboxes that block package installs. The readable source is in `scripts/`; `dist/` is generated from it (see *Working on the skill*).
 
-### One command (Claude Code, Codex, opencode and other agents)
-
-```
-npx skills add Olexan-art/ai-search-audit --skill ai-search-audit
-```
-
-The [skills CLI](https://skills.sh) asks which agents to install it for (add `-g` for every project, `-a claude-code` to pick one). Then ask your agent for "an AI search audit of <url>".
-
-### As a plugin (Google Antigravity, Claude Code)
-
-The repository is also a plugin: `plugin.json` and `.agents/plugins/marketplace.json` for Antigravity, `gemini-extension.json` for Gemini CLI, `.claude-plugin/` for Claude Code, with the skill in `skills/`.
-
-Google Antigravity:
-
-```
-agy plugin install https://github.com/Olexan-art/ai-search-audit
-```
+### As a plugin (Claude Code, Google Antigravity), recommended
 
 Claude Code:
 
@@ -83,6 +67,30 @@ Claude Code:
 /plugin marketplace add Olexan-art/ai-search-audit
 /plugin install ai-search-audit@ai-search-audit
 ```
+
+Then turn on auto-update: in `/plugin`, open **Marketplaces**, select `ai-search-audit` and choose **Enable auto-update**. Until you do, Claude Code keeps the version you installed; `/plugin marketplace update ai-search-audit` fetches a newer one by hand.
+
+Google Antigravity:
+
+```
+agy plugin install https://github.com/Olexan-art/ai-search-audit
+```
+
+To update, run the same command again.
+
+The repository carries `plugin.json` and `.agents/plugins/marketplace.json` for Antigravity, `gemini-extension.json` for Gemini CLI and `.claude-plugin/` for Claude Code, with the skill in `skills/`.
+
+### Update check
+
+The audit script (`audit.mjs`) asks GitHub at most once a day whether a newer version is out: one GET of `https://raw.githubusercontent.com/Olexan-art/ai-search-audit/main/plugin.json`, cached in `~/.getlooploop-skills/update-check.json`. It sends nothing else: no page URL, no domain, no audit data, no identifier. Offline or on any error it stays silent. A newer version is one line in the terminal and a notice in the report; the agent offers the update command and runs it only if you agree. Switch it off with `GETLOOPLOOP_NO_UPDATE_CHECK=1` or `--no-update-check`; it is also skipped when `CI` is set.
+
+### One command (Claude Code, Codex, opencode and other agents)
+
+```
+npx skills add Olexan-art/ai-search-audit --skill ai-search-audit
+```
+
+The [skills CLI](https://skills.sh) asks which agents to install it for (add `-g` for every project, `-a claude-code` to pick one). Then ask your agent for "an AI search audit of <url>". Later, `npx skills update ai-search-audit` brings it up to date.
 
 ### claude.ai and the Claude desktop app
 

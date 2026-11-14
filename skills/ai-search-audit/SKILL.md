@@ -98,6 +98,17 @@ The report makes no network requests. It opens in English and in the light theme
 - 1 line: Pattern score and band, marker words per 1,000, passages you judged generic (derived, derived, your judgement). Never say the page was or was not written by AI.
 - Never claim an assistant has indexed, ranks or will cite the page.
 
+## Updates
+
+- `dist/audit.mjs` checks at most once a day whether a newer version of this skill is published: one GET of this repository's `plugin.json` on GitHub. Nothing about the page or the run is sent. When it finds one, it prints a line that starts with `update` on stderr, and the report shows a notice.
+- Then tell the user in 1 line: the running and the new version. Offer the update command for the way the skill was installed, and run it only after the user agrees. Never change, download or overwrite the skill's files yourself.
+  - Claude Code plugin: the user types `/plugin marketplace update ai-search-audit`, or you run `claude plugin update ai-search-audit@ai-search-audit` in the shell. To have it update by itself: `/plugin` > **Marketplaces** > `ai-search-audit` > **Enable auto-update**.
+  - skills CLI: `npx skills update ai-search-audit`.
+  - Google Antigravity: `agy plugin install https://github.com/Olexan-art/ai-search-audit` again.
+  - claude.ai or the desktop app: the user uploads the new zip from https://github.com/Olexan-art/ai-search-audit/releases.
+  - If you do not know how it was installed, ask; do not guess.
+- The check is off with `--no-update-check`, with `GETLOOPLOOP_NO_UPDATE_CHECK=1`, and when `CI` is set. If the user asks for no network beyond the page, pass `--no-update-check`.
+
 ## Refusal codes
 
 | Code | Tell the user |

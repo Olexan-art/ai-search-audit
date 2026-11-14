@@ -12,7 +12,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { buildModel } from "./lib/model.mjs";
 import { renderRefusal, renderReport } from "./lib/report.mjs";
 import { buildExport, buildRefusalExport, renderMarkdown, renderRefusalMarkdown } from "./lib/outputs.mjs";
-import { READING_SCHEMA } from "./lib/version.mjs";
+import { READING_SCHEMA, SKILL_VERSION } from "./lib/version.mjs";
+import { checkForUpdate, NO_UPDATE_FLAG, updateLine, updateNotice } from "./lib/update-check.mjs";
 import { validateQuestions } from "./lib/questions.mjs";
 import { validateBrand } from "./lib/brand.mjs";
 import { controlFor, validateReviews } from "./lib/reviews.mjs";
@@ -22,6 +23,7 @@ import { computeGenerated, validateStyle } from "./vendor/vectorscope/generatedT
 const USAGE = [
   "Usage: node scripts/audit.mjs reading.json [--questions questions.json] [--brand brand.json] [--reviews reviews.json] [--style style.json]",
   '       [--keyword "phrase"] [--html report.html] [--md report.md] [--json export.json] [--check]',
+  "   --no-update-check (or GETLOOPLOOP_NO_UPDATE_CHECK=1) skips the daily check for a newer version.",
 ].join("\n");
 
 function parseArgs(argv) {
@@ -35,6 +37,7 @@ function parseArgs(argv) {
       out[takes[arg]] = v;
     } else if (arg === "--check") out.check = true;
     else if (arg === "-h" || arg === "--help") out.help = true;
+    else if (arg === NO_UPDATE_FLAG) out.noUpdateCheck = true;
     else if (arg.startsWith("--")) throw new Error(`Unknown option: ${arg}`);
     else if (!out.reading) out.reading = arg;
     else throw new Error(`One reading only; also given: ${arg}`);
@@ -55,6 +58,12 @@ if (args.help || !args.reading) {
   process.exit(args.help ? 0 : 1);
 }
 if (!args.check && !args.html && !args.md && !args.json) args.html = "report.html";
+// At most one GET of plugin.json on GitHub a day, about 2 seconds at worst, silent on failure.
+const update = args.check || args.noUpdateCheck ? null : await checkForUpdate({ repo: "ai-search-audit", plugin: "ai-search-audit", current: SKILL_VERSION });
+if (update) {
+  update.notice = updateNotice(update);
+  console.error(updateLine(update));
+}
 
 const readJson = (file, what) => {
   try {
@@ -108,6 +117,7 @@ for (const [key, file, validate] of judged) {
 if (args.check) process.exit(0);
 
 const model = buildModel(reading, extra);
+model.update = update;
 // How generated the text sounds: the writing patterns' own text (the kept sections), each passage, the swap test.
 model.generated = computeGenerated({ sections: reading.facts.sections || null, passages: reading.vs.passages, style: extra.style ?? null });
 if (args.html) writeFileSync(args.html, renderReport(model));
