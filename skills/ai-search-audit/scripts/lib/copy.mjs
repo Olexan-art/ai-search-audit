@@ -440,6 +440,15 @@ export const CARD_COPY = {
   },
 };
 
+/** The group of findings the agent set aside under a rubric clause (drops.json). */
+export const DROPPED = {
+  title: ["Dropped by the agent", "Відкинуто агентом", "Odrzucone przez agenta"],
+  sub: (n) => [`${n} finding${n === 1 ? "" : "s"} set aside under a rubric clause; listed, not counted as problems`, `${n} ${ukForm(n, "знахідка", "знахідки", "знахідок")} відкладено за умовою рубрики; показано, але не враховано як проблеми`, `${n} ${plForm(n, "ustalenie odłożone", "ustalenia odłożone", "ustaleń odłożonych")} według warunku rubryki; pokazane, ale nie liczone jako problemy`],
+  clause: ["Clause", "Умова", "Warunek"],
+  note: ["Agent's note", "Примітка агента", "Uwaga agenta"],
+  by: ["Judged by", "Оцінив", "Ocenił"],
+};
+
 export const LITE = {
   checked: [(d) => `Checked ${d}`, (d) => `Перевірено ${d}`, (d) => `Sprawdzono ${d}`],
   about: ["About this check", "Про цю перевірку", "O tym sprawdzeniu"],

@@ -222,7 +222,16 @@ function strips(reading, findings) {
  */
 export function buildModel(reading, extra = {}) {
   const modules = textModules(reading, extra);
-  const findings = auditFindings(reading, { ...extra, modules }).map((f) => ({ ...f, label: label(f) }));
+  // drops.json (rubrics.mjs validateDrops): a finding the agent set aside by a dropWhen clause is not
+  // a problem (no pin, no tile, no count), and is kept in model.dropped, never deleted.
+  const dropBy = new Map((extra.drops?.drops || []).map((d) => [d.code, d]));
+  const dropped = [];
+  const findings = [];
+  for (const f of auditFindings(reading, { ...extra, modules }).map((x) => ({ ...x, label: label(x) }))) {
+    const d = dropBy.get(f.code);
+    if (d) dropped.push({ ...f, drop: d });
+    else findings.push(f);
+  }
   const zones = reading.facts.zones;
   const seen = zoneSeen(reading);
   const jsZones = (reading.render?.jsZones || []).map((z, i) => ({ ...z, id: `js${i}`, kind: "js" }));
@@ -265,6 +274,8 @@ export function buildModel(reading, extra = {}) {
   return {
     reading,
     findings: ordered,
+    dropped,
+    dropJudgement: extra.drops ? extra.drops.judgement : null,
     bigs,
     tiles,
     counts,

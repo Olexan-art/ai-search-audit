@@ -16,7 +16,7 @@ import { FINDINGS, REFUSAL_COPY, SANCTIONS_LINKS, isRefusalCode, refusalReason }
 import { MOTANKA } from "../vendor/vectorscope/sprites.mjs";
 import { CSS, CSS_EXTRA } from "./css.mjs";
 import { FAVICONS } from "./favicons.mjs";
-import { CANNOT, CARD_COPY, LAYER, LITE, MARK, OWNERS, SEV, SEV_COUNT, STATE, UI, ZONE_LABEL, dateLong, fmtEn, fmtPl, fmtUk, headline, nMinor, nProblems, subtitle } from "./copy.mjs";
+import { DROPPED, CANNOT, CARD_COPY, LAYER, LITE, MARK, OWNERS, SEV, SEV_COUNT, STATE, UI, ZONE_LABEL, dateLong, fmtEn, fmtPl, fmtUk, headline, nMinor, nProblems, subtitle } from "./copy.mjs";
 import { GLL_MARK, GLL_MARK_LIGHT, GLLMOLFAR_ICON } from "../vendor/vectorscope/brandmark.mjs";
 import { GENERATED_CSS, renderGeneratedHtml } from "../vendor/vectorscope/generatedText.mjs";
 import { LOGO_GLITCH_JS } from "./glitch.mjs";
@@ -357,6 +357,23 @@ function allChecksBlock(model) {
   ].join("\n");
 }
 
+/** Findings the agent set aside by a rubric clause: their own group, never deleted. Clause text is the rubric's (English). */
+function droppedBlock(model) {
+  const list = model.dropped || [];
+  if (!list.length) return "";
+  const j = model.dropJudgement || {};
+  const by = [j.agent, j.model].filter(Boolean).join(" · ");
+  const items = list
+    .map((f) => `<li class="drop-i"><p class="drop-h"><span class="sev ${f.severity}">${P(SEV[f.severity])}</span> <b>${P(f.label)}</b> <span class="code">${esc(f.code)}</span></p><p class="drop-c"><span class="lbl">${P(DROPPED.clause)}</span> <code>${esc(f.drop.clause)}</code> <span lang="en">${esc(f.drop.clauseText)}</span></p><p class="drop-n"><span class="lbl">${P(DROPPED.note)}</span> <span lang="en">${esc(f.drop.note)}</span></p></li>`)
+    .join("");
+  return [
+    `<details class="allc dropped" id="dropped" open>`,
+    `<summary class="allc-s"><span class="allc-i">${LIST_ICON}</span><span class="allc-t"><h2 id="h-dropped">${P(DROPPED.title)} (${list.length})</h2><span class="sub">${P(DROPPED.sub(list.length))}</span></span>${CHEV}</summary>`,
+    `<div class="allc-b">${by ? `<p class="drop-by"><span class="lbl">${P(DROPPED.by)}</span> ${esc(by)}</p>` : ""}<ul class="drop-l">${items}</ul></div>`,
+    "</details>",
+  ].join("\n");
+}
+
 function infoStrip() {
   return [
     `<section class="info" id="info-strip" ${attrPair("aria-label", LITE.about[0], LITE.about[1], LITE.about[2])}>`,
@@ -565,6 +582,7 @@ export function renderReport(model) {
   o.push(firstBlock(model));
   o.push(placesBlock(model));
   o.push(allChecksBlock(model));
+  if (model.dropped?.length) o.push(droppedBlock(model));
   // How generated the text sounds: at the bottom of the page, the same block as Vectorscope's.
   if (model.generated) o.push(generatedBlock(model));
   o.push(infoStrip());

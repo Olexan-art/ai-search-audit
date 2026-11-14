@@ -282,6 +282,10 @@ export const CSS_EXTRA = `
 :root[data-theme="dark"] .gll-on-dark{display:block!important}
 .links .gll-ico{width:28px;height:15px;flex:none}
 .links .gm-ico{width:16px;height:16px;flex:none;border-radius:3px}
+.drop-l{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.drop-i{border:1px dashed var(--line);border-radius:10px;padding:10px 14px}
+.drop-i p{margin:4px 0}
+.drop-i .lbl,.drop-by .lbl{font-weight:600;margin-right:6px}
 /* The split-signal mark; its signal fault is drawn by LOGO_GLITCH_JS (glitch.mjs), at random moments. */
 .gll-glitch{position:relative;display:inline-grid;place-items:center;flex:none}
 .brand--top .gll-word{font-size:18px}

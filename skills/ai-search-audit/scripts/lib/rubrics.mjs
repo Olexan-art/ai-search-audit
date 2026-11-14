@@ -75,3 +75,48 @@ export const RUBRICS = {
 
 /** The rubric of a code, or null. */
 export const rubricOf = (code) => RUBRICS[code] || null;
+
+// ── drops.json: the agent sets a finding aside by citing one dropWhen clause ──
+
+const MAX_NOTE_CHARS = 200;
+const MAX_NAME_CHARS = 60;
+
+/**
+ * Validates drops.json against this audit's findings:
+ *   {"agent": "…", "model": "…", "drops": [{"finding": "<code>", "clause": "<code>:drop-N", "note": "…"}]}
+ * A drop must name a finding of this audit (its code or id), a code that has a rubric, and one of
+ * that code's dropWhen clause ids, with a one-sentence English note. Every problem is listed at
+ * once; a file with any problem is refused whole. The dropped findings are never deleted: the
+ * report shows them in their own group, with the clause and the note.
+ */
+export function validateDrops(input, findings) {
+  if (!input || typeof input !== "object" || !Array.isArray(input.drops)) throw new Error('drops.json must be {"agent": "…", "model": "…", "drops": [{"finding": "<code>", "clause": "<code>:drop-N", "note": "one sentence"}]}.');
+  const byKey = new Map();
+  for (const f of findings) {
+    byKey.set(f.code, f);
+    if (f.id) byKey.set(f.id, f);
+  }
+  const problems = [];
+  const name = (k) => (input[k] === undefined || input[k] === null ? null : typeof input[k] === "string" && input[k].trim() && input[k].length <= MAX_NAME_CHARS ? input[k].trim() : (problems.push(`${k} must be a string of at most ${MAX_NAME_CHARS} characters`), null));
+  const judgement = { agent: name("agent"), model: name("model") };
+  const seen = new Set();
+  const drops = [];
+  input.drops.forEach((d, i) => {
+    const where = `drops[${i}]`;
+    if (!d || typeof d !== "object") return problems.push(`${where} is not an object`);
+    const f = typeof d.finding === "string" ? byKey.get(d.finding.trim()) : null;
+    if (!f) return problems.push(`${where}.finding ${JSON.stringify(d.finding)} is not a finding of this audit`);
+    const rubric = RUBRICS[f.code];
+    if (!rubric) return problems.push(`${where}: ${f.code} has no rubric, so it cannot be dropped`);
+    const clause = rubric.dropWhen.find((c) => c.id === d.clause);
+    if (!clause) return problems.push(`${where}.clause ${JSON.stringify(d.clause)} is not a dropWhen clause of ${f.code} (${rubric.dropWhen.map((c) => c.id).join(", ")})`);
+    const note = typeof d.note === "string" ? d.note.trim().replace(/\s+/g, " ") : "";
+    if (!note || note.length > MAX_NOTE_CHARS) problems.push(`${where}.note must be one short sentence of 1 to ${MAX_NOTE_CHARS} characters`);
+    else if (/[Ѐ-ӿ]/.test(note)) problems.push(`${where}.note must be written in English`);
+    if (seen.has(f.code)) problems.push(`${where}: ${f.code} is dropped twice`);
+    seen.add(f.code);
+    drops.push({ finding: f.id || f.code, code: f.code, clause: clause.id, clauseText: clause.text, note });
+  });
+  if (problems.length) throw new Error(`${problems.length} problem${problems.length === 1 ? "" : "s"}: ${problems.join("; ")}.`);
+  return { judgement, drops, warnings: [] };
+}

@@ -65,10 +65,10 @@ Each is a named constant with its reason, in `scripts/lib/`.
 
 ## Verifier rubrics
 
-Some checks fire on pages that are fine: a script sees markup, not intent. For these codes, read the page before you present the finding and check which clause holds. The export carries the same clauses with each finding (`findings[].rubric`, from `scripts/lib/rubrics.mjs`).
+Some checks fire on pages that are fine: a script sees markup, not intent. For these codes, read the page before you present the finding and check which clause holds. The export carries the same clauses with each finding (`findings[].rubric`, from `scripts/lib/rubrics.mjs`); `audit.mjs --explain <code>` prints them for one code.
 
 - When a **keepWhen** clause holds, present the finding as it is.
-- When a **dropWhen** clause holds, still list the finding, and tell the user which clause you believe holds, by its id (for example `script_render_blocking:drop-1`). Never delete a finding from the report or the export; the scripts do not accept a drop.
+- When a **dropWhen** clause clearly holds, you may drop the finding with `drops.json` (`--drops`), citing that clause id (for example `script_render_blocking:drop-1`) and one sentence. The script refuses a drop that names an unknown finding, a code with no rubric or a clause that is not the code's, listing every problem at once. A dropped finding is not deleted: the report, the Markdown and the export (`dropped`, `counts.dropped`) show it in its own group, "Dropped by the agent", and it is not counted as a problem.
 - When neither is clear, present the finding and say what you could not tell.
 
 ### `image_lcp_lazy`

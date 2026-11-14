@@ -19,16 +19,20 @@ import { validateBrand } from "./lib/brand.mjs";
 import { controlFor, validateReviews } from "./lib/reviews.mjs";
 import { textModules } from "./lib/checks.mjs";
 import { computeGenerated, validateStyle } from "./vendor/vectorscope/generatedText.mjs";
+import { validateDrops } from "./lib/rubrics.mjs";
+import { codesText, EXPLAIN_LANGS, explainText, isCode } from "./lib/explainCli.mjs";
 
 const USAGE = [
   "Usage: node scripts/audit.mjs reading.json [--questions questions.json] [--brand brand.json] [--reviews reviews.json] [--style style.json]",
-  '       [--keyword "phrase"] [--html report.html] [--md report.md] [--json export.json] [--check]',
+  '       [--keyword "phrase"] [--drops drops.json] [--html report.html] [--md report.md] [--json export.json] [--check]',
+  "   or: node scripts/audit.mjs --codes [--lang en|uk|pl]          every finding code with its title",
+  "   or: node scripts/audit.mjs --explain <code> [--lang en|uk|pl]  what one code means, its sources and its rubric",
   "   --no-update-check (or GETLOOPLOOP_NO_UPDATE_CHECK=1) skips the daily check for a newer version.",
 ].join("\n");
 
 function parseArgs(argv) {
   const out = { reading: null, html: null, md: null, json: null, questions: null, brand: null, reviews: null, style: null, keyword: null, check: false };
-  const takes = { "--html": "html", "--md": "md", "--json": "json", "--questions": "questions", "--brand": "brand", "--reviews": "reviews", "--style": "style", "--keyword": "keyword" };
+  const takes = { "--html": "html", "--md": "md", "--json": "json", "--questions": "questions", "--brand": "brand", "--reviews": "reviews", "--style": "style", "--drops": "drops", "--explain": "explain", "--lang": "lang", "--keyword": "keyword" };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (takes[arg]) {
@@ -36,6 +40,7 @@ function parseArgs(argv) {
       if (v === undefined) throw new Error(`${arg} needs a value`);
       out[takes[arg]] = v;
     } else if (arg === "--check") out.check = true;
+    else if (arg === "--codes") out.codes = true;
     else if (arg === "-h" || arg === "--help") out.help = true;
     else if (arg === NO_UPDATE_FLAG) out.noUpdateCheck = true;
     else if (arg.startsWith("--")) throw new Error(`Unknown option: ${arg}`);
@@ -52,6 +57,20 @@ try {
   console.error(error.message);
   console.error(USAGE);
   process.exit(1);
+}
+// --codes and --explain: what the codes mean, with no reading and no network.
+if (args.codes || args.explain) {
+  const lang = args.lang || "en";
+  if (!EXPLAIN_LANGS.includes(lang)) {
+    console.error(`--lang must be one of ${EXPLAIN_LANGS.join(", ")}`);
+    process.exit(2);
+  }
+  if (args.explain && !isCode(args.explain)) {
+    console.error(`unknown code: ${args.explain}. List them with --codes.`);
+    process.exit(2);
+  }
+  console.log(args.explain ? explainText(args.explain, lang) : codesText(lang));
+  process.exit(0);
 }
 if (args.help || !args.reading) {
   console.error(USAGE);
@@ -114,6 +133,17 @@ for (const [key, file, validate] of judged) {
   const j = extra[key].judgement;
   console.log(`${key.padEnd(9)} ${file} ok · judged by ${j.agent || "agent not stated"} · ${j.model || "model not stated"}`);
 }
+// drops.json: checked against the findings of this very audit, so it is read after the others.
+if (args.drops) {
+  try {
+    extra.drops = validateDrops(readJson(args.drops, "drops"), buildModel(reading, extra).findings);
+  } catch (error) {
+    console.error(`REFUSED   ${args.drops}: ${error.message}`);
+    process.exit(1);
+  }
+  const j = extra.drops.judgement;
+  console.log(`drops     ${args.drops} ok · ${extra.drops.drops.length} dropped · judged by ${j.agent || "agent not stated"} · ${j.model || "model not stated"}`);
+}
 if (args.check) process.exit(0);
 
 const model = buildModel(reading, extra);
@@ -134,6 +164,7 @@ console.log(`patterns  ${p.analysed ? `${p.language} · ${p.wordCount} words · 
 const gx = model.generated;
 console.log(`generated ${gx.page?.score ? `pattern score ${gx.page.score.value}/100 ${gx.page.score.band}` : `pattern score not computed (${gx.reason})`}${gx.page ? ` · markers ${gx.page.markers.perThousand}/1k` : ""} · ${gx.judged ? `${gx.generic.passages} of ${gx.generic.of} passages generic` : "swap test not given (--style)"}`);
 if (model.modules.locales) console.log(`locales   ${model.modules.locales.compared.map((x) => `${x.hreflang} ${x.aligned ? `${x.differ} differ` : "not aligned"}`).join(" · ")}`);
+if (model.dropped.length) console.log(`dropped   ${model.dropped.map((f) => `${f.code} (${f.drop.clause})`).join(" · ")}`);
 for (const f of model.findings) console.log(`  ${String(f.pin).padStart(2)} [${f.severity}] ${f.code}${f.layer === "judgement" ? " (judgement)" : ""}${f.where ? `  @ ${f.where.slice(0, 90)}` : ""}`);
 const cl = model.checklist;
 console.log(`checklist ${["pass", "fail", "warn", "na", "none"].map((s) => `${s} ${cl.filter((x) => x.state === s).length}`).join(" · ")}`);

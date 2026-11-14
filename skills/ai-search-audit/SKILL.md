@@ -46,7 +46,12 @@ The skill checks 1 public page against the published rules for crawling, indexin
 6. **Write the report (script).** `node "$SKILL/dist/audit.mjs" reading.json --questions questions.json --style style.json --brand brand.json --reviews reviews.json --html report.html --md report.md --json export.json`
    - Add `--keyword "phrase"` when the user gave a target keyword; otherwise the keyword comes from the h1.
    - Result: the 3 files; prints the problems numbered as on the map, judgement findings marked `(judgement)`.
-7. **Show the report.** Required; see *Show the report*.
+7. **Drops (optional judgement).** Only for a finding whose code has a verifier rubric (`node "$SKILL/dist/audit.mjs" --explain <code>` prints it). Read the page where the finding points. If exactly one dropWhen clause clearly holds, write `drops.json`: `{"agent": "…", "model": "…", "drops": [{"finding": "<code>", "clause": "<code>:drop-N", "note": "one sentence in English"}]}`, and run step 6 again with `--drops drops.json` added.
+   - Cite one clause id per drop, word for word. If no clause holds, or you are not sure, do not drop.
+   - Nothing else may be removed, hidden or softened. A code without a rubric cannot be dropped.
+   - On failure: `REFUSED drops.json: <n> problems: …` lists every bad drop. Fix them all, or leave the finding in.
+   - The report keeps every dropped finding in its own group, "Dropped by the agent", with the clause and your note; it is not counted as a problem.
+8. **Show the report.** Required; see *Show the report*.
 
 ## Judgement files
 
@@ -92,7 +97,7 @@ The report makes no network requests. It opens in English and in the light theme
 - First, if present: `ai_search_blocked`, `search_engine_blocked`, `robots_unreachable`, `snippet_blocked` or `noindex`.
 - The verdict line and the counts by severity.
 - Problems 1 to 5, each with its place.
-- For a problem whose code has a verifier rubric (`references/checks.md`, *Verifier rubrics*), read the page first. If a dropWhen clause holds, still list the problem and name the clause id. Never remove a finding.
+- If you dropped findings (step 7), say how many, and for each the code and the clause id, in 1 line. Never leave a finding out of the summary any other way.
 - Every cap the audit printed (links past 30, images past 20, alternates past 10, child sitemaps past 5, merged sections, a render that could not run).
 - Once: the checks are deterministic; the questions, brand and reviews are your judgement as 1 model (name it), not what ChatGPT, Gemini or Perplexity say (the web Brandscope and Reviewscope ask 3 assistants).
 - 1 line: Pattern score and band, marker words per 1,000, passages you judged generic (derived, derived, your judgement). Never say the page was or was not written by AI.
@@ -134,6 +139,6 @@ On a `refused_ru_*` or `refused_language_ru` code: skip steps 2 to 5, run step 6
 | File | Read when |
 |---|---|
 | `references/judgement-files.md` | Before steps 2 to 4. |
-| `references/checks.md` | The user asks about a finding code, tile, severity, threshold or check. |
+| `references/checks.md` | The user asks about a finding code, tile, severity, threshold or check. For one code, run `node "$SKILL/dist/audit.mjs" --explain <code>` instead (`--codes` lists them; `--lang uk` or `pl`). |
 | `references/network-and-limits.md` | What is sent; a failed fetch; no network; a read-only skill folder. |
 | `references/outputs.md` | The user asks for the data or what a file holds. |
