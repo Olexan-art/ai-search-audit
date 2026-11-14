@@ -88,6 +88,12 @@ export const SOURCES = {
   wcagH30: ["W3C WCAG technique H30: link text for anchor elements", "https://www.w3.org/WAI/WCAG22/Techniques/html/H30"],
   wcagF41: ["W3C WCAG failure F41: meta refresh to reload the page", "https://www.w3.org/WAI/WCAG22/Techniques/failures/F41"],
   gLazy: ["Google Search Central: fix lazy-loaded content", "https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading"],
+  // modern-web-guidance (Apache-2.0): guides for building pages, written for coding agents. They back
+  // how a page is built (priorities, folding); none of them is a search-ranking rule. Pinned to a commit.
+  mwgImagePriority: ["modern-web-guidance: optimize image priority", "https://github.com/GoogleChrome/modern-web-guidance/blob/4dd968349e54ca45a05dd5c818fb035c9054b022/skills/modern-web-guidance/guides/performance/optimize-image-priority.md"],
+  mwgScriptPriority: ["modern-web-guidance: optimize script priority", "https://github.com/GoogleChrome/modern-web-guidance/blob/4dd968349e54ca45a05dd5c818fb035c9054b022/skills/modern-web-guidance/guides/performance/optimize-script-priority.md"],
+  mwgPreloadPriority: ["modern-web-guidance: optimize preload priority", "https://github.com/GoogleChrome/modern-web-guidance/blob/4dd968349e54ca45a05dd5c818fb035c9054b022/skills/modern-web-guidance/guides/performance/optimize-preload-priority.md"],
+  mwgHiddenContent: ["modern-web-guidance: search hidden content", "https://github.com/GoogleChrome/modern-web-guidance/blob/4dd968349e54ca45a05dd5c818fb035c9054b022/skills/modern-web-guidance/guides/ui-behaviors/search-hidden-content.md"],
 };
 
 /** A source key as { name, url }. */

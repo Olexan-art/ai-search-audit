@@ -92,6 +92,7 @@ The report makes no network requests. It opens in English and in the light theme
 - First, if present: `ai_search_blocked`, `search_engine_blocked`, `robots_unreachable`, `snippet_blocked` or `noindex`.
 - The verdict line and the counts by severity.
 - Problems 1 to 5, each with its place.
+- For a problem whose code has a verifier rubric (`references/checks.md`, *Verifier rubrics*), read the page first. If a dropWhen clause holds, still list the problem and name the clause id. Never remove a finding.
 - Every cap the audit printed (links past 30, images past 20, alternates past 10, child sitemaps past 5, merged sections, a render that could not run).
 - Once: the checks are deterministic; the questions, brand and reviews are your judgement as 1 model (name it), not what ChatGPT, Gemini or Perplexity say (the web Brandscope and Reviewscope ask 3 assistants).
 - 1 line: Pattern score and band, marker words per 1,000, passages you judged generic (derived, derived, your judgement). Never say the page was or was not written by AI.

@@ -37,6 +37,10 @@ export const URL_MAX_CHARS = 115;
 export const URL_MAX_PARAMS = 2;
 /** Hidden text this long under hidden headings is a section, not a stray label. */
 export const HIDDEN_HIGH_CHARS = 200;
+/** How many addresses a finding lists before it says "and N more" (evidence.more). */
+export const MAX_LISTED = 6;
+/** modern-web-guidance, optimize-image-priority: fetchpriority="high" on at most 1-2 images. */
+export const FETCHPRIORITY_HIGH_MAX = 2;
 
 export const SEVERITIES = ["blocking", "high", "medium", "low"];
 export const SEVERITY_RANK = { blocking: 4, high: 3, medium: 2, low: 1 };
@@ -82,7 +86,8 @@ export const CODES = {
   viewport_missing: { severity: "medium", area: "classic", owner: "dev", rules: ["gMobile"] },
   html_lang_missing: { severity: "low", area: "classic", owner: "dev", rules: ["i18n"] },
   social_tags_missing: { severity: "low", area: "classic", owner: "seo", rules: ["ogp"] },
-  page_weight_heavy: { severity: "low", area: "classic", owner: "dev", rules: ["skill"], layer: "derived" },
+  page_weight_heavy: { severity: "low", area: "classic", owner: "dev", rules: ["skill", "mwgScriptPriority"], layer: "derived" },
+  script_render_blocking: { severity: "low", area: "classic", owner: "dev", rules: ["mwgScriptPriority"] },
   url_unreadable: { severity: "low", area: "classic", owner: "seo", rules: ["gUrl", "skill"] },
   // 2.102: the response, the headings, the links and their anchors, one page at a time
   html_not_compressed: { severity: "low", area: "classic", owner: "dev", rules: ["mdnCompression"] },
@@ -104,8 +109,10 @@ export const CODES = {
   rich_result_retired: { severity: "low", area: "classic", owner: "seo", rules: ["gUpdates"], info: true },
   // Images (a HEAD of up to 20 for their size)
   image_dimensions_missing: { severity: "low", area: "classic", owner: "dev", rules: ["wCls"] },
-  image_lcp_lazy: { severity: "medium", area: "classic", owner: "dev", rules: ["wLcpLazy", "skill"] },
-  image_not_lazy: { severity: "low", area: "classic", owner: "dev", rules: ["wLcpLazy", "skill"] },
+  image_lcp_lazy: { severity: "medium", area: "classic", owner: "dev", rules: ["wLcpLazy", "mwgImagePriority", "skill"] },
+  image_not_lazy: { severity: "low", area: "classic", owner: "dev", rules: ["wLcpLazy", "mwgImagePriority", "skill"] },
+  image_preload_lazy: { severity: "low", area: "classic", owner: "dev", rules: ["mwgPreloadPriority", "mwgImagePriority"] },
+  image_fetchpriority_overused: { severity: "low", area: "classic", owner: "dev", rules: ["mwgImagePriority"] },
   image_legacy_format: { severity: "low", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
   image_oversized: { severity: "medium", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
   image_no_srcset: { severity: "low", area: "classic", owner: "dev", rules: ["gImages", "skill"] },
@@ -127,7 +134,7 @@ export const CODES = {
   date_mismatch: { severity: "low", area: "classic", owner: "content", rules: ["gArticle", "skill"] },
   // AI quotes it right: FAQ and visible text, the questions people ask, writing patterns, the keyword
   faq_schema_not_visible: { severity: "high", area: "quote", owner: "content", rules: ["gSdPol", "sFaq"] },
-  lost_faq_questions: { severity: "high", area: "quote", owner: "content", rules: ["apgAcc", "vs"] },
+  lost_faq_questions: { severity: "high", area: "quote", owner: "content", rules: ["apgAcc", "mwgHiddenContent", "vs"] },
   mid_sentence_start: { severity: "medium", area: "quote", owner: "content", rules: ["vs"], layer: "derived" },
   truncated_teaser: { severity: "low", area: "quote", owner: "content", rules: ["vs"] },
   repeated_claim: { severity: "low", area: "quote", owner: "content", rules: ["vs"], layer: "derived" },
@@ -153,7 +160,7 @@ export const CODES = {
   cap_overflow: { severity: "high", area: "read", owner: "content", rules: ["vs"], hides: true, layer: "derived" },
   js_dependent: { severity: "high", area: "read", owner: "dev", rules: ["gJs"], hides: true },
   hero_lede_dropped: { severity: "high", area: "read", owner: "dev", rules: ["header", "vs"], hides: true },
-  hidden_headings: { severity: "high", area: "read", owner: "dev", rules: ["hidden"], hides: true },
+  hidden_headings: { severity: "high", area: "read", owner: "dev", rules: ["hidden", "mwgHiddenContent"], hides: true },
   ssr_placeholder_text: { severity: "medium", area: "read", owner: "dev", rules: ["gJs"] },
   spa_shell: { severity: "high", area: "read", owner: "dev", rules: ["gJs", "skill"], hides: true },
   h1_glued_words: { severity: "medium", area: "read", owner: "dev", rules: ["dom", "cssText"] },
@@ -316,6 +323,9 @@ function classicChecks(r, loc, out) {
   if (!head.twitter["twitter:card"]) missingSocial.push("twitter:card");
   if (missingSocial.length) out.push({ code: "social_tags_missing", evidence: { missing: missingSocial }, strip: { side: "head", rows: ["social"] }, where: missingSocial.join(", ") });
   if (facts.htmlBytes > HEAVY_HTML_BYTES || head.scripts.total > HEAVY_SCRIPTS) out.push({ code: "page_weight_heavy", evidence: { htmlBytes: facts.htmlBytes, scripts: head.scripts.total, blocking: head.scripts.blocking, maxBytes: HEAVY_HTML_BYTES, maxScripts: HEAVY_SCRIPTS }, strip: { side: "head", rows: ["scripts"] }, where: "HTML" });
+  // Consent managers and A/B-test snippets are often blocking on purpose; the finding says so.
+  const blocking = head.scripts.blockingSrc || [];
+  if (blocking.length) out.push({ code: "script_render_blocking", evidence: { count: blocking.length, samples: blocking.slice(0, MAX_LISTED), more: Math.max(0, blocking.length - MAX_LISTED) }, strip: { side: "head", rows: ["scripts"] }, where: "<head> <script src>" });
   const u = new URL(fetch.finalUrl);
   const params = [...u.searchParams.keys()].length;
   const tail = `${u.pathname}${u.search}`;
@@ -527,6 +537,12 @@ function imageChecks(r, out) {
   if (lcp && lcp.loading === "lazy") out.push({ code: "image_lcp_lazy", evidence: { src: lcp.src, loading: lcp.loading, fetchpriority: lcp.fetchpriority }, zones: [lcp.zone], where: lcp.path });
   const below = content.filter((i) => !above.includes(i) && i.loading !== "lazy");
   if (below.length) out.push({ code: "image_not_lazy", evidence: { count: below.length, aboveFold: ABOVE_FOLD_IMAGES, samples: below.slice(0, 6).map((i) => i.src) }, zones: zones(below), where: where(below) });
+  // A preload says "needed soon"; loading="lazy" on the same image says "not yet". Both cannot hold.
+  const preloaded = new Set((r.facts.head.preloadImages || []).flatMap((p) => p.urls));
+  const preLazy = r.facts.images.filter((i) => i.url && i.loading === "lazy" && preloaded.has(i.url));
+  if (preLazy.length) out.push({ code: "image_preload_lazy", evidence: { count: preLazy.length, samples: preLazy.slice(0, MAX_LISTED).map((i) => i.src), more: Math.max(0, preLazy.length - MAX_LISTED) }, zones: zones(preLazy), where: where(preLazy) });
+  const high = r.facts.images.filter((i) => i.fetchpriority === "high");
+  if (high.length > FETCHPRIORITY_HIGH_MAX) out.push({ code: "image_fetchpriority_overused", evidence: { count: high.length, max: FETCHPRIORITY_HIGH_MAX, samples: high.slice(0, MAX_LISTED).map((i) => i.src), more: Math.max(0, high.length - MAX_LISTED) }, zones: zones(high), where: where(high) });
   const legacy = imgs.filter((i) => {
     if (i.modernSource || MODERN_EXT.test(i.url)) return false;
     const t = head.get(i.index)?.type || "";

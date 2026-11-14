@@ -41,9 +41,18 @@ const role = (n) => (attr(n, "role") || "").trim().toLowerCase();
 const HIDDEN_STYLE = /(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden)\s*(?:!important)?\s*(?:;|$)/i;
 const NEVER_RENDERED = new Set(["script", "style", "noscript", "template", "head", "title", "meta", "link"]);
 
+/**
+ * hidden="until-found" (any case) is not hidden content: the browser keeps the text in the page,
+ * finds it with Ctrl+F and opens it for a text-fragment link (modern-web-guidance,
+ * ui-behaviors/search-hidden-content). The Vectorscope extractor keeps it by the same rule
+ * ([hidden]:not([hidden='until-found' i])). A closed <details> is not hidden either: nothing
+ * here looks at it, and its text stays in the reading.
+ */
+export const isUntilFound = (n) => (attr(n, "hidden") || "").toLowerCase() === "until-found";
+
 function isHiddenEl(n) {
   if (!isEl(n)) return false;
-  if (attr(n, "hidden") !== null) return true;
+  if (attr(n, "hidden") !== null && !isUntilFound(n)) return true;
   if ((attr(n, "aria-hidden") || "").trim().toLowerCase() === "true") return true;
   const style = attr(n, "style");
   return Boolean(style && HIDDEN_STYLE.test(style));
@@ -281,6 +290,18 @@ function headFacts($, resolve, htmlEl) {
     return Boolean(t) && !["text/javascript", "module", "application/javascript", "text/ecmascript"].includes(t);
   };
   const exec = $("script").toArray().filter((n) => !dataType(n));
+  // A classic external script in <head> without async or defer stops the parser until it has run.
+  // A nomodule script (a polyfill bundle) is skipped by every browser that runs modules, so it is not counted.
+  const blocking = exec.filter((n) => attr(n, "src") && within(n, (p) => p.name === "head") && attr(n, "async") === null && attr(n, "defer") === null && attr(n, "nomodule") === null && (attr(n, "type") || "").trim().toLowerCase() !== "module");
+  // <link rel=preload as=image>: what the page asks the browser to fetch early (href and imagesrcset).
+  const preloadImages = $("link[rel]")
+    .toArray()
+    .filter((n) => (attr(n, "rel") || "").toLowerCase().split(/\s+/).includes("preload") && (attr(n, "as") || "").trim().toLowerCase() === "image")
+    .map((n) => {
+      const raw = (attr(n, "href") || "").trim();
+      const set = (attr(n, "imagesrcset") || "").split(",").map((c) => c.trim().split(/\s+/)[0]).filter(Boolean);
+      return { raw: clip(raw || set[0] || "", 120), urls: [...new Set([raw, ...set].filter((u) => u && !/^data:/i.test(u)).map((u) => resolve(u)).filter(Boolean))], fetchpriority: (attr(n, "fetchpriority") || "").trim().toLowerCase() || null };
+    });
   return {
     title: titles.length ? fold($(titles[0]).text()) : "",
     titleCount: titles.length,
@@ -298,9 +319,11 @@ function headFacts($, resolve, htmlEl) {
       total: exec.length,
       external: exec.filter((n) => attr(n, "src")).length,
       inline: exec.filter((n) => !attr(n, "src")).length,
-      // A classic external script in <head> without async or defer stops the parser until it has run.
-      blocking: exec.filter((n) => attr(n, "src") && within(n, (p) => p.name === "head") && attr(n, "async") === null && attr(n, "defer") === null && (attr(n, "type") || "").toLowerCase() !== "module").length,
+      blocking: blocking.length,
+      // Every blocking script's address, in document order; the check caps what it shows.
+      blockingSrc: blocking.map((n) => clip(resolve(attr(n, "src").trim()) || attr(n, "src").trim(), 160)),
     },
+    preloadImages,
   };
 }
 

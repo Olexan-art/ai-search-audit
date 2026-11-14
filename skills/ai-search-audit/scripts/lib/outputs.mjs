@@ -5,6 +5,7 @@
 import { CANNOT, LAYER, MARK, SEV, UI, dateOf, verdict, ZONE_LABEL } from "./copy.mjs";
 import { generatedExport, generatedMarkdown } from "../vendor/vectorscope/generatedText.mjs";
 import { CODES, SEVERITIES } from "./checks.mjs";
+import { rubricOf } from "./rubrics.mjs";
 import { EXPORT_SCHEMA, PRODUCED_BY, SKILL_VERSION } from "./version.mjs";
 import { FULL_VERSION_URL, refusalLead, TOOL_NAME } from "./report.mjs";
 import { FINDINGS, REFUSAL_COPY, isRefusalCode, refusalReason } from "../vendor/vectorscope/refusal.mjs";
@@ -111,6 +112,8 @@ export function buildExport(model) {
       passages: f.passages,
       evidence: f.evidence,
       rules: f.rules,
+      // The verifier rubric (rubrics.mjs): when the finding stands and when a reader would set it aside, by clause id.
+      ...(rubricOf(f.code) ? { rubric: rubricOf(f.code) } : {}),
     })),
     codes: Object.fromEntries(Object.entries(CODES).map(([k, v]) => [k, { severity: v.severity, area: v.area, owner: v.owner, layer: v.layer || "measured" }])),
     layers: { measured: "what a script counted on the page; any agent gets the same value", derived: "computed from measured values by a fixed formula", judgement: "the agent's model read or answered it; another model may judge differently" },

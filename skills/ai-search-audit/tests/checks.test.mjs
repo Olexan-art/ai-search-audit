@@ -68,6 +68,12 @@ const CASES = [
   ["hero_lede_dropped", [page({ omit: ["h1"], before: `<header><nav><a href="/">Home</a></nav><h1>The page heading</h1><p>The product is help-desk software for support teams of three to three hundred people.</p></header>` })], [page({ omit: ["h1"], before: `<header><h1>The page heading</h1><p>The product is help-desk software for support teams of three to three hundred people.</p></header>` })]],
   ["hidden_headings", [page({ body: `<div role="tabpanel" hidden><h2>Compare features</h2><p>${"Hidden comparison text. ".repeat(12)}</p></div>` })], [page({ body: `<div role="tabpanel"><h2>Compare features</h2><p>${"Visible comparison text. ".repeat(12)}</p></div>` })]],
   ["hidden_headings", [page({ before: `<nav hidden><h2>Menu</h2><p>Links</p></nav>` })], [page({ body: `<dialog><h2>Sign in</h2><p>Form</p></dialog>` })], { inverse: true }],
+  // modern-web-guidance, search-hidden-content: hidden="until-found" (any case) is findable content, so it is not a hidden heading; plain hidden still is.
+  ["hidden_headings", [page({ body: `<div hidden=""><h2>Compare features</h2><p>${"Hidden comparison text. ".repeat(12)}</p></div>` })], [page({ body: `<div hidden="until-found"><h2>Compare features</h2><p>${"Folded comparison text. ".repeat(12)}</p></div><div hidden="Until-Found"><h2>Prices</h2><p>${"Folded price text. ".repeat(12)}</p></div><details><summary>More</summary><h2>Limits</h2><p>${"Closed details text. ".repeat(12)}</p></details>` })]],
+  ["script_render_blocking", [page({ head: '<script src="/js/consent.js"></script>' })], [page({ head: '<script src="/js/a.js" defer></script><script src="/js/b.js" async></script><script type="module" src="/js/c.js"></script><script nomodule src="/js/polyfills.js"></script><script>var inline = 1;</script><script type="application/ld+json">{}</script>', body: '<script src="/js/late.js"></script>' })]],
+  ["image_preload_lazy", [page({ head: '<link rel="preload" as="image" href="/img/hero.webp">', body: '<img src="/img/hero.webp" alt="Hero" width="800" height="400" loading="lazy">' })], [page({ head: '<link rel="preload" as="image" href="/img/hero.webp">', body: '<img src="/img/hero.webp" alt="Hero" width="800" height="400" fetchpriority="high">' })]],
+  ["image_preload_lazy", [page({ head: '<link rel="preload" as="image" imagesrcset="/img/hero-800.webp 800w, /img/hero-1600.webp 1600w">', body: '<img src="/img/hero-800.webp" alt="Hero" width="800" height="400" loading="lazy">' })], [page({ head: '<link rel="preload" as="font" href="/img/hero.webp" crossorigin>', body: '<img src="/img/hero.webp" alt="Hero" width="800" height="400" loading="lazy">' })]],
+  ["image_fetchpriority_overused", [page({ body: [1, 2, 3].map((i) => `<img src="/img/${i}.webp" alt="Image ${i}" width="400" height="300" fetchpriority="high">`).join("") })], [page({ body: [1, 2, 3].map((i) => `<img src="/img/${i}.webp" alt="Image ${i}" width="400" height="300"${i < 3 ? ' fetchpriority="high"' : ""}>`).join("") })]],
   ["ssr_placeholder_text", [page({ body: section("Calculator") + "<p>Calculating your plan…</p>" })], [page({ body: section("Calculator") + "<p>Calculating your plan takes a moment and uses only the numbers you type into the form.</p>" })]],
   ["h1_glued_words", [page({ h1: "<h1><span>BrightDesk</span><span>Plans for every team</span></h1>" })], [page({ h1: "<h1>Get<span>Loop</span>Loop</h1>" })]],
   // 2.102: the response, link text, anchors, the sitemap's dates, the preview image
@@ -132,4 +138,19 @@ test("FAQ markup: the questions that are not on the page are counted", async () 
   const f = await findingOf(page({ head: faq("Is the widget free for schools?") }), "faq_schema_not_visible");
   assert.equal(f.evidence.notVisible, 1);
   assert.deepEqual(f.evidence.samples, ["Is the widget free for schools?"]);
+});
+
+test("script_render_blocking lists the first addresses and says how many more, with no silent cap", async () => {
+  const head = Array.from({ length: 9 }, (_, i) => `<script src="/js/s${i}.js"></script>`).join("");
+  const f = await findingOf(page({ head }), "script_render_blocking");
+  assert.equal(f.evidence.count, 9);
+  assert.equal(f.evidence.samples.length, 6);
+  assert.equal(f.evidence.more, 3);
+  assert.equal(f.evidence.samples[0], "https://example.org/js/s0.js");
+  assert.equal(f.severity, "low");
+});
+
+test("a missing fetchpriority is never a finding on its own", async () => {
+  const codes = await codesOf(page({ body: '<img src="/img/hero.webp" alt="Hero" width="800" height="400">' }));
+  assert.ok(!codes.includes("image_fetchpriority_overused") && !codes.includes("image_preload_lazy") && !codes.includes("image_lcp_lazy"));
 });
